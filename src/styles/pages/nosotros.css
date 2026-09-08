@@ -41,7 +41,7 @@ body {
     margin-bottom: 2rem;
 }
 
-/* 1. Hero Section con Cuadro/Tarjeta independiente */
+/* 1. Hero Section con Cuadro/Tarjeta independiente (Base - Mobile) */
 .nosotros-hero {
     background-color: var(--jet-dark);
     padding: 3rem 1.5rem 2.5rem;
@@ -51,7 +51,7 @@ body {
     background-color: var(--jet-card);
     border: 1px solid rgba(122, 166, 179, 0.25);
     border-radius: 16px;
-    padding: 3rem 2.5rem;
+    padding: 2rem 1.25rem; /* Padding ajustado para móvil */
     text-align: center;
     max-width: 850px;
     margin: 0 auto;
@@ -70,14 +70,14 @@ body {
 
 .hero-card h1 {
     font-family: var(--font-title);
-    font-size: 2.5rem;
+    font-size: 2rem; /* Tamaño de fuente ajustado para móvil */
     color: var(--orange-primary);
     margin: 0 0 1.25rem 0;
     line-height: 1.2;
 }
 
 .nosotros-description {
-    font-size: 1.1rem;
+    font-size: 1rem; /* Tamaño de fuente ajustado para móvil */
     line-height: 1.7;
     color: var(--text-white);
     margin: 0;
@@ -87,7 +87,7 @@ body {
     color: var(--orange-primary);
 }
 
-/* 2. Sección Valores */
+/* 2. Sección Valores (Base - Mobile) */
 .nosotros-valores-section {
     background-color: #212323;
     padding: 4rem 0;
@@ -95,8 +95,8 @@ body {
 
 .nosotros-valores {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
+    grid-template-columns: 1fr; /* Una columna para pantallas pequeñas */
+    gap: 1.5rem; /* Espaciado adaptado para móvil */
 }
 
 .valor-card {
@@ -143,7 +143,7 @@ body {
     margin: 0;
 }
 
-/* 3. Registro SEMARNAT */
+/* 3. Registro SEMARNAT (Base - Mobile) */
 .nosotros-registro-section {
     background-color: var(--bg-light);
     color: var(--jet-dark);
@@ -156,7 +156,7 @@ body {
     background-color: var(--text-white);
     border: 2px dashed var(--moonstone);
     border-radius: 16px;
-    padding: 3rem 2rem;
+    padding: 2rem 1rem; /* Padding ajustado para móvil */
     text-align: center;
     max-width: 650px;
     width: 100%;
@@ -190,25 +190,26 @@ body {
     margin: 0;
 }
 
-@media (max-width: 900px) {
+/* --- MEDIA QUERIES (Mejora Progresiva para Escritorio/Tabletas Grandes) --- */
+@media (min-width: 900px) {
     .nosotros-valores {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+        grid-template-columns: repeat(3, 1fr); /* 3 columnas para escritorio */
+        gap: 2rem;
     }
 
     .hero-card {
-        padding: 2rem 1.25rem;
+        padding: 3rem 2.5rem; /* Padding amplio para escritorio */
     }
 
     .hero-card h1 {
-        font-size: 2rem;
+        font-size: 2.5rem; /* Fuente más grande para escritorio */
     }
 
     .nosotros-description {
-        font-size: 1rem;
+        font-size: 1.1rem; /* Fuente adaptada para escritorio */
     }
 
     .registro-card {
-        padding: 2rem 1rem;
+        padding: 3rem 2rem; /* Padding amplio para escritorio */
     }
 }
