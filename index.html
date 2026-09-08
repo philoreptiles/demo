@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Escama y Colmillo - PIMVS Crotalus</title>
+</head>
+<body>
+    <div id="header-root"></div>
+
+    <main class="main-container">
+        <!-- Filtro pegajoso (Sticky) -->
+        <div id="filters-root"></div>
+
+        <!-- Galería del catálogo -->
+        <div id="catalog-root"></div>
+    </main>
+
+    <div id="footer-root"></div>
+
+    <!-- Modal Base Estática -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-container">
+            <button type="button" class="modal-close" id="modal-close-btn" aria-label="Cerrar">&times;</button>
+            <div class="modal-body" id="modal-body-content"></div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

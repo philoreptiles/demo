@@ -1,0 +1,106 @@
+.catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.catalog-loading, 
+.catalog-error, 
+.catalog-empty {
+    text-align: center;
+    padding: 3rem;
+    background-color: var(--card-bg, #282B2B);
+    border-radius: 10px;
+    font-size: 1.1rem;
+    color: var(--text-light, #F4F5F5);
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border-left-color: var(--primary-color, #EE6C29);
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.empty-catalog {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    background-color: #282B2B;
+    border-radius: 12px;
+    border: 2px dashed #7AA6B3;
+    margin: 2rem 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.empty-catalog h3 {
+    font-size: 1.5rem;
+    color: #ffffff;
+    margin: 0 0 0.5rem 0;
+}
+
+.empty-catalog p {
+    color: #7AA6B3;
+    font-size: 1rem;
+    margin: 0 0 1.5rem 0;
+}
+
+.btn-clear-filters {
+    background-color: #EE6C29;
+    color: #ffffff;
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-clear-filters:hover {
+    background-color: #d45c1f;
+    transform: translateY(-2px);
+}
+
+/* Tablet (768px a 1024px): 3 Columnas */
+@media (max-width: 1024px) and (min-width: 768px) {
+    .catalog-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.85rem;
+    }
+}
+
+/* Móvil (< 768px): 2 Columnas */
+@media (max-width: 767px) {
+    .catalog-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.4rem;
+        padding: 1.5rem;
+    }
+}
+
+/* Móvil Pequeño (< 400px) */
+@media (max-width: 399px) {
+    .catalog-grid {
+        gap: 0.35rem;
+    }
+}

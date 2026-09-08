@@ -1,0 +1,1008 @@
+﻿:root {
+    --color-orange: #EE6C29;
+    --color-orange-hover: #D85A1A;
+    --color-jet: #282B2B;
+    --color-jet-dark: #1E2020;
+    --color-jet-card: #282B2B;
+    --color-moonstone: #7AA6B3;
+    --color-border: #3D4242;
+    --color-text-main: #F4F5F5;
+    --color-text-muted: #A0AAB0;
+    --color-bg: #1E2020;
+    --font-primary: 'Apoc Revelations It', 'Georgia', serif;
+    --font-secondary: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: var(--color-bg);
+    color: var(--color-text-main);
+    font-family: var(--font-secondary);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+/* Header */
+.header {
+    background-color: var(--color-jet);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-link {
+    text-decoration: none;
+}
+
+.brand-title {
+    color: var(--color-orange);
+    font-family: var(--font-primary);
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.nav-link {
+    color: var(--color-text-main);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+    color: var(--color-orange);
+}
+
+/* Layout Principal */
+.admin-main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem 3rem;
+}
+
+.dashboard-header {
+    margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+    font-family: var(--font-primary);
+    font-size: 2.2rem;
+    color: var(--color-text-main);
+    margin: 0 0 0.5rem 0;
+    font-weight: 700;
+}
+
+.dashboard-header p {
+    color: var(--color-text-muted);
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Tarjetas */
+.premium-card {
+    background: var(--color-jet-card);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.card-title {
+    font-family: var(--font-primary);
+    font-size: 1.5rem;
+    color: var(--color-text-main);
+    margin: 0 0 1.25rem 0;
+    font-weight: 600;
+}
+
+/* Formularios */
+.admin-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-grid-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.75rem;
+}
+
+/* Formulario "Agregar nuevo ejemplar" */
+.premium-card:has(#add-ejemplar-form) {
+    padding: 1rem 1.5rem;
+}
+
+.premium-card:has(#add-ejemplar-form) .card-title {
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+}
+
+#add-ejemplar-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem 1.25rem;
+    align-items: center;
+}
+
+#add-ejemplar-form .form-column {
+    display: contents;
+}
+
+#add-ejemplar-form .form-group-premium {
+    gap: 0.15rem;
+}
+
+#add-ejemplar-form .form-group-premium label {
+    font-size: 0.72rem;
+    letter-spacing: 0.3px;
+}
+
+#add-ejemplar-form input[type="text"],
+#add-ejemplar-form input[type="number"],
+#add-ejemplar-form select {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.85rem;
+    height: 34px;
+}
+
+#add-ejemplar-form .drop-zone {
+    padding: 0.3rem 0.5rem;
+    min-height: 34px;
+    border-width: 1px;
+}
+
+#add-ejemplar-form .drop-text {
+    font-size: 0.75rem;
+}
+
+#add-ejemplar-form .preview-container {
+    padding: 0.25rem 0.5rem;
+    margin-top: 0.2rem;
+}
+
+#add-ejemplar-form .preview-thumb {
+    width: 30px;
+    height: 30px;
+}
+
+#add-ejemplar-form .form-actions-full {
+    grid-column: 1 / -1;
+    margin-top: 0.25rem;
+    justify-content: flex-end;
+}
+
+#add-ejemplar-form .form-actions-full .btn-premium {
+    padding: 0.45rem 1.25rem;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 820px) {
+    .admin-grid-form,
+    #add-ejemplar-form {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-group-premium {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group-premium label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group-premium input[type="text"],
+.form-group-premium input[type="number"],
+.form-group-premium input[type="email"],
+.form-group-premium input[type="password"],
+.form-group-premium select {
+    background: #181A1A;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--color-text-main);
+    font-size: 0.95rem;
+    font-family: var(--font-secondary);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-group-premium input:focus,
+.form-group-premium select:focus {
+    border-color: var(--color-orange);
+    box-shadow: 0 0 0 3px rgba(238, 108, 41, 0.2);
+}
+
+.form-group-premium select option {
+    background: #181A1A;
+    color: var(--color-text-main);
+}
+
+/* Eliminar flechas en inputs number */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Carga de Archivos (Drop Zone) */
+.drop-zone {
+    position: relative;
+    border: 2px dashed var(--color-border);
+    border-radius: 10px;
+    background: #181A1A;
+    padding: 1.25rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 64px;
+}
+
+.drop-zone:hover,
+.drop-zone.dragover {
+    border-color: var(--color-orange);
+    background: rgba(238, 108, 41, 0.08);
+}
+
+.drop-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.drop-text {
+    font-size: 0.88rem;
+    color: var(--color-text-muted);
+    pointer-events: none;
+}
+
+.preview-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    background: #181A1A;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+}
+
+.preview-thumb {
+    width: 54px;
+    height: 54px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+}
+
+.btn-change-img {
+    background: #333737;
+    color: var(--color-text-main);
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btn-change-img:hover {
+    background: #454A4A;
+}
+
+.form-actions-full {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+}
+
+/* Botones */
+.btn-premium {
+    background: var(--color-orange);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 1.6rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-premium:hover {
+    background: var(--color-orange-hover);
+}
+
+.btn-premium:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-secondary-premium {
+    background: transparent;
+    color: var(--color-text-main);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary-premium:hover {
+    background: #333737;
+    border-color: #525858;
+}
+
+/* Panel de Estadísticas */
+.stats-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--color-jet-card);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-orange);
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* Filtros de Inventario */
+.premium-card:has(.filter-grid-premium) {
+    padding: 1rem 1.5rem;
+}
+
+.premium-card:has(.filter-grid-premium) .card-title {
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+}
+
+.filter-grid-premium {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    align-items: end;
+}
+
+.filter-grid-premium .form-group-premium {
+    gap: 0.15rem;
+}
+
+.filter-grid-premium .form-group-premium label {
+    font-size: 0.72rem;
+}
+
+.filter-grid-premium input,
+.filter-grid-premium select {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.85rem;
+    height: 34px;
+}
+
+.filter-actions-right {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.filter-actions-right .btn-premium,
+.filter-actions-right .btn-secondary-premium {
+    padding: 0.4rem 1rem;
+    font-size: 0.82rem;
+}
+
+/* Contenedor del botón Ver Todos / Mostrar Menos */
+.inventory-toggle-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.25rem;
+}
+
+.inventory-toggle-container .btn-secondary-premium:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: var(--color-border);
+    background: transparent;
+}
+
+/* Tablas */
+.table-container-premium {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: #181A1A;
+}
+
+.table-premium {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.table-premium th {
+    background: #141616;
+    color: var(--color-text-muted);
+    padding: 0.85rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+
+.table-premium td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #282B2B;
+    vertical-align: middle;
+    color: var(--color-text-main);
+    white-space: nowrap;
+}
+
+.table-premium tbody tr {
+    transition: background 0.15s ease;
+}
+
+.table-premium tbody tr:hover {
+    background: #232626;
+}
+
+.table-thumb {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    display: block;
+}
+
+/* Badges de Estatus
+   NOTA: .status-badge y sus variantes también existen en card.css (para el
+   overlay de las tarjetas del catálogo público) con "position: absolute".
+   Como card.css se importa globalmente vía main.css, esas reglas también
+   llegan a esta página. Aquí las escopamos bajo ".table-premium" para que
+   ganen siempre por especificidad, y reseteamos explícitamente "position"
+   y demás propiedades de posicionamiento absoluto para que el badge se
+   quede dentro de la celda de la tabla en vez de salir del flujo normal. */
+.table-premium .status-badge {
+    position: static;
+    top: auto;
+    right: auto;
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    box-shadow: none;
+}
+
+.table-premium .status-disponible {
+    background: rgba(46, 125, 50, 0.2);
+    color: #4CAF50;
+    border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+.table-premium .status-apartado {
+    background: rgba(238, 108, 41, 0.2);
+    color: #EE6C29;
+    border: 1px solid rgba(238, 108, 41, 0.4);
+}
+
+.table-premium .status-vendido {
+    background: rgba(211, 47, 47, 0.2);
+    color: #EF5350;
+    border: 1px solid rgba(239, 83, 80, 0.4);
+}
+
+.table-premium .status-holdback {
+    background: rgba(122, 166, 179, 0.2);
+    color: #7AA6B3;
+    border: 1px solid rgba(122, 166, 179, 0.4);
+}
+
+/* Botones de acción */
+.action-buttons {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.btn-icon {
+    background: #282B2B;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+    background: #383D3D;
+}
+
+.btn-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-edit-icon {
+    color: var(--color-moonstone);
+}
+
+.btn-edit-icon:hover {
+    color: #9cd1e0;
+    border-color: var(--color-moonstone);
+}
+
+.btn-delete-icon {
+    color: #EF5350;
+}
+
+.btn-delete-icon:hover {
+    color: #FF8A80;
+    border-color: #EF5350;
+}
+
+/* Modal de Edición */
+.edit-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+    background: rgba(10, 12, 12, 0.82);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.22s ease, visibility 0.22s ease;
+}
+
+.edit-modal-overlay.is-open {
+    display: flex !important;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.edit-modal {
+    width: min(780px, 100%);
+    max-height: 96vh;
+    overflow-y: auto;
+    background: var(--color-jet-card);
+    color: var(--color-text-main);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.edit-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.edit-modal-kicker {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--color-orange);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+#edit-modal-title {
+    font-family: var(--font-primary);
+    font-size: 1.15rem;
+    margin: 0.1rem 0 0 0;
+    color: var(--color-text-main);
+}
+
+.edit-modal-close {
+    background: #181A1A;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.edit-modal-close:hover {
+    background: #333737;
+    color: var(--color-text-main);
+}
+
+.edit-modal-form {
+    padding: 0.75rem 1.25rem;
+}
+
+.edit-modal-id-row {
+    background: #181A1A;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 0.35rem 0.75rem;
+    margin-bottom: 0.6rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+.edit-modal-id-row strong {
+    color: var(--color-orange);
+    font-size: 0.85rem;
+}
+
+.edit-form-section {
+    margin-bottom: 0.6rem;
+}
+
+.edit-form-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--color-moonstone);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+}
+
+.edit-modal-form .form-group-premium {
+    gap: 0.15rem;
+}
+
+.edit-modal-form label {
+    font-size: 0.7rem;
+}
+
+.edit-modal-form input[type="text"],
+.edit-modal-form input[type="number"],
+.edit-modal-form select {
+    background: #181A1A;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 0.25rem 0.55rem;
+    color: var(--color-text-main);
+    font-size: 0.8rem;
+    font-family: var(--font-secondary);
+    outline: none;
+    height: 30px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.edit-modal-form select option {
+    background: #181A1A;
+    color: var(--color-text-main);
+}
+
+.edit-images-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.edit-images-grid .image-edit-container {
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.image-edit-container label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.current-image-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 65px;
+    border: 1px dashed var(--color-border);
+    border-radius: 6px;
+    background: #181A1A;
+    overflow: hidden;
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
+}
+
+.current-image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-edit-container input[type="file"] {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    width: 100%;
+}
+
+.image-edit-container input[type="file"]::-webkit-file-upload-button {
+    background: #333737;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    color: var(--color-text-main);
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+    cursor: pointer;
+    margin-right: 0.3rem;
+}
+
+.new-image-preview {
+    margin-top: 0.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    font-size: 0.68rem;
+    color: var(--color-orange);
+}
+
+.new-image-preview img {
+    max-width: 100%;
+    height: 35px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid var(--color-orange);
+}
+
+.edit-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.edit-modal-actions .btn-premium,
+.edit-modal-actions .btn-secondary-premium {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+}
+
+@media (max-width: 640px) {
+    .edit-images-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Alertas */
+.alert-premium {
+    padding: 0.85rem 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.alert-info {
+    background: rgba(122, 166, 179, 0.15);
+    color: #90CAF9;
+    border: 1px solid rgba(122, 166, 179, 0.3);
+}
+
+.alert-success {
+    background: rgba(46, 125, 50, 0.15);
+    color: #81C784;
+    border: 1px solid rgba(46, 125, 50, 0.3);
+}
+
+.alert-error {
+    background: rgba(211, 47, 47, 0.15);
+    color: #E57373;
+    border: 1px solid rgba(211, 47, 47, 0.3);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ==========================================================
+   RESPONSIVO / MÓVIL
+   ----------------------------------------------------------
+   Antes admin.css casi no tenía reglas para pantallas chicas:
+   el header desbordaba (título + nav + botón "Cerrar sesión"
+   en una sola fila sin wrap), el título del panel era
+   demasiado grande, las tarjetas de estadísticas y la rejilla
+   de filtros se apretaban a 2 columnas incluso en celulares
+   angostos. Este bloque cubre esos puntos sin tocar el layout
+   de escritorio/tablet (que ya funcionaba bien).
+   ========================================================== */
+
+@media (max-width: 640px) {
+    .header-container {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
+    }
+
+    .brand-title {
+        font-size: 1.1rem;
+    }
+
+    .nav-menu {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .admin-main {
+        padding: 0 1rem 2.5rem;
+        margin: 1.25rem auto;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-header p {
+        font-size: 0.9rem;
+    }
+
+    .stats-panel {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.6rem;
+    }
+
+    .stat-card {
+        padding: 0.85rem 0.6rem;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.68rem;
+        letter-spacing: 0.3px;
+    }
+
+    .filter-grid-premium {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions-right {
+        justify-content: stretch;
+    }
+
+    .filter-actions-right .btn-premium,
+    .filter-actions-right .btn-secondary-premium {
+        flex: 1;
+    }
+
+    /* La tabla de inventario sigue necesitando ancho fijo para ser
+       legible (muchas columnas con datos exactos: precio, año, etc.).
+       En vez de apretar las columnas hasta hacerlas ilegibles, se deja
+       scroll horizontal explícito solo dentro de la tarjeta de la
+       tabla, con una pista visual de que se puede deslizar. */
+    .table-container-premium {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table-premium {
+        min-width: 640px;
+    }
+}
+
+@media (max-width: 400px) {
+    .stats-panel {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .nav-menu {
+        gap: 0.5rem;
+    }
+
+    .nav-menu .nav-link,
+    .nav-menu button {
+        font-size: 0.85rem;
+    }
+}

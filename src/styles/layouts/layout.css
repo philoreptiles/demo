@@ -1,0 +1,35 @@
+﻿html, body {
+    /* overflow-x: clip evita el scroll horizontal sin anular el position: sticky */
+    overflow-x: clip;
+}
+
+.main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+    width: 100%;
+    flex: 1;
+    overflow: visible;
+}
+
+.hero-banner {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem 1rem;
+    background: linear-gradient(135deg, var(--jet-color) 0%, #151616 100%);
+    border: 1px solid var(--border-color);
+    color: var(--text-light);
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+}
+
+.hero-banner h1 {
+    color: var(--primary-color);
+    font-size: 2.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.hero-banner p {
+    color: var(--moonstone-color);
+    font-size: 1rem;
+}

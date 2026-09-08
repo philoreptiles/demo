@@ -1,0 +1,400 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Escama y Colmillo</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="../../styles/pages/admin.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-container">
+            <a href="/index.html" class="logo-link">
+                <span class="brand-title">ESCAMA Y COLMILLO</span>
+            </a>
+
+            <nav class="nav-menu">
+                <a href="/index.html" class="nav-link">Ejemplares</a>
+                <a href="/nosotros.html" class="nav-link">Nosotros</a>
+                <div id="auth-header-action"></div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="admin-main">
+
+        <!-- LOGIN -->
+        <section id="login-section" class="premium-card" style="max-width: 440px; margin: 4rem auto;">
+            <h2 class="card-title" style="text-align: center;">Acceso Administrativo</h2>
+            <p style="color: var(--color-text-muted); margin-bottom: 1.5rem; text-align: center;">
+                Ingresa tus credenciales para gestionar el catálogo
+            </p>
+            <div id="login-error-msg" class="alert-premium alert-error hidden"></div>
+
+            <form id="login-form" class="admin-form">
+                <div class="form-group-premium" style="margin-bottom: 1rem;">
+                    <label for="login-email">Usuario / Email</label>
+                    <input type="email" id="login-email" required placeholder="admin@escamaycolmillo.com">
+                </div>
+                <div class="form-group-premium" style="margin-bottom: 1.5rem;">
+                    <label for="login-password">Contraseña</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" id="btn-login" class="btn-premium" style="width: 100%;">
+                    Iniciar Sesión
+                </button>
+            </form>
+        </section>
+
+
+        <!-- DASHBOARD -->
+        <div id="admin-dashboard" class="hidden">
+
+            <div class="dashboard-header">
+                <h1>Panel de Control del Inventario</h1>
+                <p>Gestiona los ejemplares disponibles en el catálogo web.</p>
+            </div>
+
+            <div id="status-alert" class="alert-premium hidden"></div>
+
+
+            <!-- AGREGAR EJEMPLAR -->
+            <section class="premium-card">
+                <h2 class="card-title">Agregar nuevo ejemplar</h2>
+
+                <form id="add-ejemplar-form" class="admin-grid-form">
+
+                    <!-- Columna 1: Datos Principales -->
+                    <div class="form-column">
+
+                        <div class="form-group-premium">
+                            <label for="id">ID / Código *</label>
+                            <input type="text" id="id" name="id" required placeholder="Ej. CR-16">
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="especie">Especie *</label>
+                            <input type="text" id="especie" name="especie" required placeholder="Ej. Crotalus atrox">
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="genetica">Genética</label>
+                            <input type="text" id="genetica" name="genetica" placeholder="Ej. Albino">
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="sexo">Sexo *</label>
+                            <select id="sexo" name="sexo" required>
+                                <option value="Macho">Macho</option>
+                                <option value="Hembra">Hembra</option>
+                                <option value="No sexado" selected>No sexado</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="nacimiento">Año de nacimiento *</label>
+                            <input type="number" id="nacimiento" name="nacimiento" min="2000" max="2030" value="2026" required>
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="precio">Precio (MXN) *</label>
+                            <input type="number" id="precio" name="precio" step="0.01" min="0" required placeholder="0.00">
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="estatus">Estatus *</label>
+                            <select id="estatus" name="estatus" required>
+                                <option value="Disponible" selected>Disponible</option>
+                                <option value="Apartado">Apartado</option>
+                                <option value="Vendido">Vendido</option>
+                                <option value="Holdback">Holdback</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- Columna 2: Carga de Imágenes -->
+                    <div class="form-column">
+
+                        <!-- Imagen 1 -->
+                        <div class="form-group-premium">
+                            <label>Imagen 1 (Principal) *</label>
+                            <div class="drop-zone" id="drop-zone-1">
+                                <span class="drop-text">Arrastra o selecciona la imagen 1</span>
+                                <input type="file" id="imagen1" accept="image/*" required>
+                            </div>
+                            <div id="preview-1" class="preview-container hidden"></div>
+                        </div>
+
+                        <!-- Imagen 2 -->
+                        <div class="form-group-premium">
+                            <label>Imagen 2 (Secundaria)</label>
+                            <div class="drop-zone" id="drop-zone-2">
+                                <span class="drop-text">Arrastra o selecciona la imagen 2</span>
+                                <input type="file" id="imagen2" accept="image/*">
+                            </div>
+                            <div id="preview-2" class="preview-container hidden"></div>
+                        </div>
+
+                        <!-- Imagen 3 -->
+                        <div class="form-group-premium">
+                            <label>Imagen 3 (Adicional)</label>
+                            <div class="drop-zone" id="drop-zone-3">
+                                <span class="drop-text">Arrastra o selecciona la imagen 3</span>
+                                <input type="file" id="imagen3" accept="image/*">
+                            </div>
+                            <div id="preview-3" class="preview-container hidden"></div>
+                        </div>
+
+                    </div>
+
+                    <div class="form-actions-full">
+                        <button type="submit" id="btn-save" class="btn-premium">
+                            Guardar ejemplar
+                        </button>
+                    </div>
+
+                </form>
+            </section>
+
+
+            <!-- ESTADÍSTICAS -->
+            <div class="stats-panel" id="stats-container">
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-total">0</span>
+                    <span class="stat-label">Total Ejemplares</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-disponibles">0</span>
+                    <span class="stat-label">Disponibles</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-apartados">0</span>
+                    <span class="stat-label">Apartados</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-vendidos">0</span>
+                    <span class="stat-label">Vendidos</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-holdbacks">0</span>
+                    <span class="stat-label">Holdbacks</span>
+                </div>
+            </div>
+
+
+            <!-- INVENTARIO COMPLETO Y FILTROS -->
+            <section class="premium-card">
+                <h2 class="card-title">Filtrar inventario completo</h2>
+
+                <form id="filter-form" class="filter-grid-premium">
+                    <div class="form-group-premium">
+                        <label for="filter-estatus">Estatus</label>
+                        <select id="filter-estatus">
+                            <option value="">Todos</option>
+                            <option value="Disponible">Disponible</option>
+                            <option value="Apartado">Apartado</option>
+                            <option value="Vendido">Vendido</option>
+                            <option value="Holdback">Holdback</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group-premium">
+                        <label for="filter-genetica">Genética</label>
+                        <input type="text" id="filter-genetica" placeholder="Buscar genética...">
+                    </div>
+
+                    <div class="form-group-premium">
+                        <label for="filter-sexo">Sexo</label>
+                        <select id="filter-sexo">
+                            <option value="">Todos</option>
+                            <option value="Macho">Macho</option>
+                            <option value="Hembra">Hembra</option>
+                            <option value="No sexado">No sexado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group-premium">
+                        <label for="filter-anio">Año</label>
+                        <select id="filter-anio">
+                            <option value="">Todos los años</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-actions-right">
+                        <button type="button" id="btn-export-csv" class="btn-secondary-premium">
+                            Descargar CSV
+                        </button>
+                        <button type="button" id="btn-reset-filters" class="btn-secondary-premium">
+                            Limpiar
+                        </button>
+                        <button type="submit" id="btn-apply-filters" class="btn-premium">
+                            Aplicar
+                        </button>
+                    </div>
+                </form>
+
+                <div class="table-container-premium" style="margin-top: 1.25rem;">
+                    <table class="table-premium">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Imagen</th>
+                                <th>Especie</th>
+                                <th>Genética</th>
+                                <th>Sexo</th>
+                                <th>Año</th>
+                                <th>Precio</th>
+                                <th>Estatus</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="full-inventory-table-body">
+                            <tr><td colspan="9" style="text-align: center;">Cargando inventario...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="inventory-toggle-container">
+                    <button type="button" id="btn-toggle-inventory" class="btn-secondary-premium">
+                        Ver todos
+                    </button>
+                </div>
+            </section>
+
+        </div>
+
+
+        <!-- MODAL DE EDICIÓN -->
+        <div id="edit-modal" class="edit-modal-overlay hidden" aria-hidden="true">
+            <div class="edit-modal" role="dialog" aria-modal="true">
+
+                <div class="edit-modal-header">
+                    <div>
+                        <span class="edit-modal-kicker">INVENTARIO</span>
+                        <h2 id="edit-modal-title">Editar ejemplar</h2>
+                    </div>
+                    <button class="edit-modal-close" id="btn-close-modal-x" type="button" aria-label="Cerrar">
+                        ✕
+                    </button>
+                </div>
+
+                <form id="edit-ejemplar-form" class="edit-modal-form">
+                    <input type="hidden" id="edit-id">
+
+                    <div class="edit-modal-id-row">
+                        <span>ID del ejemplar</span>
+                        <strong id="edit-id-display">—</strong>
+                    </div>
+
+                    <div class="edit-form-section">
+                        <div class="edit-form-section-title">
+                            <span>Información del ejemplar</span>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group-premium">
+                                <label for="edit-especie">Especie *</label>
+                                <input type="text" id="edit-especie" required>
+                            </div>
+                            <div class="form-group-premium">
+                                <label for="edit-genetica">Genética</label>
+                                <input type="text" id="edit-genetica">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group-premium">
+                                <label for="edit-sexo">Sexo</label>
+                                <select id="edit-sexo">
+                                    <option value="Macho">Macho</option>
+                                    <option value="Hembra">Hembra</option>
+                                    <option value="No sexado">No sexado</option>
+                                </select>
+                            </div>
+                            <div class="form-group-premium">
+                                <label for="edit-nacimiento">Año de nacimiento</label>
+                                <input type="number" id="edit-nacimiento">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group-premium">
+                                <label for="edit-precio">Precio (MXN)</label>
+                                <input type="number" id="edit-precio" step="0.01">
+                            </div>
+                            <div class="form-group-premium">
+                                <label for="edit-estatus">Estatus</label>
+                                <select id="edit-estatus">
+                                    <option value="Disponible">Disponible</option>
+                                    <option value="Apartado">Apartado</option>
+                                    <option value="Vendido">Vendido</option>
+                                    <option value="Holdback">Holdback</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edición de Imágenes -->
+                    <div class="edit-form-section">
+                        <div class="edit-form-section-title">
+                            <span>Imágenes del ejemplar</span>
+                        </div>
+
+                        <div class="edit-images-grid">
+                            <!-- Imagen 1 -->
+                            <div class="image-edit-container">
+                                <label>Imagen 1</label>
+                                <div class="current-image-box">
+                                    <img id="edit-imagen-actual-1" alt="Imagen 1">
+                                    <span id="edit-imagen-empty-1">Sin imagen</span>
+                                </div>
+                                <input type="file" id="edit-imagen-1" accept="image/*">
+                                <div class="new-image-preview hidden" id="new-image-preview-1"></div>
+                            </div>
+
+                            <!-- Imagen 2 -->
+                            <div class="image-edit-container">
+                                <label>Imagen 2</label>
+                                <div class="current-image-box">
+                                    <img id="edit-imagen-actual-2" alt="Imagen 2">
+                                    <span id="edit-imagen-empty-2">Sin imagen</span>
+                                </div>
+                                <input type="file" id="edit-imagen-2" accept="image/*">
+                                <div class="new-image-preview hidden" id="new-image-preview-2"></div>
+                            </div>
+
+                            <!-- Imagen 3 -->
+                            <div class="image-edit-container">
+                                <label>Imagen 3</label>
+                                <div class="current-image-box">
+                                    <img id="edit-imagen-actual-3" alt="Imagen 3">
+                                    <span id="edit-imagen-empty-3">Sin imagen</span>
+                                </div>
+                                <input type="file" id="edit-imagen-3" accept="image/*">
+                                <div class="new-image-preview hidden" id="new-image-preview-3"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="edit-modal-actions">
+                        <button class="btn-secondary-premium edit-cancel-btn" id="btn-cancelar-edit" type="button">
+                            Cancelar
+                        </button>
+                        <button class="btn-premium edit-save-btn" id="btn-actualizar" type="submit">
+                            Guardar cambios
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <script type="module" src="./admin-view.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+﻿@import './base/reset.css';
+@import './base/typography.css';
+@import './layouts/layout.css';
+@import '../components/common/header/header.css';
+@import '../components/common/footer/footer.css';
+@import '../components/common/card/card.css';
+@import '../components/ui/filters/filters.css';
+@import '../components/ui/catalog/catalog.css';
+@import '../components/ui/modal/modal.css';
+
+:root {
+    --primary-color: #EE6C29;
+    --primary-hover: #d85a1a;
+    --jet-color: #282B2B;
+    --jet-dark: #1E2020;
+    --jet-card: #282B2B;
+    --moonstone-color: #7AA6B3;
+    --moonstone-hover: #63909D;
+    
+    --bg-color: #1E2020;
+    --card-bg: #282B2B;
+    --text-light: #F4F5F5;
+    --text-dark: #282B2B;
+    --border-color: #3D4242;
+    
+    --status-disponible: #2E7D32;
+    --status-apartado: #EE6C29;
+    --status-vendido: #D32F2F;
+    --status-holdback: #7AA6B3;
+    
+    --font-primary: 'Apoc Revelations It', 'Georgia', serif;
+    --font-secondary: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.35);
+    --shadow-sticky: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-light);
+    font-family: var(--font-secondary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}

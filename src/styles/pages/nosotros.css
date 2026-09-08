@@ -1,0 +1,214 @@
+﻿:root {
+    --orange-primary: #EE6C29;
+    --orange-hover: #d45c1f;
+    --jet-dark: #282B2B;
+    --jet-card: #1f2121;
+    --moonstone: #7AA6B3;
+    --bg-light: #f8f9fa;
+    --text-white: #ffffff;
+    --text-muted: #b0bec5;
+    --font-title: 'Georgia', serif;
+    --font-body: system-ui, -apple-system, sans-serif;
+}
+
+body {
+    background-color: var(--jet-dark);
+    color: var(--text-white);
+    font-family: var(--font-body);
+    margin: 0;
+    padding: 0;
+}
+
+.nosotros-main {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.section-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.section-title {
+    font-family: var(--font-title);
+    font-size: 2rem;
+    color: var(--orange-primary);
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* 1. Hero Section con Cuadro/Tarjeta independiente */
+.nosotros-hero {
+    background-color: var(--jet-dark);
+    padding: 3rem 1.5rem 2.5rem;
+}
+
+.hero-card {
+    background-color: var(--jet-card);
+    border: 1px solid rgba(122, 166, 179, 0.25);
+    border-radius: 16px;
+    padding: 3rem 2.5rem;
+    text-align: center;
+    max-width: 850px;
+    margin: 0 auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.hero-subtitle {
+    color: var(--moonstone);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.hero-card h1 {
+    font-family: var(--font-title);
+    font-size: 2.5rem;
+    color: var(--orange-primary);
+    margin: 0 0 1.25rem 0;
+    line-height: 1.2;
+}
+
+.nosotros-description {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--text-white);
+    margin: 0;
+}
+
+.nosotros-description strong {
+    color: var(--orange-primary);
+}
+
+/* 2. Sección Valores */
+.nosotros-valores-section {
+    background-color: #212323;
+    padding: 4rem 0;
+}
+
+.nosotros-valores {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.valor-card {
+    background-color: var(--jet-dark);
+    border: 1px solid rgba(122, 166, 179, 0.3);
+    border-radius: 12px;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.valor-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--orange-primary);
+}
+
+.valor-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1.25rem;
+    background-color: rgba(238, 108, 41, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.valor-icon i {
+    font-size: 1.75rem;
+    color: var(--orange-primary);
+}
+
+.valor-card h3 {
+    font-family: var(--font-title);
+    font-size: 1.35rem;
+    color: var(--text-white);
+    margin: 0 0 0.75rem 0;
+}
+
+.valor-card p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* 3. Registro SEMARNAT */
+.nosotros-registro-section {
+    background-color: var(--bg-light);
+    color: var(--jet-dark);
+    padding: 4rem 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.registro-card {
+    background-color: var(--text-white);
+    border: 2px dashed var(--moonstone);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    max-width: 650px;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.registro-badge i {
+    font-size: 3rem;
+    color: var(--orange-primary);
+    margin-bottom: 1rem;
+}
+
+.registro-card h2 {
+    font-family: var(--font-title);
+    font-size: 1.75rem;
+    color: var(--jet-dark);
+    margin: 0 0 0.5rem 0;
+}
+
+.registro-number {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--orange-primary);
+    letter-spacing: 1px;
+    margin: 0.5rem 0;
+}
+
+.registro-text {
+    font-size: 0.95rem;
+    color: #555555;
+    margin: 0;
+}
+
+@media (max-width: 900px) {
+    .nosotros-valores {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .hero-card {
+        padding: 2rem 1.25rem;
+    }
+
+    .hero-card h1 {
+        font-size: 2rem;
+    }
+
+    .nosotros-description {
+        font-size: 1rem;
+    }
+
+    .registro-card {
+        padding: 2rem 1rem;
+    }
+}
