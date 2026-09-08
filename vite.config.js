@@ -26,7 +26,6 @@ export default defineConfig({
         main: path.resolve(__dirname, 'index.html'),
         nosotros: path.resolve(__dirname, 'nosotros.html'),
         admin: path.resolve(__dirname, 'src/pages/admin/admin.html'),
-        login: path.resolve(__dirname, 'src/pages/login/login.html'),
       }
     }
   }
