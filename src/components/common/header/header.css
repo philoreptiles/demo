@@ -1,4 +1,4 @@
-﻿/* Encapsulamiento del Header para consistencia idéntica en todas las páginas */
+/* Encapsulamiento del Header para consistencia idéntica en todas las páginas */
 .site-header,
 .site-header * {
     box-sizing: border-box;
@@ -16,13 +16,21 @@
     width: 100%;
 }
 
+/* ============================================================
+   METODOLOGÍA MOBILE-FIRST
+   Base = móvil (< 768px): encabezado apilado en columna.
+   Un solo @media (min-width: 768px) al final pasa a fila y
+   agrega los :hover (no tienen sentido en pantallas táctiles).
+   ============================================================ */
 .header-container {
     max-width: 1200px;
     margin: 0 auto;
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
 }
 
 .brand-info,
@@ -84,11 +92,6 @@
     line-height: 1 !important;
 }
 
-.nav-btn:hover {
-    color: #EE6C29 !important;
-    background-color: rgba(255, 255, 255, 0.05) !important;
-}
-
 .whatsapp-btn,
 .whatsapp-btn:visited,
 .whatsapp-btn:active {
@@ -107,16 +110,24 @@
     line-height: 1 !important;
 }
 
-.whatsapp-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(37, 211, 102, 0.3) !important;
-}
-
-@media (max-width: 768px) {
+/* ============================================================
+   TABLET Y ESCRITORIO (>= 768px)
+   ============================================================ */
+@media (min-width: 768px) {
     .header-container {
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        padding: 0.25rem 0;
-        gap: 0.5rem;
+        gap: 1rem;
+        padding: 0;
+    }
+
+    .nav-btn:hover {
+        color: #EE6C29 !important;
+        background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .whatsapp-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(37, 211, 102, 0.3) !important;
     }
 }

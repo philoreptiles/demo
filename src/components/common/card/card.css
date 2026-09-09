@@ -1,7 +1,16 @@
-﻿.card {
+/* ============================================================
+   METODOLOGÍA MOBILE-FIRST
+   Base = móvil pequeño (< 400px). Dos bloques @media
+   (min-width: 400px) y (min-width: 768px) van ampliando
+   tamaños y espaciados; los :hover viven solo en el bloque
+   de escritorio (>= 768px), para no quedar "pegados" tras
+   un toque en pantallas táctiles. No existen @media
+   (max-width: ...) en este archivo.
+   ============================================================ */
+.card {
     background-color: var(--card-bg, #282B2B);
     border: 1px solid var(--border-color, #3D4242);
-    border-radius: 12px;
+    border-radius: 8px;
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease;
@@ -12,16 +21,10 @@
     box-sizing: border-box;
 }
 
-.card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
-    border-color: var(--moonstone-color, #7AA6B3);
-}
-
 .card-image-wrapper {
     position: relative;
     width: 100%;
-    height: 220px;
+    height: 100px;
     overflow: hidden;
     background-color: var(--jet-dark, #1E2020);
 }
@@ -33,18 +36,14 @@
     transition: transform 0.35s ease;
 }
 
-.card:hover .card-image {
-    transform: scale(1.05);
-}
-
 .status-badge {
     position: absolute;
-    top: 8px;
-    right: 8px;
+    top: 4px;
+    right: 4px;
     z-index: 10 !important;
-    padding: 0.3rem 0.7rem;
-    border-radius: 10px;
-    font-size: 0.72rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 6px;
+    font-size: 0.58rem;
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -61,72 +60,54 @@
 .status-holdback { background-color: var(--status-holdback, #7AA6B3); }
 
 .card-content {
-    padding: 1.25rem;
+    padding: 0.35rem;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.15rem;
     flex: 1;
 }
 
 .card-species {
     font-family: var(--font-primary, serif);
     font-style: italic;
-    font-size: 0.95rem;
+    font-size: 0.68rem;
     color: var(--moonstone-color, #7AA6B3);
 }
 
 .card-genetics {
-    font-size: 1.4rem;
+    font-size: 0.8rem;
     font-weight: 700;
     color: var(--text-light, #F4F5F5);
     margin: 0;
-    line-height: 1.2;
+    line-height: 1.15;
 }
 
 .card-details {
-    font-size: 0.88rem;
+    font-size: 0.6rem;
     color: #A0A5A5;
     margin-top: 0.1rem;
 }
 
 .card-price {
-    font-size: 1.5rem;
+    font-size: 0.85rem;
     font-weight: 800;
     color: var(--primary-color, #EE6C29);
     margin-top: auto;
-    padding-top: 0.1rem;
+    padding-top: 0.2rem;
 }
 
-/* --- Ajuste compacto para Móvil (< 768px) --- */
-@media (max-width: 767px) {
-    .card {
-        border-radius: 8px;
-    }
-
+/* --- Móvil estándar (>= 400px) --- */
+@media (min-width: 400px) {
     .card-image-wrapper {
         height: 120px;
     }
 
-    .status-badge {
-        top: 4px;
-        right: 4px;
-        padding: 0.15rem 0.4rem;
-        font-size: 0.58rem;
-        border-radius: 6px;
-    }
-
     .card-content {
         padding: 0.5rem;
-        gap: 0.15rem;
-    }
-
-    .card-species {
-        font-size: 0.68rem;
     }
 
     .card-genetics {
         font-size: 0.88rem;
-        line-height: 1.15;
     }
 
     .card-details {
@@ -135,29 +116,57 @@
 
     .card-price {
         font-size: 0.92rem;
-        padding-top: 0.2rem;
     }
 }
 
-/* --- Ajuste Ultra Compacto (< 400px) --- */
-@media (max-width: 399px) {
+/* --- Tablet y escritorio (>= 768px) --- */
+@media (min-width: 768px) {
+    .card {
+        border-radius: 12px;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+        border-color: var(--moonstone-color, #7AA6B3);
+    }
+
+    .card:hover .card-image {
+        transform: scale(1.05);
+    }
+
     .card-image-wrapper {
-        height: 100px;
+        height: 220px;
+    }
+
+    .status-badge {
+        top: 8px;
+        right: 8px;
+        padding: 0.3rem 0.7rem;
+        font-size: 0.72rem;
+        border-radius: 10px;
     }
 
     .card-content {
-        padding: 0.35rem;
+        padding: 1.25rem;
+        gap: 0.35rem;
+    }
+
+    .card-species {
+        font-size: 0.95rem;
     }
 
     .card-genetics {
-        font-size: 0.8rem;
+        font-size: 1.4rem;
+        line-height: 1.2;
     }
 
     .card-details {
-        font-size: 0.6rem;
+        font-size: 0.88rem;
     }
 
     .card-price {
-        font-size: 0.85rem;
+        font-size: 1.5rem;
+        padding-top: 0.1rem;
     }
 }

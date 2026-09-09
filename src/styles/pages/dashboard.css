@@ -66,3 +66,156 @@
         gap: 1.5rem;
     }
 }
+/* ============================================================
+   PANEL DEL CRIADOR — secciones nuevas del Dashboard
+   Mobile-first: todo lo de aquí abajo empieza apilado a 1
+   columna; un solo @media (min-width: 768px) al final acomoda
+   2 columnas donde tiene sentido (estatus + sexo lado a lado).
+   ============================================================ */
+
+.dash-loading {
+    color: var(--color-text-muted, #a0a0a0);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* --- Grid de 2 tarjetas: Estatus / Sexo --- */
+.dash-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+/* --- Listas de barras (estatus, sexo, especies) --- */
+.bar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.bar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.bar-row-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.85rem;
+}
+
+.bar-row-label {
+    color: var(--color-text-main, #F4F5F5);
+    font-weight: 600;
+}
+
+.bar-row-value {
+    color: var(--color-text-muted, #a0a0a0);
+    font-variant-numeric: tabular-nums;
+}
+
+.bar-track {
+    width: 100%;
+    height: 10px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    transition: width 0.4s ease;
+}
+
+/* --- Ejemplares por año: barras verticales con scroll horizontal
+   (mismo patrón mobile-first que .table-premium: en vez de apilar
+   los años, se conserva el eje y se navega con scroll) --- */
+.year-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.9rem;
+    min-height: 160px;
+    padding: 0.5rem 0.25rem 0;
+    overflow-x: auto;
+}
+
+.year-bar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 42px;
+    height: 140px;
+    flex-shrink: 0;
+}
+
+.year-bar-value {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-main, #F4F5F5);
+    margin-bottom: 0.35rem;
+}
+
+.year-bar {
+    width: 26px;
+    border-radius: 6px 6px 0 0;
+    background: var(--color-orange, #EE6C29);
+    min-height: 4px;
+}
+
+.year-bar-label {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted, #a0a0a0);
+}
+
+/* --- Alertas / sugerencias --- */
+.insight-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.insight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    border: 1px solid var(--color-border, #333333);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.insight-icon {
+    flex-shrink: 0;
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+.insight-item--warning {
+    border-color: rgba(238, 108, 41, 0.4);
+    background: rgba(238, 108, 41, 0.08);
+}
+
+.insight-item--success {
+    border-color: rgba(76, 175, 80, 0.35);
+    background: rgba(76, 175, 80, 0.07);
+}
+
+.insight-item--info {
+    border-color: rgba(122, 166, 179, 0.35);
+    background: rgba(122, 166, 179, 0.07);
+}
+
+/* Tablet y escritorio (>= 768px) */
+@media (min-width: 768px) {
+    .dash-grid-2 {
+        grid-template-columns: 1fr 1fr;
+    }
+}

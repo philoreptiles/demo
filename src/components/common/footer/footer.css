@@ -1,4 +1,9 @@
-﻿.site-footer {
+/* ============================================================
+   METODOLOGÍA MOBILE-FIRST
+   Base = móvil (< 768px). Un solo @media (min-width: 768px)
+   agrega los :hover y más espaciado entre enlaces.
+   ============================================================ */
+.site-footer {
     background-color: #1f2121;
     border-top: 1px solid rgba(122, 166, 179, 0.2);
     padding: 2rem 1.5rem;
@@ -17,7 +22,7 @@
 
 .footer-nav {
     display: flex;
-    gap: 1.75rem;
+    gap: 1rem;
     align-items: center;
 }
 
@@ -29,10 +34,6 @@
     transition: color 0.2s ease;
 }
 
-.footer-link:hover {
-    color: #EE6C29;
-}
-
 .footer-copyright {
     color: #8a99a8;
     font-size: 0.85rem;
@@ -40,8 +41,12 @@
     text-align: center;
 }
 
-@media (max-width: 600px) {
+@media (min-width: 768px) {
     .footer-nav {
-        gap: 1rem;
+        gap: 1.75rem;
+    }
+
+    .footer-link:hover {
+        color: #EE6C29;
     }
 }

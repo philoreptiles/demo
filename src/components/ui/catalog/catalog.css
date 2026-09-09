@@ -1,13 +1,21 @@
+/* ============================================================
+   METODOLOGÍA MOBILE-FIRST
+   Base = móvil pequeño (< 400px): 2 columnas. Los siguientes
+   bloques @media (min-width: ...) van ampliando el número de
+   columnas y el espaciado según el ancho disponible. No existen
+   @media (max-width: ...) en este archivo.
+   ============================================================ */
 .catalog-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.35rem;
+    padding: 1.5rem;
     width: 100%;
     box-sizing: border-box;
 }
 
-.catalog-loading, 
-.catalog-error, 
+.catalog-loading,
+.catalog-error,
 .catalog-empty {
     text-align: center;
     padding: 3rem;
@@ -76,31 +84,31 @@
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.btn-clear-filters:hover {
-    background-color: #d45c1f;
-    transform: translateY(-2px);
+/* Móvil estándar (>= 400px) */
+@media (min-width: 400px) {
+    .catalog-grid {
+        gap: 0.4rem;
+    }
 }
 
-/* Tablet (768px a 1024px): 3 Columnas */
-@media (max-width: 1024px) and (min-width: 768px) {
+/* Tablet (>= 768px): 3 columnas, sin el padding extra de móvil */
+@media (min-width: 768px) {
     .catalog-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 0.85rem;
+        padding: 0;
+    }
+
+    .btn-clear-filters:hover {
+        background-color: #d45c1f;
+        transform: translateY(-2px);
     }
 }
 
-/* Móvil (< 768px): 2 Columnas */
-@media (max-width: 767px) {
+/* Escritorio (>= 1025px): 4 columnas */
+@media (min-width: 1025px) {
     .catalog-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.4rem;
-        padding: 1.5rem;
-    }
-}
-
-/* Móvil Pequeño (< 400px) */
-@media (max-width: 399px) {
-    .catalog-grid {
-        gap: 0.35rem;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
     }
 }

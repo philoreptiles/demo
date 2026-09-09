@@ -1,4 +1,13 @@
-﻿/* Container y Overlay Principal */
+/* ============================================================
+   METODOLOGÍA MOBILE-FIRST
+   Base = móvil (< 768px): modal a pantalla completa, imagen y
+   ficha apiladas en 1 columna, "Otros ejemplares" en carrusel
+   horizontal. Un solo @media (min-width: 768px) amplía a modal
+   flotante de 2 columnas y agrega los :hover. No existen
+   @media (max-width: ...) en este archivo.
+   ============================================================ */
+
+/* Container y Overlay Principal */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -14,7 +23,7 @@
     visibility: hidden;
     transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 10000;
-    padding: 24px;
+    padding: 0.4rem;
     box-sizing: border-box;
 }
 
@@ -26,15 +35,15 @@
 /* Botón de Cerrar (X) */
 .modal-close {
     position: fixed;
-    top: 20px;
-    right: 40px;
+    top: 10px;
+    right: 10px;
     background-color: rgba(40, 43, 43, 0.95); /* Jet */
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: #ffffff;
-    font-size: 26px;
+    font-size: 1.4rem;
     line-height: 1;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -45,23 +54,16 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
 }
 
-.modal-close:hover {
-    background-color: #EE6C29; /* Orange */
-    color: #ffffff;
-    transform: scale(1.08);
-    border-color: #EE6C29;
-}
-
 /* Contenedor de la Ficha */
 .modal-container {
     position: relative;
     background-color: #282B2B; /* Jet */
-    width: 90%;
-    max-width: 1200px;
-    max-height: 90vh;
+    width: 100%;
+    max-width: 100%;
+    max-height: 94vh;
     overflow-y: auto;
-    border-radius: 16px;
-    padding: 36px;
+    border-radius: 10px;
+    padding: 0.75rem;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: #ffffff;
@@ -87,8 +89,8 @@
 /* Layout Principal */
 .modal-main-layout {
     display: grid;
-    grid-template-columns: 1.6fr 1fr;
-    gap: 36px;
+    grid-template-columns: 1fr;
+    gap: 10px;
     align-items: start;
 }
 
@@ -96,12 +98,14 @@
 .modal-col-left {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
 }
 
 .modal-image-main-wrapper {
     width: 100%;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: auto;
+    height: 200px;
+    max-height: 200px;
     overflow: hidden;
     border-radius: 12px;
     background-color: #1a1c1c;
@@ -111,7 +115,7 @@
 
 .modal-main-img {
     width: 100%;
-    height: 100%;
+    height: 200px;
     object-fit: cover;
     display: block;
     transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease;
@@ -121,12 +125,12 @@
 /* Miniaturas de la misma serpiente */
 .modal-thumbnails {
     display: flex;
-    gap: 12px;
+    gap: 6px;
 }
 
 .modal-thumb-wrapper {
-    width: 84px;
-    height: 64px;
+    width: 52px;
+    height: 40px;
     border-radius: 8px;
     overflow: hidden;
     background-color: #1a1c1c;
@@ -143,11 +147,6 @@
     transition: all 0.2s ease;
 }
 
-.modal-thumb:hover {
-    opacity: 1;
-    transform: scale(1.05);
-}
-
 .modal-thumb.active {
     opacity: 1;
     border-color: #EE6C29; /* Orange */
@@ -157,7 +156,7 @@
 .modal-col-right {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
 }
 
 /* Barra de Navegación */
@@ -166,7 +165,7 @@
     justify-content: space-between;
     align-items: center;
     background-color: rgba(0, 0, 0, 0.25);
-    padding: 8px 14px;
+    padding: 4px 8px;
     border-radius: 8px;
     margin-bottom: 4px;
 }
@@ -176,18 +175,14 @@
     border: none;
     color: #7AA6B3; /* Moonstone */
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     cursor: pointer;
     transition: color 0.2s ease;
-    padding: 4px 8px;
-}
-
-.modal-nav-btn:hover {
-    color: #ffffff;
+    padding: 2px 6px;
 }
 
 .modal-counter {
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     color: #a0a0a0;
     font-weight: 600;
 }
@@ -197,11 +192,11 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 4px;
 }
 
 .modal-title-species {
-    font-size: 2.2rem;
+    font-size: 1.25rem;
     font-weight: 800;
     font-style: italic;
     margin: 0;
@@ -212,9 +207,9 @@
 .modal-genetics-badge {
     background-color: #7AA6B3; /* Moonstone */
     color: #282B2B;
-    padding: 4px 12px;
+    padding: 2px 8px;
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
 }
@@ -224,10 +219,10 @@
     background-color: rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 12px;
-    padding: 20px;
+    padding: 8px;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 18px;
+    gap: 8px;
 }
 
 .detail-item {
@@ -237,14 +232,14 @@
 }
 
 .detail-item label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 800;
     color: #7AA6B3; /* Moonstone */
     letter-spacing: 0.8px;
 }
 
 .detail-item span {
-    font-size: 1.1rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: #ffffff;
 }
@@ -257,27 +252,27 @@
 
 .detail-status-text {
     display: inline-block;
-    padding: 2px 8px;
+    padding: 2px 6px;
     border-radius: 4px;
     width: fit-content;
-    font-size: 0.9rem !important;
+    font-size: 0.75rem !important;
 }
 
 /* Precio */
 .modal-price-box {
     display: flex;
     align-items: baseline;
-    gap: 12px;
+    gap: 6px;
 }
 
 .modal-price-label {
-    font-size: 0.95rem;
+    font-size: 0.8rem;
     color: #a0a0a0;
     font-weight: 700;
 }
 
 .modal-price {
-    font-size: 2.2rem;
+    font-size: 1.2rem;
     font-weight: 900;
     color: #EE6C29; /* Orange */
 }
@@ -287,14 +282,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    padding: 16px 24px;
+    gap: 8px;
+    padding: 10px 14px;
     border-radius: 10px;
     font-weight: 800;
-    font-size: 1.05rem;
+    font-size: 0.9rem;
     text-decoration: none;
     transition: all 0.25s ease;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-whatsapp svg {
+    width: 18px;
+    height: 18px;
 }
 
 .btn-whatsapp.btn-available {
@@ -302,41 +302,46 @@
     color: #ffffff;
 }
 
-.btn-whatsapp.btn-available:hover {
-    background-color: #1eb855;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
-}
-
 .btn-whatsapp.btn-unavailable {
     background-color: #7AA6B3; /* Moonstone */
     color: #ffffff;
 }
 
-.btn-whatsapp.btn-unavailable:hover {
-    background-color: #638c98;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(122, 166, 179, 0.4);
-}
-
-/* Sección Otros Ejemplares */
+/* Sección Otros Ejemplares — carrusel horizontal en móvil */
 .modal-others-section {
-    margin-top: 36px;
+    margin-top: 14px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding-top: 24px;
+    padding-top: 10px;
 }
 
 .modal-others-title {
-    font-size: 1.1rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: #7AA6B3; /* Moonstone */
-    margin: 0 0 16px 0;
+    margin: 0 0 8px 0;
 }
 
 .modal-others-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 16px;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+}
+
+.modal-others-grid::-webkit-scrollbar {
+    height: 4px;
+}
+
+.modal-others-grid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.modal-others-grid::-webkit-scrollbar-thumb {
+    background: #7AA6B3; /* Moonstone */
+    border-radius: 4px;
 }
 
 .no-others-message {
@@ -350,23 +355,20 @@
     background-color: rgba(0, 0, 0, 0.25);
     border: 2px solid transparent;
     border-radius: 10px;
-    padding: 10px;
+    padding: 6px;
     display: flex;
-    gap: 12px;
+    gap: 8px;
     align-items: center;
     cursor: pointer;
     transition: all 0.2s ease;
-}
-
-.other-card:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: #EE6C29;
-    transform: translateY(-2px);
+    flex: 0 0 135px;
+    scroll-snap-align: start;
+    box-sizing: border-box;
 }
 
 .other-card-img-wrapper {
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     border-radius: 6px;
     overflow: hidden;
     flex-shrink: 0;
@@ -386,7 +388,8 @@
 }
 
 .other-card-species {
-    font-size: 0.85rem;
+    font-size: 0.7rem;
+    max-width: 75px;
     font-weight: 700;
     font-style: italic;
     white-space: nowrap;
@@ -395,192 +398,203 @@
 }
 
 .other-card-price {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: #EE6C29;
     font-weight: 800;
 }
 
-/* ==========================================
-   OPTIMIZACIÓN MÓVIL (< 768px)
-   ========================================== */
-@media (max-width: 767px) {
+/* ============================================================
+   TABLET Y ESCRITORIO (>= 768px)
+   ============================================================ */
+@media (min-width: 768px) {
     .modal-overlay {
-        padding: 0.4rem;
+        padding: 24px;
     }
 
     .modal-close {
-        top: 10px;
-        right: 10px;
-        width: 40px;
-        height: 40px;
-        font-size: 1.4rem;
+        top: 20px;
+        right: 40px;
+        width: 44px;
+        height: 44px;
+        font-size: 26px;
+    }
+
+    .modal-close:hover {
+        background-color: #EE6C29; /* Orange */
+        color: #ffffff;
+        transform: scale(1.08);
+        border-color: #EE6C29;
     }
 
     .modal-container {
-        width: 100%;
-        max-width: 100%;
-        max-height: 94vh;
-        border-radius: 10px;
-        padding: 0.75rem;
+        width: 90%;
+        max-width: 1200px;
+        max-height: 90vh;
+        border-radius: 16px;
+        padding: 36px;
     }
 
     .modal-main-layout {
-        grid-template-columns: 1fr;
-        gap: 10px;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 36px;
     }
 
     .modal-col-left {
-        gap: 8px;
+        gap: 16px;
     }
 
-    /* Imagen más pequeña en móvil */
     .modal-image-main-wrapper {
-        aspect-ratio: auto;
-        height: 200px;
-        max-height: 200px;
+        aspect-ratio: 4 / 3;
+        height: auto;
+        max-height: none;
     }
 
     .modal-main-img {
-        height: 200px;
+        height: 100%;
     }
 
     .modal-thumbnails {
-        gap: 6px;
+        gap: 12px;
     }
 
     .modal-thumb-wrapper {
-        width: 52px;
-        height: 40px;
+        width: 84px;
+        height: 64px;
+    }
+
+    .modal-thumb:hover {
+        opacity: 1;
+        transform: scale(1.05);
     }
 
     .modal-col-right {
-        gap: 10px;
+        gap: 20px;
     }
 
     .modal-nav-bar {
-        padding: 4px 8px;
+        padding: 8px 14px;
     }
 
     .modal-nav-btn {
-        font-size: 0.8rem;
-        padding: 2px 6px;
+        font-size: 0.9rem;
+        padding: 4px 8px;
+    }
+
+    .modal-nav-btn:hover {
+        color: #ffffff;
     }
 
     .modal-counter {
-        font-size: 0.75rem;
+        font-size: 0.82rem;
     }
 
     .modal-header-info {
-        gap: 4px;
+        gap: 8px;
     }
 
-    /* Reducción de fuentes principales */
     .modal-title-species {
-        font-size: 1.25rem;
+        font-size: 2.2rem;
     }
 
     .modal-genetics-badge {
-        font-size: 0.75rem;
-        padding: 2px 8px;
+        padding: 4px 12px;
+        font-size: 0.85rem;
     }
 
-    /* Cuadrícula de detalles compacta */
     .modal-details-grid {
-        padding: 8px;
-        gap: 8px;
+        padding: 20px;
+        gap: 18px;
     }
 
     .detail-item label {
-        font-size: 0.7rem;
+        font-size: 0.75rem;
     }
 
     .detail-item span {
-        font-size: 0.85rem;
+        font-size: 1.1rem;
     }
 
     .detail-status-text {
-        font-size: 0.75rem !important;
-        padding: 2px 6px;
+        padding: 2px 8px;
+        font-size: 0.9rem !important;
     }
 
-    /* Precio compacto */
     .modal-price-box {
-        gap: 6px;
+        gap: 12px;
     }
 
     .modal-price-label {
-        font-size: 0.8rem;
+        font-size: 0.95rem;
     }
 
     .modal-price {
-        font-size: 1.2rem;
+        font-size: 2.2rem;
     }
 
-    /* Botón de WhatsApp ajustado */
     .btn-whatsapp {
-        padding: 10px 14px;
-        font-size: 0.9rem;
-        gap: 8px;
+        padding: 16px 24px;
+        font-size: 1.05rem;
+        gap: 12px;
     }
 
     .btn-whatsapp svg {
-        width: 18px;
-        height: 18px;
+        width: 22px;
+        height: 22px;
     }
 
-    /* Sección Ejemplares Disponibles con Scroll Horizontal sin desbordamiento */
+    .btn-whatsapp.btn-available:hover {
+        background-color: #1eb855;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+    }
+
+    .btn-whatsapp.btn-unavailable:hover {
+        background-color: #638c98;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(122, 166, 179, 0.4);
+    }
+
     .modal-others-section {
-        margin-top: 14px;
-        padding-top: 10px;
+        margin-top: 36px;
+        padding-top: 24px;
     }
 
     .modal-others-title {
-        font-size: 0.85rem;
-        margin-bottom: 8px;
+        font-size: 1.1rem;
+        margin-bottom: 16px;
     }
 
     .modal-others-grid {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        gap: 8px;
-        padding-bottom: 6px;
-        -webkit-overflow-scrolling: touch;
-        scroll-snap-type: x mandatory;
-    }
-
-    .modal-others-grid::-webkit-scrollbar {
-        height: 4px;
-    }
-
-    .modal-others-grid::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.2);
-    }
-
-    .modal-others-grid::-webkit-scrollbar-thumb {
-        background: #7AA6B3; /* Moonstone */
-        border-radius: 4px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 16px;
+        overflow-x: visible;
+        padding-bottom: 0;
     }
 
     .other-card {
-        flex: 0 0 135px;
-        padding: 6px;
-        gap: 8px;
-        scroll-snap-align: start;
-        box-sizing: border-box;
+        padding: 10px;
+        gap: 12px;
+        flex: initial;
+    }
+
+    .other-card:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-color: #EE6C29;
+        transform: translateY(-2px);
     }
 
     .other-card-img-wrapper {
-        width: 36px;
-        height: 36px;
+        width: 48px;
+        height: 48px;
     }
 
     .other-card-species {
-        font-size: 0.7rem;
-        max-width: 75px;
+        font-size: 0.85rem;
+        max-width: none;
     }
 
     .other-card-price {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
     }
 }

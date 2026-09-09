@@ -1,9 +1,9 @@
-﻿﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estadísticas - Escama y Colmillo</title>
+    <title>Dashboard - Escama y Colmillo</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="../../styles/main.css">
     <link rel="stylesheet" href="../../styles/pages/admin.css">
@@ -17,8 +17,9 @@
                 <span class="brand-title">ESCAMA Y COLMILLO</span>
             </a>
             <nav class="nav-menu">
-                <a href="/src/pages/admin/admin.html" class="nav-link">Inventario</a>
-                <a href="/src/pages/dashboard/dashboard.html" class="nav-link">Estadísticas</a>
+                <a href="/index.html" class="nav-link">Ejemplares</a>
+                <a href="/src/pages/admin/admin.html" class="nav-link">Control</a>
+                <a href="/src/pages/dashboard/dashboard.html" class="nav-link nav-link--active">Dashboard</a>
                 <div id="auth-header-action"></div>
             </nav>
         </div>
@@ -27,12 +28,12 @@
     <main class="admin-main">
 
         <div class="dashboard-header">
-            <h1>Estadísticas del Negocio</h1>
-            <p>Un vistazo rápido a tu inventario y tus ventas.</p>
+            <h1>Dashboard</h1>
+            <p>Resumen ejecutivo de tu criadero: inventario, ventas y salud de tus datos.</p>
         </div>
 
-        <!-- Grid de tarjetas KPI (Métricas rápidas) -->
-        <section class="kpi-grid">
+        <!-- KPIs principales -->
+        <section class="kpi-grid" id="kpi-grid">
             <article class="kpi-card">
                 <span class="kpi-label">Valor del Inventario</span>
                 <h3 class="kpi-value" id="kpi-valor-inventario">$0.00</h3>
@@ -40,9 +41,21 @@
             </article>
 
             <article class="kpi-card">
+                <span class="kpi-label">Valor en Apartado</span>
+                <h3 class="kpi-value" id="kpi-valor-apartado">$0.00</h3>
+                <span class="kpi-subtext" id="kpi-apartado-sub">Cargando...</span>
+            </article>
+
+            <article class="kpi-card">
                 <span class="kpi-label">Ventas Totales</span>
                 <h3 class="kpi-value" id="kpi-ventas-totales">$0.00</h3>
                 <span class="kpi-subtext" id="kpi-ventas-sub">Cargando...</span>
+            </article>
+
+            <article class="kpi-card">
+                <span class="kpi-label">Ticket Promedio</span>
+                <h3 class="kpi-value" id="kpi-ticket-promedio">$0.00</h3>
+                <span class="kpi-subtext" id="kpi-ticket-sub">Cargando...</span>
             </article>
 
             <article class="kpi-card">
@@ -56,6 +69,69 @@
                 <h3 class="kpi-value" id="kpi-top-especie">---</h3>
                 <span class="kpi-subtext" id="kpi-top-especie-count">Cargando...</span>
             </article>
+        </section>
+
+        <!-- Estatus del inventario + Distribución por sexo -->
+        <section class="dash-grid-2">
+            <div class="premium-card">
+                <h2 class="card-title">Estatus del inventario</h2>
+                <div class="bar-list" id="status-bar-list">
+                    <p class="dash-loading">Cargando...</p>
+                </div>
+            </div>
+
+            <div class="premium-card">
+                <h2 class="card-title">Distribución por sexo</h2>
+                <div class="bar-list" id="sexo-bar-list">
+                    <p class="dash-loading">Cargando...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Especies con mayor presencia -->
+        <section class="premium-card">
+            <h2 class="card-title">Especies con mayor presencia</h2>
+            <div class="bar-list" id="especies-bar-list">
+                <p class="dash-loading">Cargando...</p>
+            </div>
+        </section>
+
+        <!-- Ejemplares por año de nacimiento -->
+        <section class="premium-card">
+            <h2 class="card-title">Ejemplares por año de nacimiento</h2>
+            <div class="year-chart" id="year-chart">
+                <p class="dash-loading">Cargando...</p>
+            </div>
+        </section>
+
+        <!-- Alertas y sugerencias -->
+        <section class="premium-card">
+            <h2 class="card-title">Alertas y sugerencias</h2>
+            <div class="insight-list" id="insight-list">
+                <p class="dash-loading">Cargando...</p>
+            </div>
+        </section>
+
+        <!-- Últimos ejemplares agregados -->
+        <section class="premium-card">
+            <h2 class="card-title">Últimos ejemplares agregados</h2>
+            <div class="table-container-premium">
+                <table class="table-premium">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Especie</th>
+                            <th>Genética</th>
+                            <th>Estatus</th>
+                            <th>Precio</th>
+                            <th>Agregado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-table-body">
+                        <tr><td colspan="6" style="text-align: center;">Cargando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
 
     </main>
