@@ -183,23 +183,48 @@ function setupFormListeners() {
 
 async function getEstadisticas() {
 
+    // CAMBIO: se agrega "precio" al select. Antes esta consulta solo
+    // traía "estatus" porque solo se contaban ejemplares por categoría;
+    // ahora también se necesita el precio de cada uno para poder sumar
+    // el valor de los que están Disponibles (ver "valorDisponible" abajo).
     const { data, error } = await supabase
         .from('ejemplares')
-        .select('estatus');
+        .select('estatus, precio');
 
     if (error) {
         throw error;
     }
 
+    const disponibles = data.filter(e => e.estatus === 'Disponible');
+
+    // Suma de "precio" solo de los ejemplares Disponibles. Se usa
+    // "Number(e.precio) || 0" por si algún registro viejo tuviera el
+    // precio guardado como texto o vacío/null — así un dato sucio no
+    // rompe la suma completa (se cuenta como $0 en vez de tronar).
+    const valorDisponible = disponibles.reduce(
+        (suma, e) => suma + (Number(e.precio) || 0),
+        0
+    );
+
     return {
         total: data.length,
-        disponibles: data.filter(e => e.estatus === 'Disponible').length,
+        disponibles: disponibles.length,
+        valorDisponible,
         apartados: data.filter(e => e.estatus === 'Apartado').length,
         vendidos: data.filter(e => e.estatus === 'Vendido').length,
         holdbacks: data.filter(e => e.estatus === 'Holdback').length
     };
 }
 
+// Formateador de moneda reutilizado tal cual se usa en la tabla de
+// inventario (ver más abajo en este mismo archivo, dentro de
+// renderTableRows), para que el mismo número siempre se vea igual en
+// todo el panel: símbolo "$", separador de miles y 2 decimales, en
+// formato mexicano (es-MX / MXN).
+const formateadorMoneda = new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN'
+});
 
 async function renderEstadisticas() {
 
@@ -208,6 +233,8 @@ async function renderEstadisticas() {
 
         document.getElementById('stat-total').textContent = stats.total;
         document.getElementById('stat-disponibles').textContent = stats.disponibles;
+        document.getElementById('stat-valor-disponible').textContent =
+            formateadorMoneda.format(stats.valorDisponible);
         document.getElementById('stat-apartados').textContent = stats.apartados;
         document.getElementById('stat-vendidos').textContent = stats.vendidos;
         document.getElementById('stat-holdbacks').textContent = stats.holdbacks;

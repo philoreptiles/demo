@@ -13,6 +13,31 @@
     --font-secondary: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+/* ============================================================
+   METODOLOGÍA MOBILE-FIRST
+   ------------------------------------------------------------
+   Todo lo que está FUERA de un bloque @media es el diseño base
+   para celular (< 768px): layouts de 1 columna, anchos fluidos
+   (100% + max-width), espaciados compactos (1-1.5rem) y títulos
+   entre 1.4rem y 1.8rem. Al final del archivo hay UN SOLO bloque
+   @media (min-width: 768px) que amplía columnas, aire y tipografía
+   para tablet/escritorio, y agrega los efectos :hover (en táctil
+   no tienen sentido y pueden quedarse "pegados" tras un toque).
+   No existen @media (max-width: ...) en este archivo.
+
+   Excepciones deliberadas a "1 columna" en el base móvil, con su
+   razón anotada en el lugar donde aparecen:
+   - .stats-panel usa 2 columnas en vez de 1: son tarjetas pequeñas
+     de solo un número y una etiqueta; en 1 columna quedarían 5
+     franjas larguísimas y vacías, mientras que 2 columnas ya se ve
+     bien a partir de 320px de ancho.
+   - .table-premium mantiene scroll horizontal en vez de apilarse:
+     una tabla de datos (precio, año, estatus...) pierde su
+     significado si se apila en tarjetas; el scroll horizontal
+     dentro de su propio contenedor es el patrón mobile-first
+     aceptado para tablas de datos densas.
+   ============================================================ */
+
 body {
     background-color: var(--color-bg);
     color: var(--color-text-main);
@@ -26,7 +51,7 @@ body.modal-open {
     overflow: hidden;
 }
 
-/* Header */
+/* ==================== HEADER ==================== */
 .header {
     background-color: var(--color-jet);
     border-bottom: 1px solid var(--color-border);
@@ -36,12 +61,16 @@ body.modal-open {
 }
 
 .header-container {
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 1rem 1.5rem;
+    padding: 0.85rem 1rem;
+    box-sizing: border-box;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+    gap: 0.75rem;
 }
 
 .logo-link {
@@ -51,43 +80,42 @@ body.modal-open {
 .brand-title {
     color: var(--color-orange);
     font-family: var(--font-primary);
-    font-size: 1.4rem;
+    font-size: 1.15rem;
     font-weight: 700;
     letter-spacing: 1px;
 }
 
 .nav-menu {
+    width: 100%;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 1.5rem;
+    gap: 0.75rem;
 }
 
 .nav-link {
     color: var(--color-text-main);
     text-decoration: none;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 500;
-    transition: color 0.2s ease;
 }
 
-.nav-link:hover {
-    color: var(--color-orange);
-}
-
-/* Layout Principal */
+/* ==================== LAYOUT PRINCIPAL ==================== */
 .admin-main {
+    width: 100%;
     max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1.5rem 3rem;
+    margin: 1.25rem auto;
+    padding: 0 1rem 2.5rem;
+    box-sizing: border-box;
 }
 
 .dashboard-header {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .dashboard-header h1 {
     font-family: var(--font-primary);
-    font-size: 2.2rem;
+    font-size: 1.6rem;
     color: var(--color-text-main);
     margin: 0 0 0.5rem 0;
     font-weight: 700;
@@ -96,28 +124,30 @@ body.modal-open {
 .dashboard-header p {
     color: var(--color-text-muted);
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
-/* Tarjetas */
+/* ==================== TARJETAS ==================== */
 .premium-card {
+    width: 100%;
+    box-sizing: border-box;
     background: var(--color-jet-card);
     border: 1px solid var(--color-border);
-    border-radius: 16px;
-    padding: 1.75rem;
-    margin-bottom: 2rem;
+    border-radius: 12px;
+    padding: 1.25rem 1rem;
+    margin-bottom: 1.5rem;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
 .card-title {
     font-family: var(--font-primary);
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     color: var(--color-text-main);
-    margin: 0 0 1.25rem 0;
+    margin: 0 0 1rem 0;
     font-weight: 600;
 }
 
-/* Formularios */
+/* ==================== FORMULARIOS (genérico) ==================== */
 .admin-form {
     display: flex;
     flex-direction: column;
@@ -125,84 +155,8 @@ body.modal-open {
 
 .admin-grid-form {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.75rem;
-}
-
-/* Formulario "Agregar nuevo ejemplar" */
-.premium-card:has(#add-ejemplar-form) {
-    padding: 1rem 1.5rem;
-}
-
-.premium-card:has(#add-ejemplar-form) .card-title {
-    margin-bottom: 0.75rem;
-    font-size: 1.25rem;
-}
-
-#add-ejemplar-form {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem 1.25rem;
-    align-items: center;
-}
-
-#add-ejemplar-form .form-column {
-    display: contents;
-}
-
-#add-ejemplar-form .form-group-premium {
-    gap: 0.15rem;
-}
-
-#add-ejemplar-form .form-group-premium label {
-    font-size: 0.72rem;
-    letter-spacing: 0.3px;
-}
-
-#add-ejemplar-form input[type="text"],
-#add-ejemplar-form input[type="number"],
-#add-ejemplar-form select {
-    padding: 0.35rem 0.65rem;
-    font-size: 0.85rem;
-    height: 34px;
-}
-
-#add-ejemplar-form .drop-zone {
-    padding: 0.3rem 0.5rem;
-    min-height: 34px;
-    border-width: 1px;
-}
-
-#add-ejemplar-form .drop-text {
-    font-size: 0.75rem;
-}
-
-#add-ejemplar-form .preview-container {
-    padding: 0.25rem 0.5rem;
-    margin-top: 0.2rem;
-}
-
-#add-ejemplar-form .preview-thumb {
-    width: 30px;
-    height: 30px;
-}
-
-#add-ejemplar-form .form-actions-full {
-    grid-column: 1 / -1;
-    margin-top: 0.25rem;
-    justify-content: flex-end;
-}
-
-#add-ejemplar-form .form-actions-full .btn-premium {
-    padding: 0.45rem 1.25rem;
-    font-size: 0.85rem;
-}
-
-@media (max-width: 820px) {
-    .admin-grid-form,
-    #add-ejemplar-form {
-        grid-template-columns: 1fr;
-    }
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
 }
 
 .form-column {
@@ -266,7 +220,76 @@ input[type="number"] {
     appearance: textfield;
 }
 
-/* Carga de Archivos (Drop Zone) */
+/* ==================== FORMULARIO "AGREGAR EJEMPLAR" ==================== */
+.premium-card:has(#add-ejemplar-form) {
+    padding: 1.1rem 1rem;
+}
+
+.premium-card:has(#add-ejemplar-form) .card-title {
+    margin-bottom: 0.75rem;
+    font-size: 1.15rem;
+}
+
+#add-ejemplar-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+
+#add-ejemplar-form .form-column {
+    display: contents;
+}
+
+#add-ejemplar-form .form-group-premium {
+    gap: 0.3rem;
+}
+
+#add-ejemplar-form .form-group-premium label {
+    font-size: 0.78rem;
+    letter-spacing: 0.3px;
+}
+
+#add-ejemplar-form input[type="text"],
+#add-ejemplar-form input[type="number"],
+#add-ejemplar-form select {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+    min-height: 42px;
+    box-sizing: border-box;
+}
+
+#add-ejemplar-form .drop-zone {
+    padding: 0.75rem 1rem;
+    min-height: 48px;
+}
+
+#add-ejemplar-form .drop-text {
+    font-size: 0.82rem;
+}
+
+#add-ejemplar-form .preview-container {
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.35rem;
+}
+
+#add-ejemplar-form .preview-thumb {
+    width: 42px;
+    height: 42px;
+}
+
+#add-ejemplar-form .form-actions-full {
+    grid-column: 1 / -1;
+    margin-top: 0.35rem;
+}
+
+#add-ejemplar-form .form-actions-full .btn-premium {
+    width: 100%;
+    padding: 0.85rem 1.25rem;
+    font-size: 0.95rem;
+}
+
+/* ==================== CARGA DE ARCHIVOS (drop zone genérica) ==================== */
 .drop-zone {
     position: relative;
     border: 2px dashed var(--color-border);
@@ -282,7 +305,6 @@ input[type="number"] {
     min-height: 64px;
 }
 
-.drop-zone:hover,
 .drop-zone.dragover {
     border-color: var(--color-orange);
     background: rgba(238, 108, 41, 0.08);
@@ -327,30 +349,26 @@ input[type="number"] {
     color: var(--color-text-main);
     border: none;
     border-radius: 6px;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.82rem;
     cursor: pointer;
     transition: background 0.2s ease;
-}
-
-.btn-change-img:hover {
-    background: #454A4A;
 }
 
 .form-actions-full {
     grid-column: 1 / -1;
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
     margin-top: 0.5rem;
 }
 
-/* Botones */
+/* ==================== BOTONES ==================== */
 .btn-premium {
     background: var(--color-orange);
     color: #ffffff;
     border: none;
     border-radius: 8px;
-    padding: 0.8rem 1.6rem;
+    padding: 0.85rem 1.5rem;
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
@@ -358,10 +376,6 @@ input[type="number"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-}
-
-.btn-premium:hover {
-    background: var(--color-orange-hover);
 }
 
 .btn-premium:disabled {
@@ -374,31 +388,27 @@ input[type="number"] {
     color: var(--color-text-main);
     border: 1px solid var(--color-border);
     border-radius: 8px;
-    padding: 0.75rem 1.25rem;
+    padding: 0.8rem 1.25rem;
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.btn-secondary-premium:hover {
-    background: #333737;
-    border-color: #525858;
-}
-
-/* Panel de Estadísticas */
+/* ==================== PANEL DE ESTADÍSTICAS ==================== */
+/* Excepción documentada arriba: 2 columnas en vez de 1 desde el base móvil. */
 .stats-panel {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
 }
 
 .stat-card {
     background: var(--color-jet-card);
     border: 1px solid var(--color-border);
     border-radius: 12px;
-    padding: 1.25rem 1rem;
+    padding: 0.9rem 0.6rem;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -406,63 +416,84 @@ input[type="number"] {
 }
 
 .stat-number {
-    font-size: 2rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: var(--color-orange);
 }
 
+/*
+   Modificador para fichas cuyo número es una cantidad de dinero
+   (ej. "$45,231.00") en vez de un conteo simple (ej. "12").
+   Un texto así es mucho más largo, así que necesita:
+   - Un tamaño de letra menor, para que quepa en el mismo espacio
+     de tarjeta que las demás fichas sin agrandar toda la fila.
+   - "white-space: nowrap" + "text-overflow: ellipsis" como
+     salvavidas: si algún día el inventario vale tanto que ni con
+     letra chica cabe, se corta con "..." en vez de desbordar la
+     tarjeta o romper la cuadrícula de estadísticas.
+*/
+.stat-number--currency {
+    font-size: 1.05rem;
+    display: inline-block;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .stat-label {
-    font-size: 0.8rem;
+    font-size: 0.68rem;
     color: var(--color-text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     font-weight: 600;
 }
 
-/* Filtros de Inventario */
+/* ==================== FILTROS DE INVENTARIO ==================== */
 .premium-card:has(.filter-grid-premium) {
-    padding: 1rem 1.5rem;
+    padding: 1.1rem 1rem;
 }
 
 .premium-card:has(.filter-grid-premium) .card-title {
     margin-bottom: 0.75rem;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
 }
 
 .filter-grid-premium {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 0.75rem;
-    align-items: end;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
 }
 
 .filter-grid-premium .form-group-premium {
-    gap: 0.15rem;
+    gap: 0.3rem;
 }
 
 .filter-grid-premium .form-group-premium label {
-    font-size: 0.72rem;
+    font-size: 0.78rem;
 }
 
 .filter-grid-premium input,
 .filter-grid-premium select {
-    padding: 0.35rem 0.65rem;
-    font-size: 0.85rem;
-    height: 34px;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+    min-height: 42px;
+    box-sizing: border-box;
 }
 
 .filter-actions-right {
     grid-column: 1 / -1;
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
     gap: 0.5rem;
-    margin-top: 0.25rem;
+    margin-top: 0.35rem;
 }
 
 .filter-actions-right .btn-premium,
 .filter-actions-right .btn-secondary-premium {
-    padding: 0.4rem 1rem;
-    font-size: 0.82rem;
+    width: 100%;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
 }
 
 /* Contenedor del botón Ver Todos / Mostrar Menos */
@@ -479,10 +510,13 @@ input[type="number"] {
     background: transparent;
 }
 
-/* Tablas */
+/* ==================== TABLAS ====================
+   Ver nota de excepción "1 columna" al inicio del archivo: la tabla
+   conserva scroll horizontal en vez de apilarse en el base móvil. */
 .table-container-premium {
     width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     border: 1px solid var(--color-border);
     border-radius: 10px;
     background: #181A1A;
@@ -490,16 +524,17 @@ input[type="number"] {
 
 .table-premium {
     width: 100%;
+    min-width: 640px;
     border-collapse: collapse;
     text-align: left;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .table-premium th {
     background: #141616;
     color: var(--color-text-muted);
-    padding: 0.85rem 1rem;
-    font-size: 0.75rem;
+    padding: 0.75rem 0.85rem;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.6px;
@@ -508,24 +543,16 @@ input[type="number"] {
 }
 
 .table-premium td {
-    padding: 0.85rem 1rem;
+    padding: 0.75rem 0.85rem;
     border-bottom: 1px solid #282B2B;
     vertical-align: middle;
     color: var(--color-text-main);
     white-space: nowrap;
 }
 
-.table-premium tbody tr {
-    transition: background 0.15s ease;
-}
-
-.table-premium tbody tr:hover {
-    background: #232626;
-}
-
 .table-thumb {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     object-fit: cover;
     border-radius: 6px;
     border: 1px solid var(--color-border);
@@ -545,9 +572,9 @@ input[type="number"] {
     top: auto;
     right: auto;
     display: inline-block;
-    padding: 0.25rem 0.65rem;
+    padding: 0.25rem 0.6rem;
     border-radius: 20px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.4px;
@@ -588,17 +615,13 @@ input[type="number"] {
     background: #282B2B;
     border: 1px solid var(--color-border);
     border-radius: 6px;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-}
-
-.btn-icon:hover {
-    background: #383D3D;
 }
 
 .btn-icon svg {
@@ -610,21 +633,11 @@ input[type="number"] {
     color: var(--color-moonstone);
 }
 
-.btn-edit-icon:hover {
-    color: #9cd1e0;
-    border-color: var(--color-moonstone);
-}
-
 .btn-delete-icon {
     color: #EF5350;
 }
 
-.btn-delete-icon:hover {
-    color: #FF8A80;
-    border-color: #EF5350;
-}
-
-/* Modal de Edición */
+/* ==================== MODAL DE EDICIÓN ==================== */
 .edit-modal-overlay {
     position: fixed;
     inset: 0;
@@ -649,7 +662,8 @@ input[type="number"] {
 }
 
 .edit-modal {
-    width: min(780px, 100%);
+    width: 100%;
+    max-width: 780px;
     max-height: 96vh;
     overflow-y: auto;
     background: var(--color-jet-card);
@@ -657,13 +671,14 @@ input[type="number"] {
     border: 1px solid var(--color-border);
     border-radius: 14px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    box-sizing: border-box;
 }
 
 .edit-modal-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    padding: 0.75rem 1.25rem;
+    padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--color-border);
 }
 
@@ -677,7 +692,7 @@ input[type="number"] {
 
 #edit-modal-title {
     font-family: var(--font-primary);
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     margin: 0.1rem 0 0 0;
     color: var(--color-text-main);
 }
@@ -686,8 +701,8 @@ input[type="number"] {
     background: #181A1A;
     border: 1px solid var(--color-border);
     border-radius: 50%;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     color: var(--color-text-muted);
     cursor: pointer;
     display: flex;
@@ -695,23 +710,19 @@ input[type="number"] {
     justify-content: center;
     font-size: 0.85rem;
     transition: all 0.2s ease;
-}
-
-.edit-modal-close:hover {
-    background: #333737;
-    color: var(--color-text-main);
+    flex-shrink: 0;
 }
 
 .edit-modal-form {
-    padding: 0.75rem 1.25rem;
+    padding: 0.85rem 1rem;
 }
 
 .edit-modal-id-row {
     background: #181A1A;
     border: 1px solid var(--color-border);
     border-radius: 6px;
-    padding: 0.35rem 0.75rem;
-    margin-bottom: 0.6rem;
+    padding: 0.45rem 0.75rem;
+    margin-bottom: 0.75rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -725,7 +736,7 @@ input[type="number"] {
 }
 
 .edit-form-section {
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.85rem;
 }
 
 .edit-form-section-title {
@@ -735,23 +746,23 @@ input[type="number"] {
     letter-spacing: 0.4px;
     color: var(--color-moonstone);
     border-bottom: 1px solid var(--color-border);
-    padding-bottom: 0.25rem;
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.3rem;
+    margin-bottom: 0.6rem;
 }
 
 .form-row {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-    margin-bottom: 0.4rem;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
 }
 
 .edit-modal-form .form-group-premium {
-    gap: 0.15rem;
+    gap: 0.25rem;
 }
 
 .edit-modal-form label {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
 }
 
 .edit-modal-form input[type="text"],
@@ -760,12 +771,12 @@ input[type="number"] {
     background: #181A1A;
     border: 1px solid var(--color-border);
     border-radius: 6px;
-    padding: 0.25rem 0.55rem;
+    padding: 0.5rem 0.6rem;
     color: var(--color-text-main);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-family: var(--font-secondary);
     outline: none;
-    height: 30px;
+    min-height: 38px;
     width: 100%;
     box-sizing: border-box;
 }
@@ -777,8 +788,8 @@ input[type="number"] {
 
 .edit-images-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
 }
 
 .edit-images-grid .image-edit-container {
@@ -786,11 +797,11 @@ input[type="number"] {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: 0.3rem;
 }
 
 .image-edit-container label {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: var(--color-text-muted);
 }
@@ -800,13 +811,13 @@ input[type="number"] {
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 65px;
+    height: 110px;
     border: 1px dashed var(--color-border);
     border-radius: 6px;
     background: #181A1A;
     overflow: hidden;
     color: var(--color-text-muted);
-    font-size: 0.7rem;
+    font-size: 0.72rem;
 }
 
 .current-image-box img {
@@ -816,7 +827,7 @@ input[type="number"] {
 }
 
 .image-edit-container input[type="file"] {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     color: var(--color-text-muted);
     width: 100%;
 }
@@ -826,24 +837,24 @@ input[type="number"] {
     border: 1px solid var(--color-border);
     border-radius: 4px;
     color: var(--color-text-main);
-    padding: 0.2rem 0.4rem;
-    font-size: 0.7rem;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.72rem;
     cursor: pointer;
     margin-right: 0.3rem;
 }
 
 .new-image-preview {
-    margin-top: 0.15rem;
+    margin-top: 0.2rem;
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
-    font-size: 0.68rem;
+    gap: 0.2rem;
+    font-size: 0.7rem;
     color: var(--color-orange);
 }
 
 .new-image-preview img {
     max-width: 100%;
-    height: 35px;
+    height: 60px;
     object-fit: cover;
     border-radius: 4px;
     border: 1px solid var(--color-orange);
@@ -851,32 +862,34 @@ input[type="number"] {
 
 .edit-modal-actions {
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
     gap: 0.5rem;
-    margin-top: 0.6rem;
-    padding-top: 0.6rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
     border-top: 1px solid var(--color-border);
 }
 
 .edit-modal-actions .btn-premium,
 .edit-modal-actions .btn-secondary-premium {
-    padding: 0.35rem 0.85rem;
-    font-size: 0.8rem;
-    border-radius: 6px;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.88rem;
+    border-radius: 8px;
 }
 
-@media (max-width: 640px) {
-    .edit-images-grid {
-        grid-template-columns: 1fr;
-    }
+/* Los botones de "Cancelar" / "Guardar cambios" se ordenan con Guardar
+   arriba en móvil (la acción principal, más fácil de alcanzar con el
+   pulgar); en escritorio vuelven al orden natural en fila. */
+.edit-modal-actions .edit-save-btn {
+    order: -1;
 }
 
-/* Alertas */
+/* ==================== ALERTAS ==================== */
 .alert-premium {
-    padding: 0.85rem 1.25rem;
+    padding: 0.85rem 1.1rem;
     border-radius: 8px;
     margin-bottom: 1.25rem;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-weight: 600;
 }
 
@@ -902,107 +915,354 @@ input[type="number"] {
     display: none !important;
 }
 
-/* ==========================================================
-   RESPONSIVO / MÓVIL
-   ----------------------------------------------------------
-   Antes admin.css casi no tenía reglas para pantallas chicas:
-   el header desbordaba (título + nav + botón "Cerrar sesión"
-   en una sola fila sin wrap), el título del panel era
-   demasiado grande, las tarjetas de estadísticas y la rejilla
-   de filtros se apretaban a 2 columnas incluso en celulares
-   angostos. Este bloque cubre esos puntos sin tocar el layout
-   de escritorio/tablet (que ya funcionaba bien).
-   ========================================================== */
 
-@media (max-width: 640px) {
+/* ============================================================
+   TABLET Y ESCRITORIO (>= 768px)
+   ------------------------------------------------------------
+   Único punto de quiebre del archivo. Aquí solo se redefine lo
+   que realmente cambia al escalar: más columnas, más aire, texto
+   más grande, y los efectos :hover (que en el base móvil no
+   existen, para no dejar estilos "pegados" tras un toque en
+   pantallas táctiles).
+   ============================================================ */
+@media (min-width: 768px) {
+
+    /* --- Header --- */
     .header-container {
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        padding: 0.85rem 1rem;
+        padding: 1rem 1.5rem;
+        flex-wrap: nowrap;
     }
 
     .brand-title {
-        font-size: 1.1rem;
+        font-size: 1.4rem;
     }
 
     .nav-menu {
-        width: 100%;
-        justify-content: flex-start;
-        gap: 0.75rem;
-        flex-wrap: wrap;
+        width: auto;
+        flex-wrap: nowrap;
+        gap: 1.5rem;
     }
 
+    .nav-link:hover {
+        color: var(--color-orange);
+    }
+
+    /* --- Layout principal --- */
     .admin-main {
-        padding: 0 1rem 2.5rem;
-        margin: 1.25rem auto;
+        margin: 2rem auto;
+        padding: 0 1.5rem 3rem;
+    }
+
+    .dashboard-header {
+        margin-bottom: 2rem;
     }
 
     .dashboard-header h1 {
-        font-size: 1.5rem;
+        font-size: 2.2rem;
     }
 
     .dashboard-header p {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 
-    .stats-panel {
+    /* --- Tarjetas --- */
+    .premium-card {
+        padding: 1.75rem;
+        margin-bottom: 2rem;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    /* --- Formulario "Agregar ejemplar": pasa a 2 columnas densas --- */
+    .admin-grid-form {
         grid-template-columns: repeat(2, 1fr);
-        gap: 0.6rem;
+        gap: 1.75rem;
+    }
+
+    .premium-card:has(#add-ejemplar-form) {
+        padding: 1rem 1.5rem;
+    }
+
+    .premium-card:has(#add-ejemplar-form) .card-title {
+        font-size: 1.25rem;
+    }
+
+    #add-ejemplar-form {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem 1.25rem;
+        align-items: center;
+    }
+
+    #add-ejemplar-form .form-group-premium {
+        gap: 0.15rem;
+    }
+
+    #add-ejemplar-form .form-group-premium label {
+        font-size: 0.72rem;
+    }
+
+    #add-ejemplar-form input[type="text"],
+    #add-ejemplar-form input[type="number"],
+    #add-ejemplar-form select {
+        padding: 0.35rem 0.65rem;
+        font-size: 0.85rem;
+        min-height: 34px;
+    }
+
+    #add-ejemplar-form .drop-zone {
+        padding: 0.3rem 0.5rem;
+        min-height: 34px;
+        border-width: 1px;
+    }
+
+    #add-ejemplar-form .drop-text {
+        font-size: 0.75rem;
+    }
+
+    #add-ejemplar-form .preview-container {
+        padding: 0.25rem 0.5rem;
+        margin-top: 0.2rem;
+    }
+
+    #add-ejemplar-form .preview-thumb {
+        width: 30px;
+        height: 30px;
+    }
+
+    #add-ejemplar-form .form-actions-full {
+        margin-top: 0.25rem;
+        justify-content: flex-end;
+    }
+
+    #add-ejemplar-form .form-actions-full .btn-premium {
+        width: auto;
+        padding: 0.45rem 1.25rem;
+        font-size: 0.85rem;
+    }
+
+    .form-actions-full {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+
+    /* --- Drop zone genérica: hover y look táctil-vs-mouse --- */
+    .drop-zone:hover {
+        border-color: var(--color-orange);
+        background: rgba(238, 108, 41, 0.08);
+    }
+
+    .btn-change-img:hover {
+        background: #454A4A;
+    }
+
+    /* --- Botones: efectos hover solo con mouse --- */
+    .btn-premium:hover {
+        background: var(--color-orange-hover);
+    }
+
+    .btn-secondary-premium:hover {
+        background: #333737;
+        border-color: #525858;
+    }
+
+    /* --- Panel de estadísticas: más columnas y más aire --- */
+    .stats-panel {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
     }
 
     .stat-card {
-        padding: 0.85rem 0.6rem;
+        padding: 1.25rem 1rem;
     }
 
     .stat-number {
-        font-size: 1.5rem;
+        font-size: 2rem;
+    }
+
+    /* La versión de moneda crece menos que el resto: a 2rem, una cifra
+       como "$45,231.00" ya no cabe cómodamente en una tarjeta de
+       160-200px de ancho (el mínimo que permite minmax() arriba). */
+    .stat-number--currency {
+        font-size: 1.4rem;
     }
 
     .stat-label {
-        font-size: 0.68rem;
-        letter-spacing: 0.3px;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* --- Filtros: rejilla horizontal con acciones alineadas a la derecha --- */
+    .premium-card:has(.filter-grid-premium) {
+        padding: 1rem 1.5rem;
+    }
+
+    .premium-card:has(.filter-grid-premium) .card-title {
+        font-size: 1.25rem;
     }
 
     .filter-grid-premium {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.75rem;
+        align-items: end;
+    }
+
+    .filter-grid-premium .form-group-premium {
+        gap: 0.15rem;
+    }
+
+    .filter-grid-premium .form-group-premium label {
+        font-size: 0.72rem;
+    }
+
+    .filter-grid-premium input,
+    .filter-grid-premium select {
+        padding: 0.35rem 0.65rem;
+        font-size: 0.85rem;
+        min-height: 34px;
     }
 
     .filter-actions-right {
-        justify-content: stretch;
+        flex-direction: row;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 0.25rem;
     }
 
     .filter-actions-right .btn-premium,
     .filter-actions-right .btn-secondary-premium {
-        flex: 1;
+        width: auto;
+        padding: 0.4rem 1rem;
+        font-size: 0.82rem;
     }
 
-    /* La tabla de inventario sigue necesitando ancho fijo para ser
-       legible (muchas columnas con datos exactos: precio, año, etc.).
-       En vez de apretar las columnas hasta hacerlas ilegibles, se deja
-       scroll horizontal explícito solo dentro de la tarjeta de la
-       tabla, con una pista visual de que se puede deslizar. */
-    .table-container-premium {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
+    /* --- Tabla: un poco más de aire, encabezados más grandes --- */
     .table-premium {
-        min-width: 640px;
+        font-size: 0.9rem;
     }
-}
 
-@media (max-width: 400px) {
-    .stats-panel {
-        grid-template-columns: 1fr 1fr;
+    .table-premium th {
+        padding: 0.85rem 1rem;
+        font-size: 0.75rem;
+    }
+
+    .table-premium td {
+        padding: 0.85rem 1rem;
+    }
+
+    .table-premium tbody tr:hover {
+        background: #232626;
+    }
+
+    .table-thumb {
+        width: 44px;
+        height: 44px;
+    }
+
+    .table-premium .status-badge {
+        padding: 0.25rem 0.65rem;
+        font-size: 0.75rem;
+    }
+
+    /* --- Botones de acción de la tabla --- */
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .btn-icon:hover {
+        background: #383D3D;
+    }
+
+    .btn-edit-icon:hover {
+        color: #9cd1e0;
+        border-color: var(--color-moonstone);
+    }
+
+    .btn-delete-icon:hover {
+        color: #FF8A80;
+        border-color: #EF5350;
+    }
+
+    /* --- Modal de edición: más aire, 3 columnas de imágenes, acciones en fila --- */
+    .edit-modal-header {
+        padding: 0.75rem 1.25rem;
+    }
+
+    #edit-modal-title {
+        font-size: 1.15rem;
+    }
+
+    .edit-modal-close:hover {
+        background: #333737;
+        color: var(--color-text-main);
+    }
+
+    .edit-modal-form {
+        padding: 0.75rem 1.25rem;
+    }
+
+    .edit-modal-id-row {
+        padding: 0.35rem 0.75rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .edit-form-section {
+        margin-bottom: 0.6rem;
+    }
+
+    .edit-form-section-title {
+        padding-bottom: 0.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .edit-modal-form input[type="text"],
+    .edit-modal-form input[type="number"],
+    .edit-modal-form select {
+        padding: 0.25rem 0.55rem;
+        font-size: 0.8rem;
+        min-height: 30px;
+    }
+
+    .edit-images-grid {
+        grid-template-columns: repeat(3, 1fr);
         gap: 0.5rem;
     }
 
-    .nav-menu {
-        gap: 0.5rem;
+    .current-image-box {
+        height: 65px;
     }
 
-    .nav-menu .nav-link,
-    .nav-menu button {
-        font-size: 0.85rem;
+    .new-image-preview img {
+        height: 35px;
+    }
+
+    .edit-modal-actions {
+        flex-direction: row;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 0.6rem;
+        padding-top: 0.6rem;
+    }
+
+    .edit-modal-actions .btn-premium,
+    .edit-modal-actions .btn-secondary-premium {
+        width: auto;
+        padding: 0.35rem 0.85rem;
+        font-size: 0.8rem;
+        border-radius: 6px;
+    }
+
+    .edit-modal-actions .edit-save-btn {
+        order: initial;
     }
 }
