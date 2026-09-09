@@ -1,0 +1,65 @@
+﻿﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas - Escama y Colmillo</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <link rel="stylesheet" href="../../styles/pages/admin.css">
+    <link rel="stylesheet" href="../../styles/pages/dashboard.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-container">
+            <a href="/index.html" class="logo-link">
+                <span class="brand-title">ESCAMA Y COLMILLO</span>
+            </a>
+            <nav class="nav-menu">
+                <a href="/src/pages/admin/admin.html" class="nav-link">Inventario</a>
+                <a href="/src/pages/dashboard/dashboard.html" class="nav-link">Estadísticas</a>
+                <div id="auth-header-action"></div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="admin-main">
+
+        <div class="dashboard-header">
+            <h1>Estadísticas del Negocio</h1>
+            <p>Un vistazo rápido a tu inventario y tus ventas.</p>
+        </div>
+
+        <!-- Grid de tarjetas KPI (Métricas rápidas) -->
+        <section class="kpi-grid">
+            <article class="kpi-card">
+                <span class="kpi-label">Valor del Inventario</span>
+                <h3 class="kpi-value" id="kpi-valor-inventario">$0.00</h3>
+                <span class="kpi-subtext" id="kpi-valor-sub">Cargando...</span>
+            </article>
+
+            <article class="kpi-card">
+                <span class="kpi-label">Ventas Totales</span>
+                <h3 class="kpi-value" id="kpi-ventas-totales">$0.00</h3>
+                <span class="kpi-subtext" id="kpi-ventas-sub">Cargando...</span>
+            </article>
+
+            <article class="kpi-card">
+                <span class="kpi-label">Ejemplares Totales</span>
+                <h3 class="kpi-value" id="kpi-total-ejemplares">0</h3>
+                <span class="kpi-subtext" id="kpi-disponibles-sub">Cargando...</span>
+            </article>
+
+            <article class="kpi-card">
+                <span class="kpi-label">Especie Principal</span>
+                <h3 class="kpi-value" id="kpi-top-especie">---</h3>
+                <span class="kpi-subtext" id="kpi-top-especie-count">Cargando...</span>
+            </article>
+        </section>
+
+    </main>
+
+    <script type="module" src="./dashboard-view.js"></script>
+</body>
+</html>

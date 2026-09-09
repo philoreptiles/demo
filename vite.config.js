@@ -26,6 +26,7 @@ export default defineConfig({
         main: path.resolve(__dirname, 'index.html'),
         nosotros: path.resolve(__dirname, 'nosotros.html'),
         admin: path.resolve(__dirname, 'src/pages/admin/admin.html'),
+        dashboard: path.resolve(__dirname, 'src/pages/dashboard/dashboard.html'), // <-- RUTA AGREGADA
       }
     }
   }
