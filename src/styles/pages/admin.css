@@ -458,7 +458,7 @@ input[type="number"] {
      tarjeta o romper la cuadrícula de estadísticas.
 */
 .stat-number--currency {
-    font-size: 1.05rem;
+    font-size: 1.7rem;
     display: inline-block;
     max-width: 100%;
     white-space: nowrap;
@@ -471,7 +471,7 @@ input[type="number"] {
     color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.3px;
-    font-weight: 600;
+    font-weight: 800;
 }
 
 /* ==================== FILTROS DE INVENTARIO ==================== */
@@ -1097,7 +1097,7 @@ input[type="number"] {
         border-color: #525858;
     }
 
-    /* --- Panel de estadísticas: más columnas y más aire --- */
+    /* --- Panel de estadísticas: más columnas y más aire ------------------------------------------- */
     .stats-panel {
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: 1rem;
@@ -1105,7 +1105,7 @@ input[type="number"] {
     }
 
     .stat-card {
-        padding: 1.25rem 1rem;
+        padding: 1.4rem .5rem;
     }
 
     .stat-number {
