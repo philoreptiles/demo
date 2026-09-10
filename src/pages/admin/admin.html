@@ -97,6 +97,63 @@
                 </div>
             </section>
 
+            <!-- REPRODUCCIÓN -->
+            <!-- La etiqueta del campo "fecha esperada" cambia sola según el
+                 tipo de reproducción de la especie de la hembra elegida
+                 (ver reproduccion.js -> actualizarEtiquetaFechaEsperada). -->
+            <section class="premium-card">
+                <h2 class="card-title">Reproducción</h2>
+                <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: -0.5rem 0 1rem;">
+                    Registra cada apareamiento o bloqueo. La fecha esperada se pide distinto
+                    según si la especie es ovípara u ovovivípara.
+                </p>
+
+                <form id="repro-form" class="filter-grid-premium" style="margin-bottom: 1.5rem;">
+                    <div class="form-group-premium">
+                        <label for="repro-hembra">Hembra *</label>
+                        <select id="repro-hembra" required>
+                            <option value="">Cargando...</option>
+                        </select>
+                    </div>
+                    <div class="form-group-premium">
+                        <label for="repro-macho">Macho</label>
+                        <select id="repro-macho">
+                            <option value="">Sin registrar</option>
+                        </select>
+                    </div>
+                    <div class="form-group-premium">
+                        <label id="repro-fecha-inicio-label" for="repro-fecha-inicio">Fecha de apareamiento/bloqueo *</label>
+                        <input type="date" id="repro-fecha-inicio" required>
+                    </div>
+                    <div class="form-group-premium hidden" id="repro-fecha-ovulacion-grupo">
+                        <label for="repro-fecha-ovulacion">Día de la ovulación</label>
+                        <input type="date" id="repro-fecha-ovulacion">
+                        <small style="color: var(--color-text-muted); font-size: 0.78rem;">
+                            Puedes dejarla en blanco si todavía no se detecta.
+                        </small>
+                    </div>
+                    <div class="form-group-premium">
+                        <label id="repro-fecha-esperada-label" for="repro-fecha-esperada">Fecha esperada</label>
+                        <input type="date" id="repro-fecha-esperada">
+                        <small id="repro-fecha-esperada-ayuda" style="color: var(--color-text-muted); font-size: 0.78rem;">
+                            Elige primero la hembra para que esta etiqueta se ajuste a su tipo de reproducción.
+                        </small>
+                    </div>
+                    <div class="form-group-premium form-group-premium--full">
+                        <label for="repro-notas">Notas</label>
+                        <textarea id="repro-notas" rows="2" placeholder="Notas de este ciclo, temperatura de incubación, etc."></textarea>
+                    </div>
+                    <div class="filter-actions-right">
+                        <button type="submit" class="btn-premium">Registrar evento</button>
+                    </div>
+                </form>
+
+                <h3 style="font-size: 0.95rem; margin-bottom: 0.75rem;">Eventos en curso</h3>
+                <div id="repro-eventos-list" class="evento-repro-list">
+                    <p class="dash-loading">Cargando eventos...</p>
+                </div>
+            </section>
+
 
             <!-- AGREGAR EJEMPLAR -->
             <section class="premium-card">
@@ -626,5 +683,6 @@
     </main>
 
     <script type="module" src="./admin-view.js"></script>
+    <script type="module" src="./reproduccion.js"></script>
 </body>
 </html>

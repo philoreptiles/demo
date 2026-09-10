@@ -84,6 +84,20 @@
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
+/* Contenedor del botón "Cargar más", debajo del grid (no es parte de
+   la rejilla de tarjetas, es un hermano suyo dentro del contenedor). */
+.catalog-load-more-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 0;
+}
+
+.btn-load-more:disabled {
+    opacity: 0.6;
+    cursor: default;
+    transform: none;
+}
+
 /* Móvil estándar (>= 400px) */
 @media (min-width: 400px) {
     .catalog-grid {

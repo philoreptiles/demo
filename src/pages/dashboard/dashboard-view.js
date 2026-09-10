@@ -69,7 +69,117 @@ async function initAuthGuard() {
         }
     });
 
-    await renderResumenGeneral();
+    // En paralelo: los KPIs de inventario/ventas no dependen de los
+    // eventos reproductivos ni viceversa, así que no hay razón para
+    // esperar uno para empezar el otro.
+    await Promise.all([
+        renderResumenGeneral(),
+        renderProximosEventos()
+    ]);
+}
+
+// ==========================================
+// PRÓXIMOS EVENTOS REPRODUCTIVOS (cuenta regresiva)
+// ------------------------------------------
+// Lee "eventos_reproductivos" (EN_CURSO) tal como los deja Control
+// (ver src/pages/admin/reproduccion.js) y los muestra ordenados por
+// cercanía a la fecha esperada. La etiqueta ("Eclosión estimada" /
+// "Parto esperado") y el color de urgencia se resuelven aquí mismo,
+// sin necesidad de volver a consultar "especies": el tipo de
+// reproducción ya viene congelado en cada fila desde que se creó el
+// evento en Control.
+// ==========================================
+
+const DIAS_URGENTE = 7;
+const DIAS_PRONTO = 30;
+
+async function renderProximosEventos() {
+    const container = document.getElementById('repro-countdown-list');
+    if (!container) return;
+
+    const { data, error } = await supabase
+        .from('eventos_reproductivos')
+        .select('*')
+        .eq('estado', 'EN_CURSO')
+        .order('fecha_esperada', { ascending: true, nullsFirst: false });
+
+    if (error) {
+        console.error('Error al consultar eventos reproductivos:', error);
+        container.innerHTML = '<p class="dash-loading">No se pudieron cargar los eventos reproductivos.</p>';
+        return;
+    }
+
+    const eventos = data || [];
+
+    if (eventos.length === 0) {
+        container.innerHTML = '<p class="dash-loading">No hay eventos reproductivos en curso. Regístralos desde Control &gt; Reproducción.</p>';
+        return;
+    }
+
+    container.innerHTML = eventos.map(ev => {
+        // fecha_esperada es la fecha estimada de PUESTA en ovíparas (no de
+        // eclosión -- esa se registra después, ya con la puesta real hecha,
+        // y no tiene una fecha estimada por separado en este panel).
+        const etiqueta = ev.tipo_reproduccion === 'Ovípara'
+            ? 'Puesta estimada'
+            : ev.tipo_reproduccion === 'Ovovivípara'
+                ? 'Parto esperado'
+                : 'Fecha esperada';
+
+        const sub = [ev.hembra_label || ev.hembra_id, ev.especie_nombre]
+            .filter(Boolean)
+            .join(' · ');
+
+        if (!ev.fecha_esperada) {
+            return `
+                <div class="evento-countdown-card evento-countdown-card--lejos">
+                    <div class="evento-countdown-info">
+                        <span class="evento-countdown-titulo">${escapeHtml(etiqueta)}</span>
+                        <span class="evento-countdown-sub">${escapeHtml(sub)}</span>
+                    </div>
+                    <div class="evento-countdown-dias">
+                        —
+                        <span class="evento-countdown-dias-sub">Sin fecha aún</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        const dias = diasHasta(ev.fecha_esperada);
+        const urgencia = dias <= DIAS_URGENTE ? 'urgente' : dias <= DIAS_PRONTO ? 'pronto' : 'lejos';
+        const diasTexto = dias < 0
+            ? `${Math.abs(dias)} día${Math.abs(dias) === 1 ? '' : 's'} de retraso`
+            : dias === 0
+                ? 'Es hoy'
+                : `${dias} día${dias === 1 ? '' : 's'}`;
+
+        return `
+            <div class="evento-countdown-card evento-countdown-card--${urgencia}">
+                <div class="evento-countdown-info">
+                    <span class="evento-countdown-titulo">${escapeHtml(etiqueta)}</span>
+                    <span class="evento-countdown-sub">${escapeHtml(sub)}</span>
+                </div>
+                <div class="evento-countdown-dias">
+                    ${escapeHtml(diasTexto)}
+                    <span class="evento-countdown-dias-sub">${new Date(`${ev.fecha_esperada}T00:00:00`).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Días de calendario entre hoy y una fecha (puede ser negativo si la
+ * fecha ya pasó -- eso es justo lo que queremos detectar: un evento
+ * que se pasó de su fecha esperada y probablemente necesita que el
+ * criador lo revise y lo marque como completado en Control.
+ */
+function diasHasta(fechaISO) {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const fecha = new Date(`${fechaISO}T00:00:00`);
+    const diffMs = fecha.getTime() - hoy.getTime();
+    return Math.round(diffMs / (1000 * 60 * 60 * 24));
 }
 
 function renderAuthHeaderAction() {

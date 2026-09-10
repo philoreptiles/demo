@@ -27,6 +27,21 @@
     height: 100px;
     overflow: hidden;
     background-color: var(--jet-dark, #1E2020);
+    /* CAMBIO: antes se veía un bloque de color plano mientras la foto
+       real (con loading="lazy" + paginación, ahora tarda un poco más en
+       empezar a pedirse) todavía no terminaba de descargar. Este es el
+       MISMO ícono de serpiente que ya usa el placeholder de "sin
+       imagen" en src/utils/security.js (PLACEHOLDER_IMG) -- aquí va
+       repetido como fondo CSS estático en vez de referenciado desde JS
+       a propósito: así el navegador lo cachea junto con la hoja de
+       estilos una sola vez, en lugar de tener que insertarlo como
+       estilo inline en cada una de las tarjetas del catálogo.
+       Si se cambia el ícono/color en security.js, actualizar también
+       aquí para que no se desalineen los dos placeholders. */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Cpath d='M 90 195 C 90 150, 165 150, 165 195 C 165 240, 240 240, 240 195 C 240 155, 275 145, 295 122' fill='none' stroke='%237AA6B3' stroke-width='15' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='298' cy='116' r='15' fill='%237AA6B3'/%3E%3Cpath d='M 310 108 L 322 100 M 310 108 L 322 112' stroke='%237AA6B3' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 42% auto;
 }
 
 .card-image {

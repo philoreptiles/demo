@@ -109,6 +109,24 @@ probarlo sin tocar el código del sitio.)*
 
 ---
 
+## 2.1 Módulo de Reproducción (nuevo)
+
+Este módulo agrega una tabla nueva, `eventos_reproductivos`, que **no
+existe todavía en tu base de datos** ni en la de ningún criador ya
+desplegado. Antes de subir este cambio a producción:
+
+1. Abre el **SQL Editor** de cada proyecto de Supabase (el tuyo y el de
+   cualquier criador que ya tengas activo) y corre completo el archivo
+   `sql/eventos_reproductivos.sql` incluido en este repo. Crea la tabla,
+   su índice y sus políticas RLS en un solo paso.
+2. No necesitas tocar la tabla `especies` ni `ejemplares` — el módulo
+   reutiliza la columna `tipo_reproduccion` de `especies` que ya
+   existía (hasta ahora solo se mostraba como texto en Control, sin
+   usarse para nada más).
+3. A diferencia de `ejemplares`, esta tabla **no tiene lectura
+   pública**: solo un usuario autenticado puede leer o escribir en
+   ella. Es información interna de manejo, no del catálogo de venta.
+
 ## 3. Usar este proyecto como plantilla para otro criador
 
 Pasos, en orden:

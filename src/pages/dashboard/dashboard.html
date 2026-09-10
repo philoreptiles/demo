@@ -83,6 +83,21 @@
             </article>
         </section>
 
+        <!-- Próximos eventos reproductivos: countdown a eclosión/parto.
+             Se coloca justo debajo de los KPIs y antes de todo lo demás
+             a propósito -- es información con fecha de caducidad real
+             (a diferencia del resto del Dashboard, que describe el
+             estado actual del inventario), así que merece ser lo
+             primero que ve el criador, no un dato escondido en la
+             ficha de un ejemplar. -->
+        <section class="premium-card" id="repro-widget-section">
+            <h2 class="card-title">Próximos eventos reproductivos</h2>
+            <p class="card-subtitle">Cuenta regresiva a la fecha esperada de cada evento en curso, registrado desde Control.</p>
+            <div class="evento-countdown-list" id="repro-countdown-list">
+                <p class="dash-loading">Cargando...</p>
+            </div>
+        </section>
+
         <!-- ============================================================
              KPIs POR SECTOR — Ventas
              Módulo preparado para crecer a más sectores (Inventario,

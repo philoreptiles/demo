@@ -30,13 +30,19 @@
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
                 
+                // CAMBIO: WebP en vez de JPEG. A calidad equivalente, WebP
+                // suele pesar 25-35% menos, y todos los navegadores que nos
+                // importan (Chrome, Firefox, Safari 14+, Edge) lo soportan
+                // sin problema al subir/mostrar la imagen después. La escala
+                // de "quality" (0-1) funciona igual que con JPEG, así que el
+                // valor por default (0.7) no necesita ajustarse.
                 canvas.toBlob((blob) => {
                     if (blob) {
                         resolve(blob);
                     } else {
                         reject(new Error('Error al comprimir la imagen'));
                     }
-                }, 'image/jpeg', quality);
+                }, 'image/webp', quality);
             };
             
             img.onerror = () => reject(new Error('Error al cargar la imagen'));

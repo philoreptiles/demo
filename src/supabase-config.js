@@ -58,7 +58,21 @@ export async function crearEspecie(nombre, tipoReproduccion) {
 // dejo marcado como visible desde Control. Las paginas de Control y
 // Dashboard consultan la tabla directamente (no usan esta funcion), asi
 // que ahi el criador sigue viendo el 100% del inventario sin excepcion.
+//
+// CAMBIO (paginación): antes esta función traía el 100% de los
+// ejemplares visibles de un solo golpe, y catalog.js metía todas las
+// tarjetas al DOM de una vez. Ahora acepta "page" (1-indexed) y
+// "limit" (8 por default) dentro del mismo objeto de filtros, y usa
+// .range(from, to) de Supabase para que la API solo devuelva ese
+// bloque. catalog.js decide si hay más páginas viendo si el arreglo
+// devuelto llegó completo (longitud === limit) -- si vino más corto,
+// es la última página.
 export async function getEjemplares(filters = {}) {
+    const page = Number.isInteger(filters.page) && filters.page > 0 ? filters.page : 1;
+    const limit = Number.isInteger(filters.limit) && filters.limit > 0 ? filters.limit : 8;
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
     let query = supabase
         .from('ejemplares')
         .select('*')
@@ -97,7 +111,7 @@ export async function getEjemplares(filters = {}) {
         }
     }
 
-    const { data, error } = await query;
+    const { data, error } = await query.range(from, to);
     if (error) {
         console.error('Error al obtener ejemplares:', error);
         throw error;
