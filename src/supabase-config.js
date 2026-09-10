@@ -26,8 +26,44 @@ export function initSupabase() {
     return supabase;
 }
 
+export async function getEspecies() {
+    const { data, error } = await supabase
+        .from('especies')
+        .select('*')
+        .order('nombre', { ascending: true });
+
+    if (error) {
+        console.error('Error al obtener especies:', error);
+        return [];
+    }
+    return data || [];
+}
+
+export async function crearEspecie(nombre, tipoReproduccion) {
+    const { data, error } = await supabase
+        .from('especies')
+        .insert([{ nombre, tipo_reproduccion: tipoReproduccion }])
+        .select()
+        .single();
+
+    if (error) throw error;
+    return data;
+}
+
+// CAMBIO: el catalogo publico ahora respeta "visible_publico". Antes esta
+// funcion (usada UNICAMENTE por el catalogo publico en catalog.js) traia
+// TODOS los ejemplares sin excepcion -- incluidos los que el criador marca
+// como Holdback o cualquiera que prefiera no mostrar todavia. Con este
+// filtro, un ejemplar solo aparece en el sitio publico si el criador lo
+// dejo marcado como visible desde Control. Las paginas de Control y
+// Dashboard consultan la tabla directamente (no usan esta funcion), asi
+// que ahi el criador sigue viendo el 100% del inventario sin excepcion.
 export async function getEjemplares(filters = {}) {
-    let query = supabase.from('ejemplares').select('*').order('created_at', { ascending: false });
+    let query = supabase
+        .from('ejemplares')
+        .select('*')
+        .eq('visible_publico', true)
+        .order('created_at', { ascending: false });
 
     if (filters.genetica && filters.genetica.trim() !== '') {
         query = query.ilike('genetica', `%${filters.genetica.trim()}%`);

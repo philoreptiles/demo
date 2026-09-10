@@ -1,4 +1,4 @@
-﻿import { supabase } from '../../supabase-config.js';
+﻿import { supabase, getEspecies, crearEspecie } from '../../supabase-config.js';
 import { compressImage } from '../../utils/image-compressor.js';
 
 // Limites de validacion para archivos subidos por el formulario.
@@ -15,6 +15,11 @@ let currentFilteredData = [];
 let editingEjemplarId = null;
 let showingAll = false;
 
+// Cache en memoria de especies y ejemplares (para llenar selects sin
+// disparar una consulta nueva cada vez que se abre un formulario).
+let especiesCache = [];
+let ejemplaresParaGenealogiaCache = [];
+
 
 // ==========================================
 // INICIALIZACIÓN
@@ -30,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupFormListeners();
     setupEditModalListeners();
+    setupEspeciesFormListener();
 
 });
 
@@ -131,6 +137,152 @@ function updateUI(session) {
 
 
 // ==========================================
+// ESPECIES (catálogo normalizado)
+// ==========================================
+//
+// Reemplaza el antiguo campo de texto libre "especie" por un catálogo
+// real. Se carga una sola vez por sesión de Control y se reutiliza en
+// tres lugares: el select del formulario de alta, el select del modal
+// de edición, y el filtro de inventario -- así el criador nunca vuelve
+// a escribir el nombre de la especie a mano.
+
+async function loadEspecies() {
+    especiesCache = await getEspecies();
+    renderEspeciesList();
+    populateEspecieSelects();
+}
+
+function renderEspeciesList() {
+
+    const container = document.getElementById('especies-list');
+    if (!container) return;
+
+    if (especiesCache.length === 0) {
+        container.innerHTML = `
+            <p class="dash-loading">
+                Aún no registras ninguna especie. Agrega la primera arriba para poder dar de alta ejemplares.
+            </p>
+        `;
+        return;
+    }
+
+    container.innerHTML = especiesCache.map(especie => `
+        <div class="bar-row-meta" style="padding: 0.4rem 0;">
+            <span class="bar-row-label">${escapeHTML(especie.nombre)}</span>
+            <span class="bar-row-value">${escapeHTML(especie.tipo_reproduccion)}</span>
+        </div>
+    `).join('');
+}
+
+function populateEspecieSelects() {
+
+    const opciones = especiesCache
+        .map(e => `<option value="${e.id}">${escapeHTML(e.nombre)}</option>`)
+        .join('');
+
+    const selectAdd = document.getElementById('especie_id');
+    if (selectAdd) {
+        selectAdd.innerHTML = especiesCache.length
+            ? `<option value="">Selecciona una especie</option>${opciones}`
+            : `<option value="">Registra una especie primero</option>`;
+    }
+
+    const selectEdit = document.getElementById('edit-especie_id');
+    if (selectEdit) {
+        selectEdit.innerHTML = especiesCache.length
+            ? opciones
+            : `<option value="">Registra una especie primero</option>`;
+    }
+
+    const selectFiltro = document.getElementById('filter-especie_id');
+    if (selectFiltro) {
+        selectFiltro.innerHTML = `<option value="">Todas</option>${opciones}`;
+    }
+}
+
+function setupEspeciesFormListener() {
+
+    const form = document.getElementById('add-especie-form');
+    form?.addEventListener('submit', async event => {
+        event.preventDefault();
+
+        const nombreInput = document.getElementById('especie-nombre');
+        const tipoSelect = document.getElementById('especie-tipo-reproduccion');
+
+        const nombre = nombreInput?.value.trim();
+        const tipoReproduccion = tipoSelect?.value;
+
+        if (!nombre) {
+            showAlert('El nombre de la especie es obligatorio.', 'error');
+            return;
+        }
+
+        try {
+            await crearEspecie(nombre, tipoReproduccion);
+            showAlert(`Especie "${nombre}" agregada correctamente.`, 'success');
+            form.reset();
+            await loadEspecies();
+            await loadPadreMadreOptions();
+
+        } catch (error) {
+            console.error('Error al crear especie:', error);
+            showAlert(`No se pudo agregar la especie: ${error.message}`, 'error');
+        }
+    });
+}
+
+
+// ==========================================
+// SELECTS DE GENEALOGÍA (PADRE / MADRE)
+// ==========================================
+//
+// Se listan ejemplares por sexo para que el criador elija de una lista
+// real en vez de escribir un ID a mano (evita romper la relación por un
+// error de dedo). "excludeId" se usa en el modal de edición para que un
+// ejemplar no pueda elegirse a sí mismo como su propio padre/madre.
+
+async function loadPadreMadreOptions() {
+
+    const { data, error } = await supabase
+        .from('ejemplares')
+        .select('id, especie, genetica, sexo')
+        .in('sexo', ['Macho', 'Hembra']);
+
+    if (error) {
+        console.error('Error al cargar opciones de genealogía:', error);
+        return;
+    }
+
+    ejemplaresParaGenealogiaCache = data || [];
+    populatePadreMadreSelects();
+}
+
+function populatePadreMadreSelects(excludeId = null) {
+
+    const construirOpciones = sexoDeseado =>
+        ejemplaresParaGenealogiaCache
+            .filter(e => e.sexo === sexoDeseado && String(e.id) !== String(excludeId))
+            .map(e => `<option value="${escapeHTML(e.id)}">${escapeHTML(e.id)} — ${escapeHTML(e.especie || '')} ${escapeHTML(e.genetica || '')}</option>`)
+            .join('');
+
+    const opcionesMachos = construirOpciones('Macho');
+    const opcionesHembras = construirOpciones('Hembra');
+
+    const selectPadreAdd = document.getElementById('id_padre');
+    if (selectPadreAdd) selectPadreAdd.innerHTML = `<option value="">Sin registrar</option>${opcionesMachos}`;
+
+    const selectMadreAdd = document.getElementById('id_madre');
+    if (selectMadreAdd) selectMadreAdd.innerHTML = `<option value="">Sin registrar</option>${opcionesHembras}`;
+
+    const selectPadreEdit = document.getElementById('edit-id_padre');
+    if (selectPadreEdit) selectPadreEdit.innerHTML = `<option value="">Sin registrar</option>${opcionesMachos}`;
+
+    const selectMadreEdit = document.getElementById('edit-id_madre');
+    if (selectMadreEdit) selectMadreEdit.innerHTML = `<option value="">Sin registrar</option>${opcionesHembras}`;
+}
+
+
+// ==========================================
 // FORMULARIOS
 // ==========================================
 
@@ -148,6 +300,8 @@ function setupFormListeners() {
         showingAll = false;
 
         const filtros = {
+            especie_id: document.getElementById('filter-especie_id').value,
+            etapa: document.getElementById('filter-etapa').value,
             estatus: document.getElementById('filter-estatus').value,
             genetica: document.getElementById('filter-genetica').value.trim(),
             sexo: document.getElementById('filter-sexo').value,
@@ -261,9 +415,13 @@ function downloadCSV(data, filename = 'inventario.csv') {
         'Especie',
         'Genética',
         'Sexo',
+        'Etapa',
         'Año',
+        'Longitud (cm)',
+        'Peso (g)',
         'Precio',
         'Estatus',
+        'Visible en catálogo',
         'Fecha Registro'
     ];
 
@@ -272,9 +430,13 @@ function downloadCSV(data, filename = 'inventario.csv') {
         `"${ejemplar.especie || ''}"`,
         `"${ejemplar.genetica || ''}"`,
         `"${ejemplar.sexo || ''}"`,
+        `"${ejemplar.etapa || ''}"`,
         ejemplar.nacimiento || '',
+        ejemplar.longitud ?? '',
+        ejemplar.peso_gramos ?? '',
         ejemplar.precio || 0,
         `"${ejemplar.estatus || ''}"`,
+        ejemplar.visible_publico === false ? 'No' : 'Sí',
         ejemplar.created_at ? new Date(ejemplar.created_at).toLocaleDateString() : ''
     ]);
 
@@ -493,12 +655,31 @@ function openEditModal(ejemplar) {
         idDisplay.textContent = ejemplar.id ?? '—';
     }
 
-    setValue('edit-especie', ejemplar.especie);
     setValue('edit-genetica', ejemplar.genetica || '');
     setValue('edit-sexo', ejemplar.sexo || 'No sexado');
+    setValue('edit-etapa', ejemplar.etapa || 'Cría');
     setValue('edit-nacimiento', ejemplar.nacimiento ?? '');
+    setValue('edit-longitud', ejemplar.longitud ?? '');
+    setValue('edit-peso_gramos', ejemplar.peso_gramos ?? '');
     setValue('edit-precio', ejemplar.precio ?? '');
     setValue('edit-estatus', ejemplar.estatus || 'Disponible');
+    setValue('edit-notas', ejemplar.notas || '');
+
+    const especieSelect = document.getElementById('edit-especie_id');
+    if (especieSelect) especieSelect.value = ejemplar.especie_id ?? '';
+
+    const visibleCheckbox = document.getElementById('edit-visible_publico');
+    if (visibleCheckbox) visibleCheckbox.checked = ejemplar.visible_publico !== false;
+
+    // Excluye al propio ejemplar de sus selects de padre/madre (no puede
+    // ser su propio ancestro).
+    populatePadreMadreSelects(ejemplar.id);
+
+    const padreSelect = document.getElementById('edit-id_padre');
+    if (padreSelect) padreSelect.value = ejemplar.id_padre ?? '';
+
+    const madreSelect = document.getElementById('edit-id_madre');
+    if (madreSelect) madreSelect.value = ejemplar.id_madre ?? '';
 
     setupCurrentImage('edit-imagen-actual-1', 'edit-imagen-empty-1', ejemplar.imagen_url);
     setupCurrentImage('edit-imagen-actual-2', 'edit-imagen-empty-2', ejemplar.imagen_url_2);
@@ -656,20 +837,32 @@ async function handleEditSubmit(event) {
         return;
     }
 
-    const especie = document.getElementById('edit-especie')?.value.trim();
+    const especieIdVal = document.getElementById('edit-especie_id')?.value;
     const genetica = document.getElementById('edit-genetica')?.value.trim() || 'Nominal';
     const sexo = document.getElementById('edit-sexo')?.value || 'No sexado';
+    const etapa = document.getElementById('edit-etapa')?.value || 'Cría';
     const nacimientoValue = document.getElementById('edit-nacimiento')?.value.trim();
+    const longitudValue = document.getElementById('edit-longitud')?.value;
+    const pesoValue = document.getElementById('edit-peso_gramos')?.value;
     const precioValue = document.getElementById('edit-precio')?.value.trim();
     const estatus = document.getElementById('edit-estatus')?.value || 'Disponible';
+    const visiblePublico = document.getElementById('edit-visible_publico')?.checked ?? true;
+    const notas = document.getElementById('edit-notas')?.value.trim() || null;
+    const idPadre = document.getElementById('edit-id_padre')?.value || null;
+    const idMadre = document.getElementById('edit-id_madre')?.value || null;
 
-    if (!especie) {
-        showAlert('La especie es obligatoria.', 'error');
+    if (!especieIdVal) {
+        showAlert('Selecciona una especie.', 'error');
         return;
     }
 
+    const especieObj = especiesCache.find(e => String(e.id) === String(especieIdVal));
+    const especie = especieObj?.nombre || '';
+
     const nacimiento = nacimientoValue ? parseInt(nacimientoValue, 10) : null;
     const precio = precioValue === '' ? 0 : parseFloat(precioValue);
+    const longitud = longitudValue ? parseFloat(longitudValue) : null;
+    const pesoGramos = pesoValue ? parseFloat(pesoValue) : null;
 
     const btnActualizar = document.getElementById('btn-actualizar');
 
@@ -680,11 +873,19 @@ async function handleEditSubmit(event) {
 
     const data = {
         especie,
+        especie_id: Number(especieIdVal),
         genetica,
         sexo,
+        etapa,
         nacimiento,
+        longitud,
+        peso_gramos: pesoGramos,
         precio,
-        estatus
+        estatus,
+        visible_publico: visiblePublico,
+        notas,
+        id_padre: idPadre,
+        id_madre: idMadre
     };
 
     const nuevasImagenes = {
@@ -755,12 +956,19 @@ async function handleAddEjemplar(event) {
 
     try {
         const idVal = document.getElementById('id')?.value.trim();
-        const especieVal = document.getElementById('especie')?.value.trim();
+        const especieIdVal = document.getElementById('especie_id')?.value;
         const geneticaVal = document.getElementById('genetica')?.value.trim() || 'Nominal';
         const sexoVal = document.getElementById('sexo')?.value || 'No sexado';
+        const etapaVal = document.getElementById('etapa')?.value || 'Cría';
         const nacimientoRaw = document.getElementById('nacimiento')?.value;
+        const longitudRaw = document.getElementById('longitud')?.value;
+        const pesoRaw = document.getElementById('peso_gramos')?.value;
         const precioRaw = document.getElementById('precio')?.value;
         const estatusVal = document.getElementById('estatus')?.value || 'Disponible';
+        const visiblePublicoVal = document.getElementById('visible_publico')?.checked ?? true;
+        const notasVal = document.getElementById('notas')?.value.trim() || null;
+        const idPadreVal = document.getElementById('id_padre')?.value || null;
+        const idMadreVal = document.getElementById('id_madre')?.value || null;
 
         const file1 = document.getElementById('imagen1')?.files[0];
         const file2 = document.getElementById('imagen2')?.files[0];
@@ -770,9 +978,15 @@ async function handleAddEjemplar(event) {
             throw new Error('El ID / Código del ejemplar es obligatorio (ej. CR-16).');
         }
 
-        if (!especieVal) {
-            throw new Error('El campo "Especie" es obligatorio.');
+        if (!especieIdVal) {
+            throw new Error('Selecciona una especie. Si no aparece ninguna, agrégala primero en "Especies registradas".');
         }
+
+        // La columna "especie" (texto) se mantiene sincronizada automáticamente
+        // a partir del catálogo de especies, para no romper el catálogo público
+        // ni el Dashboard mientras se actualizan para leer la relación directa.
+        const especieObj = especiesCache.find(e => String(e.id) === String(especieIdVal));
+        const especieVal = especieObj?.nombre || '';
 
         if (!file1) {
             throw new Error('La imagen 1 (principal) es obligatoria.');
@@ -788,6 +1002,9 @@ async function handleAddEjemplar(event) {
             throw new Error('Ingresa un precio válido (ej. 5000).');
         }
 
+        const longitudVal = longitudRaw ? parseFloat(longitudRaw) : null;
+        const pesoVal = pesoRaw ? parseFloat(pesoRaw) : null;
+
         const url1 = await uploadImage(file1, idVal);
         const url2 = file2 ? await uploadImage(file2, idVal) : null;
         const url3 = file3 ? await uploadImage(file3, idVal) : null;
@@ -795,11 +1012,19 @@ async function handleAddEjemplar(event) {
         const nuevoEjemplar = {
             id: idVal,
             especie: especieVal,
+            especie_id: Number(especieIdVal),
             genetica: geneticaVal,
             sexo: sexoVal,
+            etapa: etapaVal,
             nacimiento: nacimientoVal,
+            longitud: longitudVal,
+            peso_gramos: pesoVal,
             precio: precioValNum,
             estatus: estatusVal,
+            visible_publico: visiblePublicoVal,
+            notas: notasVal,
+            id_padre: idPadreVal,
+            id_madre: idMadreVal,
             imagen_url: url1,
             imagen_url_2: url2,
             imagen_url_3: url3
@@ -872,6 +1097,71 @@ async function deleteEjemplar(id, especie) {
 
 
 // ==========================================
+// LIBERAR IMÁGENES (conserva el registro de venta, libera Storage)
+// ==========================================
+//
+// A diferencia de "Eliminar ejemplar" (que borra TODO, incluyendo el
+// historial para las métricas del Dashboard), esta acción solo borra
+// los archivos de Supabase Storage y deja en null las 3 columnas de
+// imagen. La fila sigue existiendo con precio, especie, fecha, etc.
+// intactos -- pensada para ejemplares "Vendido" donde ya no se necesita
+// conservar la foto, solo el dato de la venta.
+
+function extraerPathDeStorageUrl(url) {
+
+    if (!url) return null;
+
+    // Las URLs públicas de Supabase Storage tienen la forma:
+    // https://xxxx.supabase.co/storage/v1/object/public/<bucket>/<path>
+    const marcador = '/object/public/ejemplares/';
+    const index = url.indexOf(marcador);
+
+    if (index === -1) return null;
+
+    return url.substring(index + marcador.length);
+}
+
+async function liberarImagenes(ejemplar) {
+
+    if (!confirm(`¿Liberar las imágenes del ejemplar ${ejemplar.id}? El registro de la venta se conserva, solo se borran las fotos.`)) {
+        return;
+    }
+
+    showAlert('Liberando imágenes...', 'info');
+
+    const paths = [ejemplar.imagen_url, ejemplar.imagen_url_2, ejemplar.imagen_url_3]
+        .map(extraerPathDeStorageUrl)
+        .filter(Boolean);
+
+    try {
+        if (paths.length > 0) {
+            const { error: storageError } = await supabase.storage
+                .from('ejemplares')
+                .remove(paths);
+
+            if (storageError) {
+                console.warn('No se pudieron borrar todos los archivos de Storage:', storageError);
+            }
+        }
+
+        const { error } = await supabase
+            .from('ejemplares')
+            .update({ imagen_url: null, imagen_url_2: null, imagen_url_3: null })
+            .eq('id', ejemplar.id);
+
+        if (error) throw error;
+
+        showAlert(`Imágenes de ${ejemplar.id} liberadas. El registro de venta se conservó.`, 'success');
+        await loadDashboardData();
+
+    } catch (error) {
+        console.error('Error al liberar imágenes:', error);
+        showAlert(`No se pudieron liberar las imágenes: ${error.message}`, 'error');
+    }
+}
+
+
+// ==========================================
 // CARGA DEL DASHBOARD
 // ==========================================
 
@@ -880,7 +1170,9 @@ async function loadDashboardData() {
     await Promise.all([
         loadFullInventory(),
         populateYearFilter(),
-        renderEstadisticas()
+        renderEstadisticas(),
+        loadEspecies(),
+        loadPadreMadreOptions()
     ]);
 }
 
@@ -897,7 +1189,7 @@ async function loadFullInventory(filtros = {}) {
 
     fullTableBody.innerHTML = `
         <tr>
-            <td colspan="9" style="text-align: center;">
+            <td colspan="11" style="text-align: center;">
                 Cargando inventario...
             </td>
         </tr>
@@ -906,6 +1198,8 @@ async function loadFullInventory(filtros = {}) {
     try {
         let query = supabase.from('ejemplares').select('*');
 
+        if (filtros.especie_id) query = query.eq('especie_id', filtros.especie_id);
+        if (filtros.etapa) query = query.eq('etapa', filtros.etapa);
         if (filtros.estatus) query = query.eq('estatus', filtros.estatus);
         if (filtros.genetica) query = query.ilike('genetica', `%${filtros.genetica}%`);
         if (filtros.sexo) query = query.eq('sexo', filtros.sexo);
@@ -923,7 +1217,7 @@ async function loadFullInventory(filtros = {}) {
 
         fullTableBody.innerHTML = `
             <tr>
-                <td colspan="9" style="text-align: center; color: red;">
+                <td colspan="11" style="text-align: center; color: red;">
                     Error al consultar inventario: ${err.message}
                 </td>
             </tr>
@@ -1019,7 +1313,7 @@ function renderTableRows(ejemplares, targetTbody) {
     if (!ejemplares || ejemplares.length === 0) {
         targetTbody.innerHTML = `
             <tr>
-                <td colspan="9" style="text-align: center;">
+                <td colspan="11" style="text-align: center;">
                     No se encontraron registros.
                 </td>
             </tr>
@@ -1053,6 +1347,7 @@ function renderTableRows(ejemplares, targetTbody) {
                     </td>
                     <td>${escapeHTML(item.genetica || 'Nominal')}</td>
                     <td>${escapeHTML(item.sexo || 'No sexado')}</td>
+                    <td>${escapeHTML(item.etapa || '—')}</td>
                     <td>${escapeHTML(item.nacimiento || 'N/A')}</td>
                     <td style="font-weight: 700; color: var(--color-orange, #EE6C29);">
                         ${precioFormatted}
@@ -1061,6 +1356,11 @@ function renderTableRows(ejemplares, targetTbody) {
                         <span class="status-badge status-${escapeHTML(estatusClass)}">
                             ${escapeHTML(estatus)}
                         </span>
+                    </td>
+                    <td>
+                        ${item.visible_publico === false
+                            ? '<span class="status-badge status-holdback">Oculto</span>'
+                            : '<span class="status-badge status-disponible">Visible</span>'}
                     </td>
                     <td>
                         <div class="action-buttons">
@@ -1075,6 +1375,21 @@ function renderTableRows(ejemplares, targetTbody) {
                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                                 </svg>
                             </button>
+
+                            ${estatus === 'Vendido' && (item.imagen_url || item.imagen_url_2 || item.imagen_url_3) ? `
+                            <button
+                                type="button"
+                                class="btn-icon btn-liberar-icon"
+                                title="Liberar imágenes (libera espacio, conserva el registro de venta)"
+                                data-id="${escapeHTML(item.id)}"
+                            >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <path d="M21 15l-5-5L5 21"/>
+                                </svg>
+                            </button>
+                            ` : ''}
 
                             <button
                                 type="button"
@@ -1103,6 +1418,15 @@ function renderTableRows(ejemplares, targetTbody) {
             const id = event.currentTarget.getAttribute('data-id');
             const item = ejemplares.find(e => String(e.id).trim() === String(id).trim());
             if (item) openEditModal(item);
+        });
+    });
+
+    targetTbody.querySelectorAll('.btn-liberar-icon').forEach(btn => {
+        btn.addEventListener('click', event => {
+            event.stopPropagation();
+            const id = event.currentTarget.getAttribute('data-id');
+            const item = ejemplares.find(e => String(e.id).trim() === String(id).trim());
+            if (item) liberarImagenes(item);
         });
     });
 

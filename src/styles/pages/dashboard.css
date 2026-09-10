@@ -117,6 +117,23 @@
     font-variant-numeric: tabular-nums;
 }
 
+/* Etiqueta secundaria dentro de una fila de barra, p. ej. en el
+   ranking de progenitores: "CR-15 · Padre · Crotalus atrox". */
+.bar-row-tag {
+    color: var(--color-text-muted, #a0a0a0);
+    font-weight: 400;
+    font-size: 0.8rem;
+    margin-left: 0.4rem;
+}
+
+/* Texto de apoyo bajo un card-title, para dar contexto breve a una
+   sección (p. ej. "Ranking de progenitores"). */
+.card-subtitle {
+    color: var(--color-text-muted, #a0a0a0);
+    font-size: 0.85rem;
+    margin: -0.5rem 0 1rem 0;
+}
+
 .bar-track {
     width: 100%;
     height: 10px;
@@ -213,9 +230,150 @@
     background: rgba(122, 166, 179, 0.07);
 }
 
-/* Tablet y escritorio (>= 768px) */
+/* ============================================================
+   MÓDULO "KPIs POR SECTOR" (Ventas / próximamente más sectores)
+   Mobile-first: tabs y tarjetas apiladas en móvil; en escritorio
+   los tabs quedan en fila y las tarjetas en una rejilla de 3.
+   ============================================================ */
+
+.sector-module-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.sector-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.sector-tab {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--color-border, #333333);
+    color: var(--color-text-muted, #a0a0a0);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    cursor: default;
+    transition: all 0.2s ease;
+}
+
+.sector-tab.is-active {
+    background: var(--color-orange, #EE6C29);
+    border-color: var(--color-orange, #EE6C29);
+    color: #ffffff;
+}
+
+.sector-tab.is-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.sector-kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.sector-kpi-card {
+    background-color: var(--color-jet-card, #282B2B);
+    border: 1px solid var(--color-border, #333333);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    position: relative;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: sector-card-in 0.4s ease forwards;
+}
+
+.sector-kpi-grid .sector-kpi-card:nth-child(2) {
+    animation-delay: 0.08s;
+}
+
+.sector-kpi-grid .sector-kpi-card:nth-child(3) {
+    animation-delay: 0.16s;
+}
+
+@keyframes sector-card-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tarjeta bloqueada: mismo tamaño que las reales, pero atenuada y
+   sin datos falsos -- solo explica qué falta para activarla. */
+.sector-kpi-card--locked {
+    background: rgba(255, 255, 255, 0.02);
+    border-style: dashed;
+}
+
+.sector-kpi-card--locked .kpi-label {
+    opacity: 0.7;
+}
+
+.locked-badge {
+    position: absolute;
+    top: 0.9rem;
+    right: 1rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted, #a0a0a0);
+}
+
+.kpi-value--locked {
+    color: var(--color-text-muted, #a0a0a0) !important;
+    font-size: 1.75rem;
+}
+
+.locked-reason {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--color-text-muted, #a0a0a0);
+    margin: 0.15rem 0 0 0;
+}
+
+.locked-reason strong {
+    color: var(--color-text-main, #F4F5F5);
+}
+
+/* Escritorio (>= 768px): tabs en fila fija y 3 tarjetas por fila */
 @media (min-width: 768px) {
     .dash-grid-2 {
         grid-template-columns: 1fr 1fr;
     }
+
+    .sector-module-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .sector-kpi-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+    }
+
+    .sector-kpi-card:hover {
+        border-color: var(--color-orange, #EE6C29);
+        transform: translateY(-2px);
+    }
+
+    .sector-kpi-card--locked:hover {
+        border-color: var(--color-border, #333333);
+        transform: none;
+    }
 }
+

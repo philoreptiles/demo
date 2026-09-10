@@ -5,13 +5,24 @@ import { supabase } from '../../supabase-config.js';
 // ------------------------------------------
 // Lógica principal de la página Dashboard:
 //   1. Guardián de sesión con Supabase Auth.
-//   2. Consulta en tiempo real de la tabla "ejemplares".
-//   3. KPIs, distribuciones (estatus/sexo/especie/año),
-//      alertas de calidad de datos y últimos movimientos.
+//   2. Consulta en tiempo real de la tabla "ejemplares" (+ "especies"
+//      para resolver especie_id -> nombre real, ver resolverEspecie()).
+//   3. KPIs, distribuciones (estatus/sexo/especie/año/etapa), ranking
+//      de progenitores, % de linaje documentado, antigüedad de
+//      inventario, alertas de calidad de datos y últimos movimientos.
 //
-// Todo se calcula en el navegador a partir de la misma
-// consulta "select('*')" -- no se agregan llamadas extra
-// a Supabase por cada gráfica.
+// Todo se calcula en el navegador a partir de dos únicas consultas
+// ("ejemplares" completo + "especies" completo) -- no se agregan
+// llamadas extra a Supabase por cada gráfica.
+//
+// CAMBIO (relación especie real): "especie" (texto libre) era una
+// columna duplicada que se llenaba a mano en Control desde el
+// principio del proyecto. Ahora que "ejemplares.especie_id" apunta a
+// la tabla "especies", el dashboard resuelve el nombre real de la
+// especie por esa relación (resolverEspecie()) y solo cae de vuelta al
+// texto libre "especie" para los registros viejos que todavía no
+// tienen especie_id asignado -- esos registros además se marcan en la
+// sección de Alertas para que el criador los vincule desde Control.
 // ==========================================
 
 const COLOR_ESTATUS = {
@@ -27,6 +38,14 @@ const LABEL_ESTATUS = {
     VENDIDO: 'Vendido',
     HOLDBACK: 'Holdback',
 };
+
+// Estatus que cuentan como "inventario activo" para la antigüedad
+// (todavía no se vendieron ni están retenidos fuera de venta).
+const ESTATUS_INVENTARIO_ACTIVO = ['DISPONIBLE', 'APARTADO'];
+
+// A partir de cuántos días sin venderse se marca una alerta de
+// antigüedad en la sección de Alertas y sugerencias.
+const DIAS_ALERTA_ANTIGUEDAD = 90;
 
 document.addEventListener('DOMContentLoaded', () => {
     initAuthGuard();
@@ -70,9 +89,15 @@ function renderAuthHeaderAction() {
 
 async function renderResumenGeneral() {
     try {
-        const { data: ejemplares, error } = await supabase
-            .from('ejemplares')
-            .select('*');
+        // Dos consultas en paralelo: los ejemplares completos y el
+        // catálogo de especies (solo id + nombre, es una tabla chica)
+        // para poder resolver especie_id -> nombre real.
+        const [ejemplaresRes, especiesRes] = await Promise.all([
+            supabase.from('ejemplares').select('*'),
+            supabase.from('especies').select('id, nombre')
+        ]);
+
+        const { data: ejemplares, error } = ejemplaresRes;
 
         if (error) {
             console.error('Error al consultar ejemplares:', error);
@@ -80,14 +105,27 @@ async function renderResumenGeneral() {
             return;
         }
 
+        if (especiesRes.error) {
+            // No es un error fatal para el dashboard: si falla la
+            // consulta de especies simplemente no se podrá resolver
+            // especie_id y todo cae de vuelta al texto libre "especie".
+            console.error('Error al consultar especies:', especiesRes.error);
+        }
+
+        const especiesMap = new Map(
+            (especiesRes.data || []).map(especie => [especie.id, especie.nombre])
+        );
+
         if (!ejemplares || ejemplares.length === 0) {
             mostrarKpisVacios();
             renderBarList('status-bar-list', [], 'Aún no hay ejemplares registrados.');
             renderBarList('sexo-bar-list', [], 'Aún no hay ejemplares registrados.');
             renderBarList('especies-bar-list', [], 'Aún no hay ejemplares registrados.');
+            renderEtapaPriceList([]);
             renderYearChart([]);
+            renderProgenitoresRanking([], especiesMap);
             renderInsights([]);
-            renderRecentTable([]);
+            renderRecentTable([], null, especiesMap);
             return;
         }
 
@@ -105,10 +143,22 @@ async function renderResumenGeneral() {
         const conteoEstatus = { DISPONIBLE: 0, APARTADO: 0, VENDIDO: 0, HOLDBACK: 0 };
         const sinImagenDisponibles = [];
         const sinPrecio = [];
+        const sinEspecieId = [];
+
+        // Para "Precio promedio por etapa": suma y conteo por etapa.
+        const etapaAcumulado = {};
+
+        // Para antigüedad de inventario (solo Disponible/Apartado).
+        const antiguedadesDias = [];
+
+        // Para % de linaje documentado.
+        let linajeCompleto = 0; // padre y madre registrados
+        let linajeParcial = 0;  // solo uno de los dos
 
         ejemplares.forEach(item => {
             const estatus = (item.estatus || '').trim().toUpperCase();
             const precio = parseFloat(item.precio) || 0;
+            const nombreEspecie = resolverEspecie(item, especiesMap);
 
             if (estatus === 'DISPONIBLE') {
                 valorInventario += precio;
@@ -127,10 +177,7 @@ async function renderResumenGeneral() {
                 conteoEstatus[estatus]++;
             }
 
-            if (item.especie) {
-                const especieClean = item.especie.trim();
-                conteoEspecies[especieClean] = (conteoEspecies[especieClean] || 0) + 1;
-            }
+            conteoEspecies[nombreEspecie] = (conteoEspecies[nombreEspecie] || 0) + 1;
 
             const sexoClean = (item.sexo || 'No especificado').trim();
             conteoSexo[sexoClean] = (conteoSexo[sexoClean] || 0) + 1;
@@ -141,6 +188,38 @@ async function renderResumenGeneral() {
 
             if (!item.precio || parseFloat(item.precio) <= 0) {
                 sinPrecio.push(item);
+            }
+
+            if (item.especie_id == null) {
+                sinEspecieId.push(item);
+            }
+
+            // Precio promedio por etapa (solo con precio válido, para
+            // que un ejemplar en $0 no jale el promedio hacia abajo).
+            if (precio > 0) {
+                const etapaClean = (item.etapa || 'Sin etapa').trim() || 'Sin etapa';
+                if (!etapaAcumulado[etapaClean]) {
+                    etapaAcumulado[etapaClean] = { suma: 0, cantidad: 0 };
+                }
+                etapaAcumulado[etapaClean].suma += precio;
+                etapaAcumulado[etapaClean].cantidad++;
+            }
+
+            // Antigüedad: días desde created_at, solo inventario activo.
+            if (ESTATUS_INVENTARIO_ACTIVO.includes(estatus) && item.created_at) {
+                const dias = diasDesde(item.created_at);
+                if (dias !== null) {
+                    antiguedadesDias.push({ item, dias, nombreEspecie });
+                }
+            }
+
+            // Linaje documentado.
+            const tienePadre = !!item.id_padre;
+            const tieneMadre = !!item.id_madre;
+            if (tienePadre && tieneMadre) {
+                linajeCompleto++;
+            } else if (tienePadre || tieneMadre) {
+                linajeParcial++;
             }
         });
 
@@ -167,11 +246,40 @@ async function renderResumenGeneral() {
         actualizarTexto('kpi-ticket-promedio', formatoMoneda.format(ticketPromedio));
         actualizarTexto('kpi-ticket-sub', vendidosCount > 0 ? 'Por ejemplar vendido' : 'Sin ventas registradas');
 
+        // Módulo "KPIs por Sector · Ventas": reutiliza el mismo cálculo,
+        // no se vuelve a consultar Supabase para esto.
+        actualizarTexto('sector-ticket-medio', formatoMoneda.format(ticketPromedio));
+        actualizarTexto(
+            'sector-ticket-medio-sub',
+            vendidosCount > 0 ? `Sobre ${vendidosCount} venta${vendidosCount === 1 ? '' : 's'} registrada${vendidosCount === 1 ? '' : 's'}` : 'Sin ventas registradas'
+        );
+
         actualizarTexto('kpi-total-ejemplares', ejemplares.length.toString());
         actualizarTexto('kpi-disponibles-sub', `${disponiblesCount} disponibles actualmente`);
 
         actualizarTexto('kpi-top-especie', topEspecie[0]);
         actualizarTexto('kpi-top-especie-count', `${topEspecie[1]} ejemplares registrados`);
+
+        // Antigüedad de inventario (nuevo).
+        const antiguedadPromedio = antiguedadesDias.length > 0
+            ? Math.round(antiguedadesDias.reduce((suma, a) => suma + a.dias, 0) / antiguedadesDias.length)
+            : 0;
+        actualizarTexto('kpi-antiguedad-promedio', antiguedadesDias.length > 0 ? `${antiguedadPromedio} días` : 'N/A');
+        actualizarTexto(
+            'kpi-antiguedad-sub',
+            antiguedadesDias.length > 0
+                ? 'Promedio de disponibles y apartados'
+                : 'Sin inventario activo para medir'
+        );
+
+        // % de linaje documentado (nuevo).
+        const totalConLinaje = linajeCompleto + linajeParcial;
+        const pctLinaje = ejemplares.length > 0 ? Math.round((totalConLinaje / ejemplares.length) * 100) : 0;
+        actualizarTexto('kpi-linaje-pct', `${pctLinaje}%`);
+        actualizarTexto(
+            'kpi-linaje-sub',
+            `${linajeCompleto} con ambos padres · ${linajeParcial} con solo uno`
+        );
 
         // -------- Estatus del inventario --------
         const statusItems = Object.entries(conteoEstatus)
@@ -195,8 +303,14 @@ async function renderResumenGeneral() {
             .map(([label, value]) => ({ label, value, color: '#EE6C29' }));
         renderBarList('especies-bar-list', especiesItems);
 
+        // -------- Precio promedio por etapa (nuevo) --------
+        renderEtapaPriceList(etapaAcumulado, formatoMoneda);
+
         // -------- Ejemplares por año de nacimiento --------
         renderYearChart(ejemplares);
+
+        // -------- Ranking de progenitores (nuevo) --------
+        renderProgenitoresRanking(ejemplares, especiesMap);
 
         // -------- Alertas y sugerencias --------
         const insights = construirInsights({
@@ -204,8 +318,10 @@ async function renderResumenGeneral() {
             topEspecie,
             sinImagenDisponibles,
             sinPrecio,
+            sinEspecieId,
             holdbackCount,
             apartadosCount,
+            antiguedadesDias,
         });
         renderInsights(insights);
 
@@ -214,12 +330,32 @@ async function renderResumenGeneral() {
             .filter(item => item.created_at)
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
             .slice(0, 5);
-        renderRecentTable(recientes, formatoMoneda);
+        renderRecentTable(recientes, formatoMoneda, especiesMap);
 
     } catch (err) {
         console.error('Excepción al procesar estadísticas:', err);
         mostrarErrorEnKpis();
     }
+}
+
+// ==========================================
+// RESOLUCIÓN DE ESPECIE (relación real vs. texto legado)
+// ==========================================
+
+/**
+ * Devuelve el nombre de la especie de un ejemplar usando la relación
+ * real (especie_id -> especies.nombre) cuando existe. Si el ejemplar
+ * todavía no tiene especie_id asignado (registros capturados antes de
+ * que existiera la relación), cae de vuelta al campo de texto libre
+ * "especie" para no perder el dato, y ese caso se reporta aparte en
+ * construirInsights() como pendiente de vincular.
+ */
+function resolverEspecie(item, especiesMap) {
+    if (item.especie_id != null && especiesMap.has(item.especie_id)) {
+        return especiesMap.get(item.especie_id);
+    }
+    const legado = (item.especie || '').trim();
+    return legado || 'Sin especie';
 }
 
 // ==========================================
@@ -247,6 +383,53 @@ function renderBarList(containerId, items, emptyMessage = 'Sin datos suficientes
                 </div>
                 <div class="bar-track">
                     <div class="bar-fill" style="width: ${pct}%; background-color: ${item.color};"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Precio promedio por etapa. A diferencia de renderBarList (que
+ * escala barras como % del total de conteos), aquí cada barra se
+ * escala respecto al promedio MÁS ALTO entre etapas, porque lo que se
+ * compara es un precio promedio, no una parte de un total.
+ */
+function renderEtapaPriceList(etapaAcumulado, formatoMoneda) {
+    const container = document.getElementById('etapa-bar-list');
+    if (!container) return;
+
+    const formatter = formatoMoneda || new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN',
+        minimumFractionDigits: 2
+    });
+
+    const etapas = Object.entries(etapaAcumulado || {})
+        .map(([etapa, { suma, cantidad }]) => ({
+            etapa,
+            promedio: cantidad > 0 ? suma / cantidad : 0,
+            cantidad,
+        }))
+        .sort((a, b) => b.promedio - a.promedio);
+
+    if (etapas.length === 0) {
+        container.innerHTML = '<p class="dash-loading">Aún no hay ejemplares con precio y etapa registrados.</p>';
+        return;
+    }
+
+    const maxPromedio = Math.max(...etapas.map(e => e.promedio)) || 1;
+
+    container.innerHTML = etapas.map(({ etapa, promedio, cantidad }) => {
+        const pct = Math.max(Math.round((promedio / maxPromedio) * 100), 4);
+        return `
+            <div class="bar-row">
+                <div class="bar-row-meta">
+                    <span class="bar-row-label">${escapeHtml(etapa)}</span>
+                    <span class="bar-row-value">${formatter.format(promedio)} · ${cantidad} ejemplar${cantidad === 1 ? '' : 'es'}</span>
+                </div>
+                <div class="bar-track">
+                    <div class="bar-fill" style="width: ${pct}%; background-color: #EE6C29;"></div>
                 </div>
             </div>
         `;
@@ -288,7 +471,93 @@ function renderYearChart(ejemplares) {
     }).join('');
 }
 
-function construirInsights({ total, topEspecie, sinImagenDisponibles, sinPrecio, holdbackCount, apartadosCount }) {
+/**
+ * Ranking de progenitores: cuenta, para cada id que aparece como
+ * id_padre o id_madre de al menos un ejemplar, cuántas crías tiene
+ * registradas y el valor total (suma de "precio") de esas crías.
+ * El nombre/especie del progenitor se resuelve buscando su propio
+ * registro dentro del mismo arreglo de ejemplares (por su "id") --
+ * no hace falta una consulta aparte a Supabase.
+ */
+function renderProgenitoresRanking(ejemplares, especiesMap) {
+    const container = document.getElementById('progenitores-list');
+    if (!container) return;
+
+    const ejemplaresPorId = new Map(ejemplares.map(item => [item.id, item]));
+    const progenitores = new Map(); // id -> { crias, valorCrias, roles:Set }
+
+    ejemplares.forEach(item => {
+        const precio = parseFloat(item.precio) || 0;
+
+        [
+            { id: item.id_padre, rol: 'Padre' },
+            { id: item.id_madre, rol: 'Madre' }
+        ].forEach(({ id, rol }) => {
+            if (!id) return;
+
+            if (!progenitores.has(id)) {
+                progenitores.set(id, { crias: 0, valorCrias: 0, roles: new Set() });
+            }
+            const registro = progenitores.get(id);
+            registro.crias++;
+            registro.valorCrias += precio;
+            registro.roles.add(rol);
+        });
+    });
+
+    if (progenitores.size === 0) {
+        container.innerHTML = `
+            <p class="dash-loading">
+                Aún no hay ejemplares con "Padre" o "Madre" capturados en Control.
+            </p>
+        `;
+        return;
+    }
+
+    const formatoMoneda = new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN',
+        minimumFractionDigits: 0
+    });
+
+    const ranking = Array.from(progenitores.entries())
+        .sort((a, b) => b[1].crias - a[1].crias)
+        .slice(0, 5);
+
+    const maxCrias = ranking[0][1].crias || 1;
+
+    container.innerHTML = ranking.map(([id, datos]) => {
+        const propioRegistro = ejemplaresPorId.get(id);
+        const nombreEspecie = propioRegistro
+            ? resolverEspecie(propioRegistro, especiesMap)
+            : 'Sin registro propio en el inventario';
+        const rolTexto = Array.from(datos.roles).join(' / ');
+        const pct = Math.max(Math.round((datos.crias / maxCrias) * 100), 4);
+
+        return `
+            <div class="bar-row">
+                <div class="bar-row-meta">
+                    <span class="bar-row-label">${escapeHtml(id)} <span class="bar-row-tag">${escapeHtml(rolTexto)} · ${escapeHtml(nombreEspecie)}</span></span>
+                    <span class="bar-row-value">${datos.crias} cría${datos.crias === 1 ? '' : 's'} · ${formatoMoneda.format(datos.valorCrias)}</span>
+                </div>
+                <div class="bar-track">
+                    <div class="bar-fill" style="width: ${pct}%; background-color: #7AA6B3;"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function construirInsights({
+    total,
+    topEspecie,
+    sinImagenDisponibles,
+    sinPrecio,
+    sinEspecieId,
+    holdbackCount,
+    apartadosCount,
+    antiguedadesDias
+}) {
     const insights = [];
 
     if (sinImagenDisponibles.length > 0) {
@@ -305,6 +574,25 @@ function construirInsights({ total, topEspecie, sinImagenDisponibles, sinPrecio,
             icono: '⚠️',
             texto: `${sinPrecio.length} ejemplar(es) no tienen un precio válido registrado. Revísalos en Control para que no aparezcan en $0 en el catálogo.`,
         });
+    }
+
+    if (sinEspecieId && sinEspecieId.length > 0) {
+        insights.push({
+            tipo: 'warning',
+            icono: '⚠️',
+            texto: `${sinEspecieId.length} ejemplar(es) todavía usan el campo de texto "especie" en vez de estar vinculados a la tabla de especies. Vincúlalos desde Control para que las estadísticas por especie sean exactas.`,
+        });
+    }
+
+    if (antiguedadesDias && antiguedadesDias.length > 0) {
+        const antiguos = antiguedadesDias.filter(a => a.dias >= DIAS_ALERTA_ANTIGUEDAD);
+        if (antiguos.length > 0) {
+            insights.push({
+                tipo: 'warning',
+                icono: '⚠️',
+                texto: `${antiguos.length} ejemplar(es) llevan ${DIAS_ALERTA_ANTIGUEDAD} días o más en inventario sin venderse. Puede ser momento de revisar su precio o darles más visibilidad.`,
+            });
+        }
     }
 
     if (total >= 4 && topEspecie[1] / total > 0.5) {
@@ -360,7 +648,7 @@ function renderInsights(insights) {
     `).join('');
 }
 
-function renderRecentTable(items, formatoMoneda) {
+function renderRecentTable(items, formatoMoneda, especiesMap) {
     const tbody = document.getElementById('recent-table-body');
     if (!tbody) return;
 
@@ -382,11 +670,12 @@ function renderRecentTable(items, formatoMoneda) {
             ? new Date(item.created_at).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })
             : '—';
         const precio = item.precio ? formatter.format(parseFloat(item.precio)) : '—';
+        const nombreEspecie = especiesMap ? resolverEspecie(item, especiesMap) : (item.especie ?? '—');
 
         return `
             <tr>
                 <td>${escapeHtml(item.id ?? '—')}</td>
-                <td>${escapeHtml(item.especie ?? '—')}</td>
+                <td>${escapeHtml(nombreEspecie)}</td>
                 <td>${escapeHtml(item.genetica ?? '—')}</td>
                 <td><span class="status-badge ${statusClass}">${escapeHtml(item.estatus ?? '—')}</span></td>
                 <td>${precio}</td>
@@ -426,6 +715,19 @@ function extraerAnio(valor) {
     return null;
 }
 
+/**
+ * Días completos transcurridos desde una fecha (created_at) hasta
+ * ahora. Devuelve null si la fecha no es válida, para que quien la
+ * use pueda decidir si la descarta en vez de sumar un NaN.
+ */
+function diasDesde(fechaISO) {
+    const fecha = new Date(fechaISO);
+    if (isNaN(fecha.getTime())) return null;
+
+    const diffMs = Date.now() - fecha.getTime();
+    return Math.max(Math.floor(diffMs / (1000 * 60 * 60 * 24)), 0);
+}
+
 function escapeHtml(value) {
     return String(value)
         .replace(/&/g, '&amp;')
@@ -448,6 +750,12 @@ function mostrarKpisVacios() {
     actualizarTexto('kpi-disponibles-sub', '0 disponibles');
     actualizarTexto('kpi-top-especie', 'N/A');
     actualizarTexto('kpi-top-especie-count', '0 ejemplares');
+    actualizarTexto('kpi-antiguedad-promedio', 'N/A');
+    actualizarTexto('kpi-antiguedad-sub', 'Sin inventario activo para medir');
+    actualizarTexto('kpi-linaje-pct', '0%');
+    actualizarTexto('kpi-linaje-sub', '0 con ambos padres · 0 con solo uno');
+    actualizarTexto('sector-ticket-medio', '$0.00');
+    actualizarTexto('sector-ticket-medio-sub', 'Sin ventas registradas');
 }
 
 function mostrarErrorEnKpis() {
@@ -457,4 +765,7 @@ function mostrarErrorEnKpis() {
     actualizarTexto('kpi-ticket-promedio', 'Error');
     actualizarTexto('kpi-total-ejemplares', 'Error');
     actualizarTexto('kpi-top-especie', 'Error');
+    actualizarTexto('kpi-antiguedad-promedio', 'Error');
+    actualizarTexto('kpi-linaje-pct', 'Error');
+    actualizarTexto('sector-ticket-medio', 'Error');
 }

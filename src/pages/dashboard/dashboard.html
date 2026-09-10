@@ -69,9 +69,70 @@
                 <h3 class="kpi-value" id="kpi-top-especie">---</h3>
                 <span class="kpi-subtext" id="kpi-top-especie-count">Cargando...</span>
             </article>
+
+            <article class="kpi-card">
+                <span class="kpi-label">Antigüedad del Inventario</span>
+                <h3 class="kpi-value" id="kpi-antiguedad-promedio">---</h3>
+                <span class="kpi-subtext" id="kpi-antiguedad-sub">Cargando...</span>
+            </article>
+
+            <article class="kpi-card">
+                <span class="kpi-label">Linaje Documentado</span>
+                <h3 class="kpi-value" id="kpi-linaje-pct">0%</h3>
+                <span class="kpi-subtext" id="kpi-linaje-sub">Cargando...</span>
+            </article>
         </section>
 
-        <!-- Estatus del inventario + Distribución por sexo -->
+        <!-- ============================================================
+             KPIs POR SECTOR — Ventas
+             Módulo preparado para crecer a más sectores (Inventario,
+             Clientes...) conforme se agreguen las tablas necesarias.
+             Hoy solo "Ventas" tiene contenido real; el resto queda como
+             pestaña deshabilitada para dejar ver hacia dónde crece esto.
+             ============================================================ -->
+        <section class="premium-card sector-module">
+            <div class="sector-module-header">
+                <h2 class="card-title">KPIs por Sector</h2>
+                <div class="sector-tabs" role="tablist" aria-label="Sectores del negocio">
+                    <button class="sector-tab is-active" type="button" role="tab" aria-selected="true">Ventas</button>
+                    <button class="sector-tab is-disabled" type="button" role="tab" aria-selected="false" disabled title="Próximamente">Inventario</button>
+                    <button class="sector-tab is-disabled" type="button" role="tab" aria-selected="false" disabled title="Próximamente">Clientes</button>
+                </div>
+            </div>
+
+            <div class="sector-kpi-grid">
+
+                <!-- Real: se calcula con los datos que ya existen (precio + estatus). -->
+                <article class="sector-kpi-card">
+                    <span class="kpi-label">Ticket Medio</span>
+                    <h3 class="kpi-value" id="sector-ticket-medio">$0.00</h3>
+                    <span class="kpi-subtext" id="sector-ticket-medio-sub">Cargando...</span>
+                </article>
+
+                <!-- Bloqueado: falta una fecha de venta real en la base de datos. -->
+                <article class="sector-kpi-card sector-kpi-card--locked">
+                    <div class="locked-badge">🔒 Próximamente</div>
+                    <span class="kpi-label">Volumen de Ventas Mensual</span>
+                    <h3 class="kpi-value kpi-value--locked">—</h3>
+                    <p class="locked-reason">
+                        Falta registrar la <strong>fecha de venta</strong> de cada ejemplar
+                        (hoy solo se guarda cuándo se dio de alta en el inventario).
+                    </p>
+                </article>
+
+                <!-- Bloqueado: no existe todavía el concepto de "cliente" en la base de datos. -->
+                <article class="sector-kpi-card sector-kpi-card--locked">
+                    <div class="locked-badge">🔒 Próximamente</div>
+                    <span class="kpi-label">Retención de Clientes</span>
+                    <h3 class="kpi-value kpi-value--locked">—</h3>
+                    <p class="locked-reason">
+                        Falta una tabla de <strong>clientes</strong> vinculada a los ejemplares
+                        vendidos para saber quién repite compra.
+                    </p>
+                </article>
+
+            </div>
+        </section>
         <section class="dash-grid-2">
             <div class="premium-card">
                 <h2 class="card-title">Estatus del inventario</h2>
@@ -96,10 +157,27 @@
             </div>
         </section>
 
+        <!-- Precio promedio por etapa -->
+        <section class="premium-card">
+            <h2 class="card-title">Precio promedio por etapa</h2>
+            <div class="bar-list" id="etapa-bar-list">
+                <p class="dash-loading">Cargando...</p>
+            </div>
+        </section>
+
         <!-- Ejemplares por año de nacimiento -->
         <section class="premium-card">
             <h2 class="card-title">Ejemplares por año de nacimiento</h2>
             <div class="year-chart" id="year-chart">
+                <p class="dash-loading">Cargando...</p>
+            </div>
+        </section>
+
+        <!-- Ranking de progenitores -->
+        <section class="premium-card">
+            <h2 class="card-title">Ranking de progenitores</h2>
+            <p class="card-subtitle">Los ejemplares con más crías registradas en Control (campos "Padre" / "Madre").</p>
+            <div class="bar-list" id="progenitores-list">
                 <p class="dash-loading">Cargando...</p>
             </div>
         </section>

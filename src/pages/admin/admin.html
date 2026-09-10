@@ -62,6 +62,42 @@
             <div id="status-alert" class="alert-premium hidden"></div>
 
 
+            <!-- GESTIONAR ESPECIES -->
+            <!-- Catálogo normalizado de especies: se llena una vez (o pocas
+                 veces, si el criador maneja más de una especie) y alimenta
+                 el select de "Especie" del formulario de alta/edición. Esto
+                 evita inconsistencias de texto (mayúsculas, typos) que antes
+                 fragmentaban las estadísticas del Dashboard, y determina el
+                 tipo de reproducción para el módulo de Camadas. -->
+            <section class="premium-card">
+                <h2 class="card-title">Especies registradas</h2>
+                <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: -0.5rem 0 1rem;">
+                    Da de alta cada especie que manejas una sola vez. Si solo trabajas con una especie, es un paso único.
+                </p>
+
+                <form id="add-especie-form" class="filter-grid-premium" style="margin-bottom: 1rem;">
+                    <div class="form-group-premium">
+                        <label for="especie-nombre">Nombre de la especie *</label>
+                        <input type="text" id="especie-nombre" required placeholder="Ej. Crotalus atrox">
+                    </div>
+                    <div class="form-group-premium">
+                        <label for="especie-tipo-reproduccion">Tipo de reproducción *</label>
+                        <select id="especie-tipo-reproduccion" required>
+                            <option value="Ovípara">Ovípara (pone huevos)</option>
+                            <option value="Ovovivípara">Ovovivípara (cría viva)</option>
+                        </select>
+                    </div>
+                    <div class="filter-actions-right">
+                        <button type="submit" class="btn-premium">Agregar especie</button>
+                    </div>
+                </form>
+
+                <div id="especies-list" class="bar-list">
+                    <p class="dash-loading">Cargando especies...</p>
+                </div>
+            </section>
+
+
             <!-- AGREGAR EJEMPLAR -->
             <section class="premium-card">
                 <h2 class="card-title">Agregar nuevo ejemplar</h2>
@@ -77,8 +113,10 @@
                         </div>
 
                         <div class="form-group-premium">
-                            <label for="especie">Especie *</label>
-                            <input type="text" id="especie" name="especie" required placeholder="Ej. Crotalus atrox">
+                            <label for="especie_id">Especie *</label>
+                            <select id="especie_id" name="especie_id" required>
+                                <option value="">Cargando especies...</option>
+                            </select>
                         </div>
 
                         <div class="form-group-premium">
@@ -96,8 +134,27 @@
                         </div>
 
                         <div class="form-group-premium">
+                            <label for="etapa">Etapa *</label>
+                            <select id="etapa" name="etapa" required>
+                                <option value="Cría" selected>Cría</option>
+                                <option value="Juvenil">Juvenil</option>
+                                <option value="Adulto">Adulto</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group-premium">
                             <label for="nacimiento">Año de nacimiento *</label>
                             <input type="number" id="nacimiento" name="nacimiento" min="2000" max="2030" value="2026" required>
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="longitud">Longitud (cm)</label>
+                            <input type="number" id="longitud" name="longitud" step="0.1" min="0" placeholder="Ej. 45.5">
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="peso_gramos">Peso (g)</label>
+                            <input type="number" id="peso_gramos" name="peso_gramos" step="1" min="0" placeholder="Ej. 320">
                         </div>
 
                         <div class="form-group-premium">
@@ -113,6 +170,30 @@
                                 <option value="Vendido">Vendido</option>
                                 <option value="Holdback">Holdback</option>
                             </select>
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="id_padre">Padre (opcional)</label>
+                            <select id="id_padre" name="id_padre">
+                                <option value="">Sin registrar</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="id_madre">Madre (opcional)</label>
+                            <select id="id_madre" name="id_madre">
+                                <option value="">Sin registrar</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group-premium form-group-full" style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" id="visible_publico" name="visible_publico" checked style="width: auto;">
+                            <label for="visible_publico" style="margin: 0;">Mostrar este ejemplar en el catálogo público</label>
+                        </div>
+
+                        <div class="form-group-premium form-group-full">
+                            <label for="notas">Notas internas</label>
+                            <textarea id="notas" name="notas" rows="2" placeholder="Notas privadas, solo visibles aquí en Control..."></textarea>
                         </div>
 
                     </div>
@@ -162,11 +243,71 @@
             </section>
 
 
+            <!-- ESTADÍSTICAS -->
+            <div class="stats-panel" id="stats-container">
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-total">0</span>
+                    <span class="stat-label">Total Ejemplares</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-disponibles">0</span>
+                    <span class="stat-label">Disponibles</span>
+                </div>
+                <!--
+                    NUEVA FICHA — "Valor disponible"
+                    ------------------------------------------------
+                    Muestra la suma de "precio" de todos los ejemplares
+                    cuyo estatus es "Disponible". Le dice al criador,
+                    de un vistazo, cuánto dinero representa el inventario
+                    que todavía puede vender (no cuenta lo Apartado,
+                    Vendido ni Holdback, porque ese capital ya no está
+                    "disponible" para una venta nueva).
+                    El cálculo real vive en admin-view.js, función
+                    getEstadisticas() — aquí solo está el contenedor
+                    donde se pinta el resultado ya formateado como
+                    moneda (ej. "$45,231.00").
+                -->
+                <div class="stat-card">
+                    <span class="stat-number stat-number--currency" id="stat-valor-disponible">$0.00</span>
+                    <span class="stat-label">Valor disponible</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-apartados">0</span>
+                    <span class="stat-label">Apartados</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-vendidos">0</span>
+                    <span class="stat-label">Vendidos</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-holdbacks">0</span>
+                    <span class="stat-label">Holdbacks</span>
+                </div>
+            </div>
+
+
             <!-- INVENTARIO COMPLETO Y FILTROS -->
             <section class="premium-card">
                 <h2 class="card-title">Filtrar inventario completo</h2>
 
                 <form id="filter-form" class="filter-grid-premium">
+                    <div class="form-group-premium">
+                        <label for="filter-especie_id">Especie</label>
+                        <select id="filter-especie_id">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group-premium">
+                        <label for="filter-etapa">Etapa</label>
+                        <select id="filter-etapa">
+                            <option value="">Todas</option>
+                            <option value="Cría">Cría</option>
+                            <option value="Juvenil">Juvenil</option>
+                            <option value="Adulto">Adulto</option>
+                        </select>
+                    </div>
+
                     <div class="form-group-premium">
                         <label for="filter-estatus">Estatus</label>
                         <select id="filter-estatus">
@@ -222,14 +363,16 @@
                                 <th>Especie</th>
                                 <th>Genética</th>
                                 <th>Sexo</th>
+                                <th>Etapa</th>
                                 <th>Año</th>
                                 <th>Precio</th>
                                 <th>Estatus</th>
+                                <th>Público</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="full-inventory-table-body">
-                            <tr><td colspan="9" style="text-align: center;">Cargando inventario...</td></tr>
+                            <tr><td colspan="11" style="text-align: center;">Cargando inventario...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -273,8 +416,10 @@
 
                         <div class="form-row">
                             <div class="form-group-premium">
-                                <label for="edit-especie">Especie *</label>
-                                <input type="text" id="edit-especie" required>
+                                <label for="edit-especie_id">Especie *</label>
+                                <select id="edit-especie_id" required>
+                                    <option value="">Cargando especies...</option>
+                                </select>
                             </div>
                             <div class="form-group-premium">
                                 <label for="edit-genetica">Genética</label>
@@ -292,15 +437,19 @@
                                 </select>
                             </div>
                             <div class="form-group-premium">
-                                <label for="edit-nacimiento">Año de nacimiento</label>
-                                <input type="number" id="edit-nacimiento">
+                                <label for="edit-etapa">Etapa</label>
+                                <select id="edit-etapa">
+                                    <option value="Cría">Cría</option>
+                                    <option value="Juvenil">Juvenil</option>
+                                    <option value="Adulto">Adulto</option>
+                                </select>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group-premium">
-                                <label for="edit-precio">Precio (MXN)</label>
-                                <input type="number" id="edit-precio" step="0.01">
+                                <label for="edit-nacimiento">Año de nacimiento</label>
+                                <input type="number" id="edit-nacimiento">
                             </div>
                             <div class="form-group-premium">
                                 <label for="edit-estatus">Estatus</label>
@@ -311,6 +460,48 @@
                                     <option value="Holdback">Holdback</option>
                                 </select>
                             </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group-premium">
+                                <label for="edit-precio">Precio (MXN)</label>
+                                <input type="number" id="edit-precio" step="0.01">
+                            </div>
+                            <div class="form-group-premium">
+                                <label for="edit-longitud">Longitud (cm)</label>
+                                <input type="number" id="edit-longitud" step="0.1" min="0">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group-premium">
+                                <label for="edit-peso_gramos">Peso (g)</label>
+                                <input type="number" id="edit-peso_gramos" step="1" min="0">
+                            </div>
+                            <div class="form-group-premium" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1.6rem;">
+                                <input type="checkbox" id="edit-visible_publico" style="width: auto;">
+                                <label for="edit-visible_publico" style="margin: 0;">Visible en catálogo público</label>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group-premium">
+                                <label for="edit-id_padre">Padre (opcional)</label>
+                                <select id="edit-id_padre">
+                                    <option value="">Sin registrar</option>
+                                </select>
+                            </div>
+                            <div class="form-group-premium">
+                                <label for="edit-id_madre">Madre (opcional)</label>
+                                <select id="edit-id_madre">
+                                    <option value="">Sin registrar</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group-premium">
+                            <label for="edit-notas">Notas internas</label>
+                            <textarea id="edit-notas" rows="2"></textarea>
                         </div>
                     </div>
 
