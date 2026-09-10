@@ -1,5 +1,6 @@
 ﻿import { supabase, getEspecies, crearEspecie } from '../../supabase-config.js';
 import { compressImage } from '../../utils/image-compressor.js';
+import { escapeHTML, safeImageUrl } from '../../utils/security.js';
 
 // Limites de validacion para archivos subidos por el formulario.
 // MAX_RAW_FILE_SIZE es el limite del archivo ORIGINAL (antes de comprimir);
@@ -14,6 +15,33 @@ const MAX_RAW_FILE_SIZE = 15 * 1024 * 1024; // 15 MB
 let currentFilteredData = [];
 let editingEjemplarId = null;
 let showingAll = false;
+
+// Búsqueda unificada: filtra currentFilteredData en el navegador, sin
+// volver a consultar Supabase por cada letra escrita.
+let searchQuery = '';
+
+// Vistas guardadas (filtros + búsqueda con nombre) y columnas ocultas
+// de la tabla de inventario. Viven en localStorage: son preferencias
+// de ESTE navegador/dispositivo, no datos del negocio, así que no
+// tiene sentido guardarlas en Supabase.
+const VISTAS_STORAGE_KEY = 'eyc_vistas_guardadas_inventario';
+const COLUMNAS_STORAGE_KEY = 'eyc_columnas_ocultas_inventario';
+let vistasGuardadas = [];
+
+// Columnas que el criador puede mostrar/ocultar en la tabla. "id" y
+// "acciones" no están aquí a propósito: son la identidad del registro
+// y los botones de editar/eliminar, siempre deben verse.
+const COLUMNAS_CONFIG = [
+    { key: 'imagen', label: 'Imagen' },
+    { key: 'especie', label: 'Especie' },
+    { key: 'genetica', label: 'Genética' },
+    { key: 'sexo', label: 'Sexo' },
+    { key: 'etapa', label: 'Etapa' },
+    { key: 'anio', label: 'Año' },
+    { key: 'precio', label: 'Precio' },
+    { key: 'estatus', label: 'Estatus' },
+    { key: 'publico', label: 'Público' },
+];
 
 // Cache en memoria de especies y ejemplares (para llenar selects sin
 // disparar una consulta nueva cada vez que se abre un formulario).
@@ -36,6 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setupFormListeners();
     setupEditModalListeners();
     setupEspeciesFormListener();
+    setupSearchListener();
+    setupSavedViewsListeners();
+    setupColumnConfigListeners();
 
 });
 
@@ -150,6 +181,21 @@ async function loadEspecies() {
     especiesCache = await getEspecies();
     renderEspeciesList();
     populateEspecieSelects();
+}
+
+/**
+ * Nombre real de la especie de un ejemplar, resuelto por especie_id
+ * contra especiesCache (ya cargado por loadEspecies()). Si el registro
+ * es viejo y todavía no tiene especie_id asignado, cae de vuelta al
+ * campo de texto libre "especie" para no perder el dato (mismo criterio
+ * que ya usa el Dashboard).
+ */
+function resolverEspecieNombre(item) {
+    if (item.especie_id != null) {
+        const especie = especiesCache.find(e => e.id === item.especie_id);
+        if (especie) return especie.nombre;
+    }
+    return (item.especie || 'N/A').trim() || 'N/A';
 }
 
 function renderEspeciesList() {
@@ -298,28 +344,23 @@ function setupFormListeners() {
         event.preventDefault();
 
         showingAll = false;
-
-        const filtros = {
-            especie_id: document.getElementById('filter-especie_id').value,
-            etapa: document.getElementById('filter-etapa').value,
-            estatus: document.getElementById('filter-estatus').value,
-            genetica: document.getElementById('filter-genetica').value.trim(),
-            sexo: document.getElementById('filter-sexo').value,
-            anio: document.getElementById('filter-anio').value
-        };
-
-        loadFullInventory(filtros);
+        loadFullInventory(leerFiltrosActuales());
     });
 
     btnResetFilters?.addEventListener('click', () => {
         showingAll = false;
         filterForm?.reset();
+
+        searchQuery = '';
+        const inputBusqueda = document.getElementById('filter-busqueda');
+        if (inputBusqueda) inputBusqueda.value = '';
+
         loadFullInventory();
     });
 
     btnExportCsv?.addEventListener('click', () => {
         const filename = getCSVFilename();
-        downloadCSV(currentFilteredData, filename);
+        downloadCSV(filtrarPorBusqueda(currentFilteredData), filename);
     });
 
     btnToggleInventory?.addEventListener('click', () => {
@@ -1174,12 +1215,35 @@ async function loadDashboardData() {
         loadEspecies(),
         loadPadreMadreOptions()
     ]);
+
+    // Se cargan y aplican DESPUÉS del Promise.all de arriba a propósito:
+    // "especie_id" y "año" necesitan que sus <select> ya tengan las
+    // opciones pobladas (loadEspecies / populateYearFilter) para que
+    // asignarles un valor guardado realmente seleccione algo.
+    cargarVistasGuardadas();
+    poblarSelectVistas();
+
+    const vistaPredeterminada = vistasGuardadas.find(v => v.esPredeterminada);
+    if (vistaPredeterminada) {
+        aplicarVista(vistaPredeterminada);
+    }
 }
 
 
 // ==========================================
 // INVENTARIO COMPLETO Y DESPLEGABLE
 // ==========================================
+
+function leerFiltrosActuales() {
+    return {
+        especie_id: document.getElementById('filter-especie_id')?.value || '',
+        etapa: document.getElementById('filter-etapa')?.value || '',
+        estatus: document.getElementById('filter-estatus')?.value || '',
+        genetica: document.getElementById('filter-genetica')?.value.trim() || '',
+        sexo: document.getElementById('filter-sexo')?.value || '',
+        anio: document.getElementById('filter-anio')?.value || ''
+    };
+}
 
 async function loadFullInventory(filtros = {}) {
 
@@ -1230,10 +1294,18 @@ function renderInventoryTable() {
 
     const fullTableBody = document.getElementById('full-inventory-table-body');
     const btnToggleInventory = document.getElementById('btn-toggle-inventory');
+    const searchResultsCount = document.getElementById('search-results-count');
 
     if (!fullTableBody) return;
 
-    const totalItems = currentFilteredData.length;
+    const datosVisibles = filtrarPorBusqueda(currentFilteredData);
+    const totalItems = datosVisibles.length;
+
+    if (searchResultsCount) {
+        searchResultsCount.textContent = searchQuery
+            ? `${totalItems} de ${currentFilteredData.length}`
+            : '';
+    }
 
     if (btnToggleInventory) {
         if (totalItems <= 5) {
@@ -1245,8 +1317,292 @@ function renderInventoryTable() {
         }
     }
 
-    const dataToRender = showingAll ? currentFilteredData : currentFilteredData.slice(0, 5);
+    const dataToRender = showingAll ? datosVisibles : datosVisibles.slice(0, 5);
     renderTableRows(dataToRender, fullTableBody);
+}
+
+
+// ==========================================
+// BÚSQUEDA UNIFICADA
+// ==========================================
+//
+// Un solo campo que busca en ID, especie (ya resuelta), genética,
+// sexo, etapa, estatus y notas al mismo tiempo -- sobre los datos que
+// ya trajo la consulta de los filtros de arriba, sin golpear Supabase
+// otra vez por cada letra escrita. Si se escriben varias palabras
+// ("hembra albino disponible"), se exige que TODAS aparezcan en algún
+// campo del ejemplar, sin importar el orden.
+
+function construirBlobBusqueda(item) {
+    return [
+        item.id,
+        resolverEspecieNombre(item),
+        item.genetica,
+        item.sexo,
+        item.etapa,
+        item.estatus,
+        item.notas
+    ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+}
+
+function filtrarPorBusqueda(data) {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return data;
+
+    const tokens = query.split(/\s+/);
+
+    return data.filter(item => {
+        const blob = construirBlobBusqueda(item);
+        return tokens.every(token => blob.includes(token));
+    });
+}
+
+function debounce(fn, delayMs) {
+    let timeoutId;
+    return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn(...args), delayMs);
+    };
+}
+
+function setupSearchListener() {
+    const inputBusqueda = document.getElementById('filter-busqueda');
+
+    inputBusqueda?.addEventListener('input', debounce(event => {
+        searchQuery = event.target.value;
+        showingAll = false;
+        renderInventoryTable();
+    }, 150));
+}
+
+
+// ==========================================
+// VISTAS GUARDADAS
+// ==========================================
+//
+// Combinaciones de filtros + búsqueda con nombre, guardadas en
+// localStorage (son una preferencia de este navegador, no un dato del
+// negocio -- por eso no viven en Supabase). Una de ellas puede
+// marcarse "predeterminada" y se aplica sola al entrar a Control.
+
+function cargarVistasGuardadas() {
+    try {
+        const raw = localStorage.getItem(VISTAS_STORAGE_KEY);
+        vistasGuardadas = raw ? JSON.parse(raw) : [];
+    } catch (err) {
+        console.error('Error al leer vistas guardadas:', err);
+        vistasGuardadas = [];
+    }
+}
+
+function persistirVistasGuardadas() {
+    localStorage.setItem(VISTAS_STORAGE_KEY, JSON.stringify(vistasGuardadas));
+}
+
+function poblarSelectVistas() {
+    const select = document.getElementById('saved-views-select');
+    if (!select) return;
+
+    const opciones = vistasGuardadas
+        .map(v => `<option value="${escapeHTML(v.id)}">${escapeHTML(v.nombre)}${v.esPredeterminada ? ' ★' : ''}</option>`)
+        .join('');
+
+    select.innerHTML = `<option value="">— Selecciona una vista —</option>${opciones}`;
+}
+
+function aplicarVista(vista) {
+    if (!vista) return;
+
+    const { filtros, busqueda } = vista;
+
+    const setValor = (id, valor) => {
+        const el = document.getElementById(id);
+        if (el) el.value = valor || '';
+    };
+
+    setValor('filter-especie_id', filtros.especie_id);
+    setValor('filter-etapa', filtros.etapa);
+    setValor('filter-estatus', filtros.estatus);
+    setValor('filter-genetica', filtros.genetica);
+    setValor('filter-sexo', filtros.sexo);
+    setValor('filter-anio', filtros.anio);
+    setValor('filter-busqueda', busqueda);
+
+    searchQuery = busqueda || '';
+    showingAll = false;
+
+    const select = document.getElementById('saved-views-select');
+    if (select) select.value = vista.id;
+
+    const btnDeleteView = document.getElementById('btn-delete-view');
+    if (btnDeleteView) btnDeleteView.disabled = false;
+
+    loadFullInventory(filtros);
+}
+
+function setupSavedViewsListeners() {
+    const select = document.getElementById('saved-views-select');
+    const btnSaveView = document.getElementById('btn-save-view');
+    const btnDeleteView = document.getElementById('btn-delete-view');
+    const inputNombre = document.getElementById('saved-view-name');
+    const checkPredeterminada = document.getElementById('saved-view-default');
+
+    select?.addEventListener('change', () => {
+        const vista = vistasGuardadas.find(v => v.id === select.value);
+
+        if (btnDeleteView) btnDeleteView.disabled = !vista;
+
+        if (vista) aplicarVista(vista);
+    });
+
+    btnSaveView?.addEventListener('click', () => {
+        const nombre = inputNombre?.value.trim();
+
+        if (!nombre) {
+            showAlert('Ponle un nombre a la vista antes de guardarla.', 'error');
+            return;
+        }
+
+        const esPredeterminada = !!checkPredeterminada?.checked;
+
+        if (esPredeterminada) {
+            vistasGuardadas.forEach(v => { v.esPredeterminada = false; });
+        }
+
+        // Si ya existe una vista con el mismo nombre, se sobreescribe en
+        // vez de crear un duplicado -- es lo que la mayoría esperaría.
+        const existente = vistasGuardadas.find(v => v.nombre.toLowerCase() === nombre.toLowerCase());
+
+        const nuevaVista = {
+            id: existente ? existente.id : `vista-${Date.now()}`,
+            nombre,
+            esPredeterminada,
+            filtros: leerFiltrosActuales(),
+            busqueda: searchQuery
+        };
+
+        if (existente) {
+            Object.assign(existente, nuevaVista);
+        } else {
+            vistasGuardadas.push(nuevaVista);
+        }
+
+        persistirVistasGuardadas();
+        poblarSelectVistas();
+
+        if (select) select.value = nuevaVista.id;
+        if (btnDeleteView) btnDeleteView.disabled = false;
+        if (inputNombre) inputNombre.value = '';
+        if (checkPredeterminada) checkPredeterminada.checked = false;
+
+        showAlert(`Vista "${nombre}" guardada.`, 'success');
+    });
+
+    btnDeleteView?.addEventListener('click', () => {
+        const vista = vistasGuardadas.find(v => v.id === select?.value);
+        if (!vista) return;
+
+        const confirmado = window.confirm(`¿Eliminar la vista "${vista.nombre}"? Esto no afecta tu inventario, solo el atajo guardado.`);
+        if (!confirmado) return;
+
+        vistasGuardadas = vistasGuardadas.filter(v => v.id !== vista.id);
+        persistirVistasGuardadas();
+        poblarSelectVistas();
+
+        if (select) select.value = '';
+        btnDeleteView.disabled = true;
+
+        showAlert(`Vista "${vista.nombre}" eliminada.`, 'info');
+    });
+}
+
+
+// ==========================================
+// COLUMNAS CONFIGURABLES
+// ==========================================
+//
+// Qué columnas de la tabla de inventario se muestran, guardado en
+// localStorage (por eso es "ocultas" y no "visibles": así, si mañana
+// se agrega una columna nueva a COLUMNAS_CONFIG, aparece visible por
+// default para todos sin tener que migrar nada).
+
+function obtenerColumnasOcultas() {
+    try {
+        const raw = localStorage.getItem(COLUMNAS_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+    } catch (err) {
+        console.error('Error al leer columnas ocultas:', err);
+        return [];
+    }
+}
+
+function guardarColumnasOcultas(ocultas) {
+    localStorage.setItem(COLUMNAS_STORAGE_KEY, JSON.stringify(ocultas));
+}
+
+function aplicarColumnasVisibles() {
+    const ocultas = obtenerColumnasOcultas();
+
+    COLUMNAS_CONFIG.forEach(col => {
+        const visible = !ocultas.includes(col.key);
+        document.querySelectorAll(`[data-col="${col.key}"]`).forEach(el => {
+            el.style.display = visible ? '' : 'none';
+        });
+    });
+}
+
+function renderColumnasPanel() {
+    const container = document.getElementById('columnas-panel-checkboxes');
+    if (!container) return;
+
+    const ocultas = obtenerColumnasOcultas();
+
+    container.innerHTML = COLUMNAS_CONFIG.map(col => `
+        <label class="columna-check">
+            <input type="checkbox" data-columna-key="${col.key}" ${ocultas.includes(col.key) ? '' : 'checked'}>
+            ${escapeHTML(col.label)}
+        </label>
+    `).join('');
+
+    container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            const key = checkbox.getAttribute('data-columna-key');
+            let ocultasActuales = obtenerColumnasOcultas();
+
+            if (checkbox.checked) {
+                ocultasActuales = ocultasActuales.filter(k => k !== key);
+            } else if (!ocultasActuales.includes(key)) {
+                ocultasActuales.push(key);
+            }
+
+            guardarColumnasOcultas(ocultasActuales);
+            aplicarColumnasVisibles();
+        });
+    });
+}
+
+function setupColumnConfigListeners() {
+    const btnToggle = document.getElementById('btn-toggle-columnas');
+    const panel = document.getElementById('columnas-panel');
+
+    if (!btnToggle || !panel) return;
+
+    renderColumnasPanel();
+    aplicarColumnasVisibles();
+
+    btnToggle.addEventListener('click', event => {
+        event.stopPropagation();
+        panel.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', event => {
+        if (!panel.contains(event.target) && event.target !== btnToggle) {
+            panel.classList.add('hidden');
+        }
+    });
 }
 
 
@@ -1290,21 +1646,6 @@ async function populateYearFilter() {
 
 
 // ==========================================
-// SEGURIDAD HTML
-// ==========================================
-
-function escapeHTML(value) {
-
-    return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
-
-
-// ==========================================
 // RENDERIZAR TABLAS
 // ==========================================
 
@@ -1330,39 +1671,40 @@ function renderTableRows(ejemplares, targetTbody) {
 
             const estatus = item.estatus || 'Disponible';
             const estatusClass = estatus.toLowerCase().replace(/\s+/g, '-');
-            const imgSrc = item.imagen_url || 'https://via.placeholder.com/40?text=Sin+Foto';
+            const nombreEspecie = resolverEspecieNombre(item);
 
             return `
                 <tr>
-                    <td><strong>${escapeHTML(item.id)}</strong></td>
-                    <td>
+                    <td data-col="id"><strong>${escapeHTML(item.id)}</strong></td>
+                    <td data-col="imagen">
                         <img
-                            src="${escapeHTML(imgSrc)}"
+                            src="${safeImageUrl(item.imagen_url)}"
                             class="table-thumb"
-                            alt="${escapeHTML(item.especie || 'Ejemplar')}"
+                            alt="${escapeHTML(nombreEspecie)}"
+                            loading="lazy"
                         >
                     </td>
-                    <td>
-                        <strong>${escapeHTML(item.especie || 'N/A')}</strong>
+                    <td data-col="especie">
+                        <strong>${escapeHTML(nombreEspecie)}</strong>
                     </td>
-                    <td>${escapeHTML(item.genetica || 'Nominal')}</td>
-                    <td>${escapeHTML(item.sexo || 'No sexado')}</td>
-                    <td>${escapeHTML(item.etapa || '—')}</td>
-                    <td>${escapeHTML(item.nacimiento || 'N/A')}</td>
-                    <td style="font-weight: 700; color: var(--color-orange, #EE6C29);">
+                    <td data-col="genetica">${escapeHTML(item.genetica || 'Nominal')}</td>
+                    <td data-col="sexo">${escapeHTML(item.sexo || 'No sexado')}</td>
+                    <td data-col="etapa">${escapeHTML(item.etapa || '—')}</td>
+                    <td data-col="anio">${escapeHTML(item.nacimiento || 'N/A')}</td>
+                    <td data-col="precio" style="font-weight: 700; color: var(--color-orange, #EE6C29);">
                         ${precioFormatted}
                     </td>
-                    <td>
+                    <td data-col="estatus">
                         <span class="status-badge status-${escapeHTML(estatusClass)}">
                             ${escapeHTML(estatus)}
                         </span>
                     </td>
-                    <td>
+                    <td data-col="publico">
                         ${item.visible_publico === false
                             ? '<span class="status-badge status-holdback">Oculto</span>'
                             : '<span class="status-badge status-disponible">Visible</span>'}
                     </td>
-                    <td>
+                    <td data-col="acciones">
                         <div class="action-buttons">
                             <button
                                 type="button"
@@ -1396,7 +1738,7 @@ function renderTableRows(ejemplares, targetTbody) {
                                 class="btn-icon btn-delete-icon"
                                 title="Eliminar ejemplar"
                                 data-id="${escapeHTML(item.id)}"
-                                data-especie="${escapeHTML(item.especie || 'ejemplar')}"
+                                data-especie="${escapeHTML(nombreEspecie)}"
                             >
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <polyline points="3 6 5 6 21 6"/>
@@ -1411,6 +1753,8 @@ function renderTableRows(ejemplares, targetTbody) {
             `;
         })
         .join('');
+
+    aplicarColumnasVisibles();
 
     targetTbody.querySelectorAll('.btn-edit-icon').forEach(btn => {
         btn.addEventListener('click', event => {

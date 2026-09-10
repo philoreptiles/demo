@@ -288,7 +288,70 @@
 
             <!-- INVENTARIO COMPLETO Y FILTROS -->
             <section class="premium-card">
-                <h2 class="card-title">Filtrar inventario completo</h2>
+                <div class="inventory-header">
+                    <h2 class="card-title">Filtrar inventario completo</h2>
+
+                    <div class="columnas-config">
+                        <button type="button" id="btn-toggle-columnas" class="btn-icon" title="Configurar columnas visibles">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                            </svg>
+                        </button>
+
+                        <div id="columnas-panel" class="columnas-panel hidden">
+                            <p class="columnas-panel-title">Columnas visibles</p>
+                            <div id="columnas-panel-checkboxes"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Búsqueda unificada: un solo campo que busca en ID, especie,
+                     genética, sexo, etapa, estatus y notas a la vez, sobre los
+                     datos que ya trajeron los filtros de abajo (sin golpear la
+                     base de datos otra vez por cada letra que se escribe). -->
+                <div class="unified-search-bar">
+                    <svg class="unified-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input
+                        type="search"
+                        id="filter-busqueda"
+                        placeholder='Buscar: "hembra albino disponible"...'
+                        autocomplete="off"
+                    >
+                    <span id="search-results-count" class="search-results-count"></span>
+                </div>
+
+                <!-- Vistas guardadas: combinaciones de filtros + búsqueda con
+                     nombre, para volver a ellas con un clic (ej. "Disponibles
+                     Crotalus"). Se guardan en este navegador (localStorage),
+                     no en la base de datos. -->
+                <div class="saved-views-bar">
+                    <div class="saved-views-select-group">
+                        <label for="saved-views-select">Vistas guardadas</label>
+                        <select id="saved-views-select">
+                            <option value="">— Selecciona una vista —</option>
+                        </select>
+                        <button type="button" id="btn-delete-view" class="btn-icon" title="Eliminar vista seleccionada" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="saved-views-save-group">
+                        <input type="text" id="saved-view-name" placeholder="Nombre de la vista (ej. Disponibles 2026)" maxlength="40">
+                        <label class="saved-view-default-check">
+                            <input type="checkbox" id="saved-view-default">
+                            Predeterminada
+                        </label>
+                        <button type="button" id="btn-save-view" class="btn-secondary-premium">
+                            Guardar vista actual
+                        </button>
+                    </div>
+                </div>
 
                 <form id="filter-form" class="filter-grid-premium">
                     <div class="form-group-premium">
@@ -358,17 +421,17 @@
                     <table class="table-premium">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Imagen</th>
-                                <th>Especie</th>
-                                <th>Genética</th>
-                                <th>Sexo</th>
-                                <th>Etapa</th>
-                                <th>Año</th>
-                                <th>Precio</th>
-                                <th>Estatus</th>
-                                <th>Público</th>
-                                <th>Acciones</th>
+                                <th data-col="id">ID</th>
+                                <th data-col="imagen">Imagen</th>
+                                <th data-col="especie">Especie</th>
+                                <th data-col="genetica">Genética</th>
+                                <th data-col="sexo">Sexo</th>
+                                <th data-col="etapa">Etapa</th>
+                                <th data-col="anio">Año</th>
+                                <th data-col="precio">Precio</th>
+                                <th data-col="estatus">Estatus</th>
+                                <th data-col="publico">Público</th>
+                                <th data-col="acciones">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="full-inventory-table-body">
