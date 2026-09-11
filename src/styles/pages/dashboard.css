@@ -5,24 +5,28 @@
    Hereda la base y el tema oscuro de main.css y admin.css.
    ============================================================ */
 
-/* Mobile First (Pantallas pequeñas) */
-.kpi-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
+/* Mobile First - Fichas de Estadísticas (KPIs) a 2 columnas fijas. */
+#kpi-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.75rem;
     margin-top: 1.5rem;
+    width: 100% !important;
+    box-sizing: border-box;
 }
 
 .kpi-card {
     background-color: var(--color-surface, #1e1e1e);
     border: 1px solid var(--color-border, #333333);
     border-radius: 12px;
-    padding: 1.25rem 1.5rem;
+    padding: 1rem 1.1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.3rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     transition: transform 0.2s ease, border-color 0.2s ease;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .kpi-card:hover {
@@ -31,7 +35,7 @@
 }
 
 .kpi-label {
-    font-size: 0.8125rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: var(--color-text-muted, #a0a0a0);
     text-transform: uppercase;
@@ -39,38 +43,42 @@
 }
 
 .kpi-value {
-    font-size: 1.75rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: var(--color-primary, #e06d20);
-    margin: 0.15rem 0;
+    margin: 0.1rem 0;
     letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .kpi-subtext {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     color: #888888;
 }
 
-/* Tablet (2 columnas) */
 @media (min-width: 640px) {
-    .kpi-grid {
-        grid-template-columns: repeat(2, 1fr);
+    #kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         gap: 1.25rem;
     }
+    .kpi-label { font-size: 0.8125rem; }
+    .kpi-value { font-size: 1.35rem; }
+    .kpi-subtext { font-size: 0.8125rem; }
 }
 
-/* Desktop (4 columnas) */
 @media (min-width: 1024px) {
-    .kpi-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.5rem;
+    #kpi-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 1.25rem;
     }
+    .kpi-value { font-size: 1.25rem; }
+    .kpi-label { font-size: 0.75rem; }
 }
+
 /* ============================================================
    PANEL DEL CRIADOR — secciones nuevas del Dashboard
-   Mobile-first: todo lo de aquí abajo empieza apilado a 1
-   columna; un solo @media (min-width: 768px) al final acomoda
-   2 columnas donde tiene sentido (estatus + sexo lado a lado).
    ============================================================ */
 
 .dash-loading {
@@ -79,15 +87,15 @@
     margin: 0;
 }
 
-/* --- Grid de 2 tarjetas: Estatus / Sexo --- */
+/* --- Grid de fichas: SIEMPRE 1 columna --- */
 .dash-grid-2 {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.25rem;
+    gap: 1rem;
     margin-top: 1.5rem;
 }
 
-/* --- Listas de barras (estatus, sexo, especies) --- */
+/* --- Listas de barras --- */
 .bar-list {
     display: flex;
     flex-direction: column;
@@ -117,8 +125,6 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* Etiqueta secundaria dentro de una fila de barra, p. ej. en el
-   ranking de progenitores: "CR-15 · Padre · Crotalus atrox". */
 .bar-row-tag {
     color: var(--color-text-muted, #a0a0a0);
     font-weight: 400;
@@ -126,8 +132,6 @@
     margin-left: 0.4rem;
 }
 
-/* Texto de apoyo bajo un card-title, para dar contexto breve a una
-   sección (p. ej. "Ranking de progenitores"). */
 .card-subtitle {
     color: var(--color-text-muted, #a0a0a0);
     font-size: 0.85rem;
@@ -148,9 +152,7 @@
     transition: width 0.4s ease;
 }
 
-/* --- Ejemplares por año: barras verticales con scroll horizontal
-   (mismo patrón mobile-first que .table-premium: en vez de apilar
-   los años, se conserva el eje y se navega con scroll) --- */
+/* --- Ejemplares por año --- */
 .year-chart {
     display: flex;
     align-items: flex-end;
@@ -190,7 +192,7 @@
     color: var(--color-text-muted, #a0a0a0);
 }
 
-/* --- Alertas / sugerencias --- */
+/* --- Alertas e Historial --- */
 .insight-list {
     display: flex;
     flex-direction: column;
@@ -230,150 +232,281 @@
     background: rgba(122, 166, 179, 0.07);
 }
 
-/* ============================================================
-   MÓDULO "KPIs POR SECTOR" (Ventas / próximamente más sectores)
-   Mobile-first: tabs y tarjetas apiladas en móvil; en escritorio
-   los tabs quedan en fila y las tarjetas en una rejilla de 3.
-   ============================================================ */
-
-.sector-module-header {
+.insight-details > summary.insight-summary {
+    list-style: none;
+    cursor: pointer;
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0;
 }
 
-.sector-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+.insight-details > summary.insight-summary::-webkit-details-marker {
+    display: none;
 }
 
-.sector-tab {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--color-border, #333333);
+.insight-summary .card-title {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+.insight-summary::after {
+    content: '▾';
     color: var(--color-text-muted, #a0a0a0);
-    font-size: 0.82rem;
-    font-weight: 600;
-    padding: 0.4rem 0.9rem;
-    border-radius: 20px;
-    cursor: default;
-    transition: all 0.2s ease;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
 }
 
-.sector-tab.is-active {
+.insight-details[open] .insight-summary::after {
+    transform: rotate(180deg);
+}
+
+.insight-count-badge {
     background: var(--color-orange, #EE6C29);
-    border-color: var(--color-orange, #EE6C29);
     color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    flex-shrink: 0;
 }
 
-.sector-tab.is-disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
+.insight-details .insight-list,
+.insight-details .insight-body {
+    margin-top: 1.25rem;
 }
 
-.sector-kpi-grid {
-    display: grid;
-    grid-template-columns: 1fr;
+/* ============================================================
+   PRÓXIMOS EVENTOS REPRODUCTIVOS
+   ============================================================ */
+.evento-countdown-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--color-border, #333333);
+    border-left: 4px solid var(--color-border, #333333);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.75rem;
 }
 
-.sector-kpi-card {
-    background-color: var(--color-jet-card, #282B2B);
-    border: 1px solid var(--color-border, #333333);
-    border-radius: 12px;
-    padding: 1.25rem 1.5rem;
+.evento-countdown-card:last-child { margin-bottom: 0; }
+.evento-countdown-card--urgente { border-left-color: #EF5350; }
+.evento-countdown-card--pronto { border-left-color: var(--color-orange, #EE6C29); }
+.evento-countdown-card--lejos { border-left-color: #4FA37A; }
+
+.evento-countdown-info {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
-    position: relative;
-    opacity: 0;
-    transform: translateY(8px);
-    animation: sector-card-in 0.4s ease forwards;
+    gap: 0.15rem;
+    min-width: 0;
 }
 
-.sector-kpi-grid .sector-kpi-card:nth-child(2) {
-    animation-delay: 0.08s;
-}
-
-.sector-kpi-grid .sector-kpi-card:nth-child(3) {
-    animation-delay: 0.16s;
-}
-
-@keyframes sector-card-in {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Tarjeta bloqueada: mismo tamaño que las reales, pero atenuada y
-   sin datos falsos -- solo explica qué falta para activarla. */
-.sector-kpi-card--locked {
-    background: rgba(255, 255, 255, 0.02);
-    border-style: dashed;
-}
-
-.sector-kpi-card--locked .kpi-label {
-    opacity: 0.7;
-}
-
-.locked-badge {
-    position: absolute;
-    top: 0.9rem;
-    right: 1rem;
-    font-size: 0.68rem;
+.evento-countdown-titulo {
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--color-text-muted, #a0a0a0);
-}
-
-.kpi-value--locked {
-    color: var(--color-text-muted, #a0a0a0) !important;
-    font-size: 1.75rem;
-}
-
-.locked-reason {
-    font-size: 0.8rem;
-    line-height: 1.4;
-    color: var(--color-text-muted, #a0a0a0);
-    margin: 0.15rem 0 0 0;
-}
-
-.locked-reason strong {
     color: var(--color-text-main, #F4F5F5);
 }
 
-/* Escritorio (>= 768px): tabs en fila fija y 3 tarjetas por fila */
-@media (min-width: 768px) {
-    .dash-grid-2 {
-        grid-template-columns: 1fr 1fr;
-    }
+.evento-countdown-sub {
+    font-size: 0.82rem;
+    color: var(--color-text-muted, #a0a0a0);
+}
 
-    .sector-module-header {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-    }
+.evento-countdown-dias {
+    text-align: right;
+    font-weight: 700;
+    color: var(--color-text-main, #F4F5F5);
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
 
-    .sector-kpi-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.25rem;
-    }
+.evento-countdown-dias-sub {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-text-muted, #a0a0a0);
+    text-transform: uppercase;
+}
 
-    .sector-kpi-card:hover {
-        border-color: var(--color-orange, #EE6C29);
-        transform: translateY(-2px);
-    }
+/* ============================================================
+   HISTORIAL DE REPRODUCCIÓN
+   ============================================================ */
+.historial-repro-card {
+    border: 1px solid var(--color-border, #333333);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.9rem;
+    background: rgba(255, 255, 255, 0.02);
+}
 
-    .sector-kpi-card--locked:hover {
-        border-color: var(--color-border, #333333);
-        transform: none;
+.historial-repro-card:last-child { margin-bottom: 0; }
+.historial-repro-card--cancelado { opacity: 0.6; border-style: dashed; }
+
+.historial-repro-resultado {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.4rem;
+}
+
+.historial-sobrevivencia {
+    font-weight: 700;
+    color: var(--color-orange, #EE6C29);
+}
+
+/* ============================================================
+   GRÁFICAS DE PASTEL (donut) — SOLUCIÓN #3 APLICADA
+   ------------------------------------------------------------
+   El bloque se centra en el espacio disponible y la leyenda tiene
+   un ancho elástico (min 200px / max 340px) para que quede pegada
+   a la dona sin dejar huecos gigantes a la derecha.
+   ============================================================ */
+.pie-chart-container {
+    min-height: 40px;
+}
+
+.pie-chart-block {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: center;   /* Centra el conjunto dona + leyenda */
+    align-items: center;
+    gap: 1.25rem;
+    width: 100%;
+}
+
+.pie-chart-block svg {
+    flex-shrink: 0;
+}
+
+.pie-legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 200px;
+    max-width: 340px;
+}
+
+.pie-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pie-legend-item .bar-row-label {
+    flex: 1;
+}
+
+.pie-legend-item .bar-row-value {
+    white-space: nowrap; 
+}
+
+.pie-legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+/* En móvil, la leyenda se deja sin min/max para que no haya overflow */
+@media (max-width: 480px) {
+    .pie-chart-block {
+        gap: 0.75rem;
+    }
+    .pie-legend {
+        min-width: 0;
+        max-width: none;
     }
 }
 
+/* ============================================================
+   DISTRIBUCIÓN POR SEXO
+   ============================================================ */
+
+.sexo-status-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+}
+
+.sexo-status-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sexo-status-title {
+    font-weight: 700;
+    color: var(--color-text-main, #F4F5F5);
+    font-size: 0.9rem;
+}
+
+.sexo-status-block .pie-chart-block--sm {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+}
+
+.sexo-status-block .pie-chart-block--sm svg {
+    width: 90px;
+    height: 90px;
+    flex-shrink: 0;
+}
+
+.sexo-status-block .pie-chart-block--sm .pie-legend {
+    gap: 0.4rem;
+}
+
+.sexo-status-block .pie-chart-block--sm .pie-legend-item {
+    font-size: 0.82rem;
+    gap: 0.4rem;
+}
+
+/* En escritorio: 2 columnas SOLO para los bloques de sexo (dentro de la tarjeta) */
+@media (min-width: 768px) {
+    .sexo-status-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem 1.5rem;
+    }
+
+    .sexo-status-block {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--color-border, #333333);
+        border-radius: 10px;
+        padding: 0.85rem 1rem;
+        gap: 0.6rem;
+    }
+
+    .sexo-status-title {
+        font-size: 0.85rem;
+        color: var(--color-moonstone, #7AA6B3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .sexo-status-block .pie-chart-block--sm {
+        gap: 0.85rem;
+    }
+
+    .sexo-status-block .pie-chart-block--sm svg {
+        width: 80px;
+        height: 80px;
+    }
+
+    .sexo-status-block .pie-chart-block--sm .pie-legend {
+        gap: 0.4rem;
+    }
+
+    .sexo-status-block .pie-chart-block--sm .pie-legend-item {
+        font-size: 0.8rem;
+    }
+}

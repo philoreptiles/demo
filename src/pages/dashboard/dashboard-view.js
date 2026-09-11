@@ -3,26 +3,7 @@ import { supabase } from '../../supabase-config.js';
 // ==========================================
 // dashboard-view.js
 // ------------------------------------------
-// Lógica principal de la página Dashboard:
-//   1. Guardián de sesión con Supabase Auth.
-//   2. Consulta en tiempo real de la tabla "ejemplares" (+ "especies"
-//      para resolver especie_id -> nombre real, ver resolverEspecie()).
-//   3. KPIs, distribuciones (estatus/sexo/especie/año/etapa), ranking
-//      de progenitores, % de linaje documentado, antigüedad de
-//      inventario, alertas de calidad de datos y últimos movimientos.
-//
-// Todo se calcula en el navegador a partir de dos únicas consultas
-// ("ejemplares" completo + "especies" completo) -- no se agregan
-// llamadas extra a Supabase por cada gráfica.
-//
-// CAMBIO (relación especie real): "especie" (texto libre) era una
-// columna duplicada que se llenaba a mano en Control desde el
-// principio del proyecto. Ahora que "ejemplares.especie_id" apunta a
-// la tabla "especies", el dashboard resuelve el nombre real de la
-// especie por esa relación (resolverEspecie()) y solo cae de vuelta al
-// texto libre "especie" para los registros viejos que todavía no
-// tienen especie_id asignado -- esos registros además se marcan en la
-// sección de Alertas para que el criador los vincule desde Control.
+// Lógica principal de la página Dashboard
 // ==========================================
 
 const COLOR_ESTATUS = {
@@ -39,12 +20,13 @@ const LABEL_ESTATUS = {
     HOLDBACK: 'Holdback',
 };
 
-// Estatus que cuentan como "inventario activo" para la antigüedad
-// (todavía no se vendieron ni están retenidos fuera de venta).
-const ESTATUS_INVENTARIO_ACTIVO = ['DISPONIBLE', 'APARTADO'];
+const COLOR_SEXO = {
+    Macho: '#5B8FB9',
+    Hembra: '#F2A6C6',
+};
+const COLOR_SEXO_DEFAULT = '#8A8F8F'; 
 
-// A partir de cuántos días sin venderse se marca una alerta de
-// antigüedad en la sección de Alertas y sugerencias.
+const ESTATUS_INVENTARIO_ACTIVO = ['DISPONIBLE', 'APARTADO'];
 const DIAS_ALERTA_ANTIGUEDAD = 90;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -69,26 +51,12 @@ async function initAuthGuard() {
         }
     });
 
-    // En paralelo: los KPIs de inventario/ventas no dependen de los
-    // eventos reproductivos ni viceversa, así que no hay razón para
-    // esperar uno para empezar el otro.
     await Promise.all([
         renderResumenGeneral(),
-        renderProximosEventos()
+        renderProximosEventos(),
+        renderHistorialReproduccion()
     ]);
 }
-
-// ==========================================
-// PRÓXIMOS EVENTOS REPRODUCTIVOS (cuenta regresiva)
-// ------------------------------------------
-// Lee "eventos_reproductivos" (EN_CURSO) tal como los deja Control
-// (ver src/pages/admin/reproduccion.js) y los muestra ordenados por
-// cercanía a la fecha esperada. La etiqueta ("Eclosión estimada" /
-// "Parto esperado") y el color de urgencia se resuelven aquí mismo,
-// sin necesidad de volver a consultar "especies": el tipo de
-// reproducción ya viene congelado en cada fila desde que se creó el
-// evento en Control.
-// ==========================================
 
 const DIAS_URGENTE = 7;
 const DIAS_PRONTO = 30;
@@ -117,9 +85,6 @@ async function renderProximosEventos() {
     }
 
     container.innerHTML = eventos.map(ev => {
-        // fecha_esperada es la fecha estimada de PUESTA en ovíparas (no de
-        // eclosión -- esa se registra después, ya con la puesta real hecha,
-        // y no tiene una fecha estimada por separado en este panel).
         const etiqueta = ev.tipo_reproduccion === 'Ovípara'
             ? 'Puesta estimada'
             : ev.tipo_reproduccion === 'Ovovivípara'
@@ -168,18 +133,102 @@ async function renderProximosEventos() {
     }).join('');
 }
 
-/**
- * Días de calendario entre hoy y una fecha (puede ser negativo si la
- * fecha ya pasó -- eso es justo lo que queremos detectar: un evento
- * que se pasó de su fecha esperada y probablemente necesita que el
- * criador lo revise y lo marque como completado en Control.
- */
 function diasHasta(fechaISO) {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
     const fecha = new Date(`${fechaISO}T00:00:00`);
     const diffMs = fecha.getTime() - hoy.getTime();
     return Math.round(diffMs / (1000 * 60 * 60 * 24));
+}
+
+let historialEventosCache = [];
+
+async function renderHistorialReproduccion() {
+    const container = document.getElementById('historial-repro-list');
+    const selectFiltro = document.getElementById('historial-hembra-filtro');
+    if (!container) return;
+
+    const { data, error } = await supabase
+        .from('eventos_reproductivos')
+        .select('*')
+        .in('estado', ['COMPLETADO', 'CANCELADO'])
+        .order('updated_at', { ascending: false });
+
+    if (error) {
+        console.error('Error al consultar el historial de reproducción:', error);
+        container.innerHTML = '<p class="dash-loading">No se pudo cargar el historial de reproducción.</p>';
+        return;
+    }
+
+    historialEventosCache = data || [];
+
+    if (selectFiltro) {
+        const hembrasUnicas = [...new Set(historialEventosCache.map(ev => ev.hembra_label || ev.hembra_id).filter(Boolean))];
+        selectFiltro.innerHTML = '<option value="">Todas</option>' +
+            hembrasUnicas.map(h => `<option value="${escapeHtml(h)}">${escapeHtml(h)}</option>`).join('');
+        selectFiltro.onchange = () => pintarHistorial(selectFiltro.value);
+    }
+
+    pintarHistorial('');
+}
+
+function pintarHistorial(filtroHembra) {
+    const container = document.getElementById('historial-repro-list');
+    if (!container) return;
+
+    const eventos = filtroHembra
+        ? historialEventosCache.filter(ev => (ev.hembra_label || ev.hembra_id) === filtroHembra)
+        : historialEventosCache;
+
+    if (eventos.length === 0) {
+        container.innerHTML = '<p class="dash-loading">Todavía no hay ciclos reproductivos cerrados.</p>';
+        return;
+    }
+
+    container.innerHTML = eventos.map(ev => {
+        const fecha = ev.fecha_eclosion || ev.fecha_parto || ev.fecha_puesta || ev.fecha_esperada;
+        const fechaTexto = fecha
+            ? new Date(`${fecha}T00:00:00`).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })
+            : 'Sin fecha registrada';
+
+        const esCancelado = ev.estado === 'CANCELADO';
+        let resultado = '';
+
+        if (ev.tipo_reproduccion === 'Ovípara') {
+            const tieneEclosion = ev.huevos_eclosionados != null || ev.huevos_perdidos != null;
+            const sobrevivencia = (ev.huevos_eclosionados != null && ev.huevos_fertiles > 0)
+                ? Math.round((ev.huevos_eclosionados / ev.huevos_fertiles) * 100)
+                : null;
+
+            resultado = `
+                <span class="bar-row-value">Puesta: ${escapeHtml(ev.huevos_fertiles ?? '—')} fértiles · ${escapeHtml(ev.huevos_no_fertiles ?? '—')} no fértiles</span>
+                ${tieneEclosion ? `<span class="bar-row-value">Eclosión: ${escapeHtml(ev.huevos_eclosionados ?? '—')} eclosionados · ${escapeHtml(ev.huevos_perdidos ?? '—')} perdidos</span>` : ''}
+                ${sobrevivencia !== null ? `<span class="historial-sobrevivencia">Sobrevivencia por huevo: ${sobrevivencia}%</span>` : ''}
+            `;
+        } else if (ev.tipo_reproduccion === 'Ovovivípara') {
+            resultado = `
+                <span class="bar-row-value">Crías vivas: ${escapeHtml(ev.crias_vivas ?? '—')} · Slugs: ${escapeHtml(ev.slugs ?? '—')} · Stillborns: ${escapeHtml(ev.stillborns ?? '—')}</span>
+            `;
+        } else {
+            resultado = '<span class="bar-row-value">Sin datos de resultado (tipo de reproducción no registrado).</span>';
+        }
+
+        return `
+            <div class="historial-repro-card${esCancelado ? ' historial-repro-card--cancelado' : ''}">
+                <div class="evento-repro-header">
+                    <span class="bar-row-label">${escapeHtml(ev.hembra_label || ev.hembra_id || '—')}</span>
+                    <span class="bar-row-tag">${escapeHtml(ev.especie_nombre || '')}${ev.macho_id ? ' · ♂ ' + escapeHtml(ev.macho_id) : ''}</span>
+                </div>
+                <div class="bar-row-meta">
+                    <span class="bar-row-value">${esCancelado ? 'Cancelado' : fechaTexto}</span>
+                </div>
+                <div class="historial-repro-resultado">
+                    ${resultado}
+                </div>
+                ${ev.notas ? `<p class="card-subtitle" style="margin-top: 0.5rem;">${escapeHtml(ev.notas)}</p>` : ''}
+            </div>
+        `;
+    }).join('');
 }
 
 function renderAuthHeaderAction() {
@@ -199,9 +248,6 @@ function renderAuthHeaderAction() {
 
 async function renderResumenGeneral() {
     try {
-        // Dos consultas en paralelo: los ejemplares completos y el
-        // catálogo de especies (solo id + nombre, es una tabla chica)
-        // para poder resolver especie_id -> nombre real.
         const [ejemplaresRes, especiesRes] = await Promise.all([
             supabase.from('ejemplares').select('*'),
             supabase.from('especies').select('id, nombre')
@@ -216,9 +262,6 @@ async function renderResumenGeneral() {
         }
 
         if (especiesRes.error) {
-            // No es un error fatal para el dashboard: si falla la
-            // consulta de especies simplemente no se podrá resolver
-            // especie_id y todo cae de vuelta al texto libre "especie".
             console.error('Error al consultar especies:', especiesRes.error);
         }
 
@@ -228,18 +271,16 @@ async function renderResumenGeneral() {
 
         if (!ejemplares || ejemplares.length === 0) {
             mostrarKpisVacios();
-            renderBarList('status-bar-list', [], 'Aún no hay ejemplares registrados.');
-            renderBarList('sexo-bar-list', [], 'Aún no hay ejemplares registrados.');
+            renderPieChart('status-bar-list', [], 'Aún no hay ejemplares registrados.');
+            renderSexoPorEstatus('sexo-bar-list', [], 'Aún no hay ejemplares registrados.');
             renderBarList('especies-bar-list', [], 'Aún no hay ejemplares registrados.');
             renderEtapaPriceList([]);
             renderYearChart([]);
             renderProgenitoresRanking([], especiesMap);
             renderInsights([]);
-            renderRecentTable([], null, especiesMap);
             return;
         }
 
-        // -------- Acumuladores --------
         let valorInventario = 0;
         let valorApartado = 0;
         let ventasTotales = 0;
@@ -249,21 +290,17 @@ async function renderResumenGeneral() {
         let holdbackCount = 0;
 
         const conteoEspecies = {};
-        const conteoSexo = {};
+        const sexoPorEstatus = { DISPONIBLE: {}, APARTADO: {}, VENDIDO: {}, HOLDBACK: {} };
         const conteoEstatus = { DISPONIBLE: 0, APARTADO: 0, VENDIDO: 0, HOLDBACK: 0 };
         const sinImagenDisponibles = [];
         const sinPrecio = [];
         const sinEspecieId = [];
 
-        // Para "Precio promedio por etapa": suma y conteo por etapa.
         const etapaAcumulado = {};
-
-        // Para antigüedad de inventario (solo Disponible/Apartado).
         const antiguedadesDias = [];
 
-        // Para % de linaje documentado.
-        let linajeCompleto = 0; // padre y madre registrados
-        let linajeParcial = 0;  // solo uno de los dos
+        let linajeCompleto = 0;
+        let linajeParcial = 0;
 
         ejemplares.forEach(item => {
             const estatus = (item.estatus || '').trim().toUpperCase();
@@ -289,8 +326,10 @@ async function renderResumenGeneral() {
 
             conteoEspecies[nombreEspecie] = (conteoEspecies[nombreEspecie] || 0) + 1;
 
-            const sexoClean = (item.sexo || 'No especificado').trim();
-            conteoSexo[sexoClean] = (conteoSexo[sexoClean] || 0) + 1;
+            const sexoClean = (item.sexo || 'No especificado').trim() || 'No especificado';
+            if (sexoPorEstatus.hasOwnProperty(estatus)) {
+                sexoPorEstatus[estatus][sexoClean] = (sexoPorEstatus[estatus][sexoClean] || 0) + 1;
+            }
 
             if (estatus === 'DISPONIBLE' && !item.imagen_url) {
                 sinImagenDisponibles.push(item);
@@ -304,8 +343,6 @@ async function renderResumenGeneral() {
                 sinEspecieId.push(item);
             }
 
-            // Precio promedio por etapa (solo con precio válido, para
-            // que un ejemplar en $0 no jale el promedio hacia abajo).
             if (precio > 0) {
                 const etapaClean = (item.etapa || 'Sin etapa').trim() || 'Sin etapa';
                 if (!etapaAcumulado[etapaClean]) {
@@ -315,7 +352,6 @@ async function renderResumenGeneral() {
                 etapaAcumulado[etapaClean].cantidad++;
             }
 
-            // Antigüedad: días desde created_at, solo inventario activo.
             if (ESTATUS_INVENTARIO_ACTIVO.includes(estatus) && item.created_at) {
                 const dias = diasDesde(item.created_at);
                 if (dias !== null) {
@@ -323,7 +359,6 @@ async function renderResumenGeneral() {
                 }
             }
 
-            // Linaje documentado.
             const tienePadre = !!item.id_padre;
             const tieneMadre = !!item.id_madre;
             if (tienePadre && tieneMadre) {
@@ -342,7 +377,6 @@ async function renderResumenGeneral() {
             minimumFractionDigits: 2
         });
 
-        // -------- KPIs --------
         actualizarTexto('kpi-valor-inventario', formatoMoneda.format(valorInventario));
         actualizarTexto('kpi-valor-sub', `${disponiblesCount} ejemplares en venta`);
 
@@ -356,21 +390,12 @@ async function renderResumenGeneral() {
         actualizarTexto('kpi-ticket-promedio', formatoMoneda.format(ticketPromedio));
         actualizarTexto('kpi-ticket-sub', vendidosCount > 0 ? 'Por ejemplar vendido' : 'Sin ventas registradas');
 
-        // Módulo "KPIs por Sector · Ventas": reutiliza el mismo cálculo,
-        // no se vuelve a consultar Supabase para esto.
-        actualizarTexto('sector-ticket-medio', formatoMoneda.format(ticketPromedio));
-        actualizarTexto(
-            'sector-ticket-medio-sub',
-            vendidosCount > 0 ? `Sobre ${vendidosCount} venta${vendidosCount === 1 ? '' : 's'} registrada${vendidosCount === 1 ? '' : 's'}` : 'Sin ventas registradas'
-        );
-
         actualizarTexto('kpi-total-ejemplares', ejemplares.length.toString());
         actualizarTexto('kpi-disponibles-sub', `${disponiblesCount} disponibles actualmente`);
 
         actualizarTexto('kpi-top-especie', topEspecie[0]);
         actualizarTexto('kpi-top-especie-count', `${topEspecie[1]} ejemplares registrados`);
 
-        // Antigüedad de inventario (nuevo).
         const antiguedadPromedio = antiguedadesDias.length > 0
             ? Math.round(antiguedadesDias.reduce((suma, a) => suma + a.dias, 0) / antiguedadesDias.length)
             : 0;
@@ -382,7 +407,6 @@ async function renderResumenGeneral() {
                 : 'Sin inventario activo para medir'
         );
 
-        // % de linaje documentado (nuevo).
         const totalConLinaje = linajeCompleto + linajeParcial;
         const pctLinaje = ejemplares.length > 0 ? Math.round((totalConLinaje / ejemplares.length) * 100) : 0;
         actualizarTexto('kpi-linaje-pct', `${pctLinaje}%`);
@@ -391,7 +415,6 @@ async function renderResumenGeneral() {
             `${linajeCompleto} con ambos padres · ${linajeParcial} con solo uno`
         );
 
-        // -------- Estatus del inventario --------
         const statusItems = Object.entries(conteoEstatus)
             .filter(([, count]) => count > 0)
             .map(([key, count]) => ({
@@ -399,30 +422,30 @@ async function renderResumenGeneral() {
                 value: count,
                 color: COLOR_ESTATUS[key] || '#7AA6B3',
             }));
-        renderBarList('status-bar-list', statusItems);
+        renderPieChart('status-bar-list', statusItems, 'Aún no hay ejemplares registrados.');
 
-        // -------- Distribución por sexo --------
-        const sexoItems = Object.entries(conteoSexo)
-            .sort((a, b) => b[1] - a[1])
-            .map(([label, value]) => ({ label, value, color: '#7AA6B3' }));
-        renderBarList('sexo-bar-list', sexoItems);
+        const gruposSexo = Object.entries(sexoPorEstatus)
+            .map(([estatusKey, conteo]) => {
+                const items = Object.entries(conteo)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([label, value]) => ({ label, value, color: COLOR_SEXO[label] || COLOR_SEXO_DEFAULT }));
+                return {
+                    label: LABEL_ESTATUS[estatusKey] || estatusKey,
+                    total: items.reduce((suma, i) => suma + i.value, 0),
+                    items
+                };
+            });
+        renderSexoPorEstatus('sexo-bar-list', gruposSexo, 'Aún no hay ejemplares registrados.');
 
-        // -------- Especies con mayor presencia (top 6) --------
         const especiesItems = especiesOrdenadas
             .slice(0, 6)
             .map(([label, value]) => ({ label, value, color: '#EE6C29' }));
         renderBarList('especies-bar-list', especiesItems);
 
-        // -------- Precio promedio por etapa (nuevo) --------
         renderEtapaPriceList(etapaAcumulado, formatoMoneda);
-
-        // -------- Ejemplares por año de nacimiento --------
         renderYearChart(ejemplares);
-
-        // -------- Ranking de progenitores (nuevo) --------
         renderProgenitoresRanking(ejemplares, especiesMap);
 
-        // -------- Alertas y sugerencias --------
         const insights = construirInsights({
             total: ejemplares.length,
             topEspecie,
@@ -435,31 +458,12 @@ async function renderResumenGeneral() {
         });
         renderInsights(insights);
 
-        // -------- Últimos ejemplares agregados --------
-        const recientes = [...ejemplares]
-            .filter(item => item.created_at)
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .slice(0, 5);
-        renderRecentTable(recientes, formatoMoneda, especiesMap);
-
     } catch (err) {
         console.error('Excepción al procesar estadísticas:', err);
         mostrarErrorEnKpis();
     }
 }
 
-// ==========================================
-// RESOLUCIÓN DE ESPECIE (relación real vs. texto legado)
-// ==========================================
-
-/**
- * Devuelve el nombre de la especie de un ejemplar usando la relación
- * real (especie_id -> especies.nombre) cuando existe. Si el ejemplar
- * todavía no tiene especie_id asignado (registros capturados antes de
- * que existiera la relación), cae de vuelta al campo de texto libre
- * "especie" para no perder el dato, y ese caso se reporta aparte en
- * construirInsights() como pendiente de vincular.
- */
 function resolverEspecie(item, especiesMap) {
     if (item.especie_id != null && especiesMap.has(item.especie_id)) {
         return especiesMap.get(item.especie_id);
@@ -467,10 +471,6 @@ function resolverEspecie(item, especiesMap) {
     const legado = (item.especie || '').trim();
     return legado || 'Sin especie';
 }
-
-// ==========================================
-// RENDERIZADO DE COMPONENTES
-// ==========================================
 
 function renderBarList(containerId, items, emptyMessage = 'Sin datos suficientes todavía.') {
     const container = document.getElementById(containerId);
@@ -499,12 +499,105 @@ function renderBarList(containerId, items, emptyMessage = 'Sin datos suficientes
     }).join('');
 }
 
-/**
- * Precio promedio por etapa. A diferencia de renderBarList (que
- * escala barras como % del total de conteos), aquí cada barra se
- * escala respecto al promedio MÁS ALTO entre etapas, porque lo que se
- * compara es un precio promedio, no una parte de un total.
- */
+function buildDonutSvg(items, size = 150, strokeWidth = 24) {
+    const total = items.reduce((suma, item) => suma + item.value, 0);
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const center = size / 2;
+
+    if (total <= 0) {
+        return `
+            <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+                <circle cx="${center}" cy="${center}" r="${radius}" fill="none"
+                    stroke="rgba(255,255,255,0.08)" stroke-width="${strokeWidth}" />
+            </svg>
+        `;
+    }
+
+    let acumulado = 0;
+    const segmentos = items.map(item => {
+        const fraccion = item.value / total;
+        const largo = fraccion * circumference;
+        const hueco = circumference - largo;
+        const dashoffset = -acumulado;
+        acumulado += largo;
+        return `<circle cx="${center}" cy="${center}" r="${radius}" fill="none"
+                    stroke="${item.color}" stroke-width="${strokeWidth}"
+                    stroke-dasharray="${largo} ${hueco}" stroke-dashoffset="${dashoffset}"
+                    transform="rotate(-90 ${center} ${center})" />`;
+    }).join('');
+
+    return `
+        <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+            ${segmentos}
+            <text x="${center}" y="${center}" text-anchor="middle" dominant-baseline="central"
+                font-size="${Math.round(size * 0.17)}" fill="var(--color-text-main, #F4F5F5)" font-weight="700">${total}</text>
+        </svg>
+    `;
+}
+
+function buildPieLegend(items, total) {
+    return `
+        <ul class="pie-legend">
+            ${items.map(item => {
+                const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
+                return `
+                    <li class="pie-legend-item">
+                        <span class="pie-legend-swatch" style="background-color: ${item.color};"></span>
+                        <span class="bar-row-label">${escapeHtml(item.label)}</span>
+                        <span class="bar-row-value">${item.value} · ${pct}%</span>
+                    </li>
+                `;
+            }).join('')}
+        </ul>
+    `;
+}
+
+/** Gráfica de pastel única reducida en px para evitar desbordes. */
+function renderPieChart(containerId, items, emptyMessage = 'Sin datos suficientes todavía.') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (!items || items.length === 0) {
+        container.innerHTML = `<p class="dash-loading">${emptyMessage}</p>`;
+        return;
+    }
+
+    const total = items.reduce((suma, item) => suma + item.value, 0);
+    container.innerHTML = `
+        <div class="pie-chart-block">
+            ${buildDonutSvg(items, 120, 20)}
+            ${buildPieLegend(items, total)}
+        </div>
+    `;
+}
+
+function renderSexoPorEstatus(containerId, grupos, emptyMessage = 'Sin datos suficientes todavía.') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const gruposConDatos = (grupos || []).filter(g => g.total > 0);
+
+    if (gruposConDatos.length === 0) {
+        container.innerHTML = `<p class="dash-loading">${emptyMessage}</p>`;
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="sexo-status-grid">
+            ${gruposConDatos.map(grupo => `
+                <div class="sexo-status-block">
+                    <span class="sexo-status-title">${escapeHtml(grupo.label)} <span class="bar-row-value">(${grupo.total})</span></span>
+                    <div class="pie-chart-block pie-chart-block--sm">
+                        ${buildDonutSvg(grupo.items, 110, 18)}
+                        ${buildPieLegend(grupo.items, grupo.total)}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
 function renderEtapaPriceList(etapaAcumulado, formatoMoneda) {
     const container = document.getElementById('etapa-bar-list');
     if (!container) return;
@@ -581,20 +674,12 @@ function renderYearChart(ejemplares) {
     }).join('');
 }
 
-/**
- * Ranking de progenitores: cuenta, para cada id que aparece como
- * id_padre o id_madre de al menos un ejemplar, cuántas crías tiene
- * registradas y el valor total (suma de "precio") de esas crías.
- * El nombre/especie del progenitor se resuelve buscando su propio
- * registro dentro del mismo arreglo de ejemplares (por su "id") --
- * no hace falta una consulta aparte a Supabase.
- */
 function renderProgenitoresRanking(ejemplares, especiesMap) {
     const container = document.getElementById('progenitores-list');
     if (!container) return;
 
     const ejemplaresPorId = new Map(ejemplares.map(item => [item.id, item]));
-    const progenitores = new Map(); // id -> { crias, valorCrias, roles:Set }
+    const progenitores = new Map();
 
     ejemplares.forEach(item => {
         const precio = parseFloat(item.precio) || 0;
@@ -743,6 +828,17 @@ function construirInsights({
 
 function renderInsights(insights) {
     const container = document.getElementById('insight-list');
+    const badge = document.getElementById('insight-count-badge');
+
+    if (badge) {
+        if (insights && insights.length > 0) {
+            badge.textContent = insights.length;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+
     if (!container) return;
 
     if (!insights || insights.length === 0) {
@@ -757,47 +853,6 @@ function renderInsights(insights) {
         </div>
     `).join('');
 }
-
-function renderRecentTable(items, formatoMoneda, especiesMap) {
-    const tbody = document.getElementById('recent-table-body');
-    if (!tbody) return;
-
-    if (!items || items.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aún no hay ejemplares registrados.</td></tr>';
-        return;
-    }
-
-    const formatter = formatoMoneda || new Intl.NumberFormat('es-MX', {
-        style: 'currency',
-        currency: 'MXN',
-        minimumFractionDigits: 2
-    });
-
-    tbody.innerHTML = items.map(item => {
-        const estatus = (item.estatus || '').trim().toUpperCase();
-        const statusClass = `status-${estatus.toLowerCase()}`;
-        const fecha = item.created_at
-            ? new Date(item.created_at).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })
-            : '—';
-        const precio = item.precio ? formatter.format(parseFloat(item.precio)) : '—';
-        const nombreEspecie = especiesMap ? resolverEspecie(item, especiesMap) : (item.especie ?? '—');
-
-        return `
-            <tr>
-                <td>${escapeHtml(item.id ?? '—')}</td>
-                <td>${escapeHtml(nombreEspecie)}</td>
-                <td>${escapeHtml(item.genetica ?? '—')}</td>
-                <td><span class="status-badge ${statusClass}">${escapeHtml(item.estatus ?? '—')}</span></td>
-                <td>${precio}</td>
-                <td>${fecha}</td>
-            </tr>
-        `;
-    }).join('');
-}
-
-// ==========================================
-// UTILIDADES
-// ==========================================
 
 function actualizarTexto(id, valor) {
     const el = document.getElementById(id);
@@ -825,11 +880,6 @@ function extraerAnio(valor) {
     return null;
 }
 
-/**
- * Días completos transcurridos desde una fecha (created_at) hasta
- * ahora. Devuelve null si la fecha no es válida, para que quien la
- * use pueda decidir si la descarta en vez de sumar un NaN.
- */
 function diasDesde(fechaISO) {
     const fecha = new Date(fechaISO);
     if (isNaN(fecha.getTime())) return null;
@@ -864,8 +914,6 @@ function mostrarKpisVacios() {
     actualizarTexto('kpi-antiguedad-sub', 'Sin inventario activo para medir');
     actualizarTexto('kpi-linaje-pct', '0%');
     actualizarTexto('kpi-linaje-sub', '0 con ambos padres · 0 con solo uno');
-    actualizarTexto('sector-ticket-medio', '$0.00');
-    actualizarTexto('sector-ticket-medio-sub', 'Sin ventas registradas');
 }
 
 function mostrarErrorEnKpis() {
@@ -877,5 +925,4 @@ function mostrarErrorEnKpis() {
     actualizarTexto('kpi-top-especie', 'Error');
     actualizarTexto('kpi-antiguedad-promedio', 'Error');
     actualizarTexto('kpi-linaje-pct', 'Error');
-    actualizarTexto('sector-ticket-medio', 'Error');
 }

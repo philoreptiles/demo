@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
     <title>Panel de Administración - Escama y Colmillo</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="../../styles/main.css">
@@ -91,69 +92,7 @@
                         <button type="submit" class="btn-premium">Agregar especie</button>
                     </div>
                 </form>
-
-                <div id="especies-list" class="bar-list">
-                    <p class="dash-loading">Cargando especies...</p>
-                </div>
             </section>
-
-            <!-- REPRODUCCIÓN -->
-            <!-- La etiqueta del campo "fecha esperada" cambia sola según el
-                 tipo de reproducción de la especie de la hembra elegida
-                 (ver reproduccion.js -> actualizarEtiquetaFechaEsperada). -->
-            <section class="premium-card">
-                <h2 class="card-title">Reproducción</h2>
-                <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: -0.5rem 0 1rem;">
-                    Registra cada apareamiento o bloqueo. La fecha esperada se pide distinto
-                    según si la especie es ovípara u ovovivípara.
-                </p>
-
-                <form id="repro-form" class="filter-grid-premium" style="margin-bottom: 1.5rem;">
-                    <div class="form-group-premium">
-                        <label for="repro-hembra">Hembra *</label>
-                        <select id="repro-hembra" required>
-                            <option value="">Cargando...</option>
-                        </select>
-                    </div>
-                    <div class="form-group-premium">
-                        <label for="repro-macho">Macho</label>
-                        <select id="repro-macho">
-                            <option value="">Sin registrar</option>
-                        </select>
-                    </div>
-                    <div class="form-group-premium">
-                        <label id="repro-fecha-inicio-label" for="repro-fecha-inicio">Fecha de apareamiento/bloqueo *</label>
-                        <input type="date" id="repro-fecha-inicio" required>
-                    </div>
-                    <div class="form-group-premium hidden" id="repro-fecha-ovulacion-grupo">
-                        <label for="repro-fecha-ovulacion">Día de la ovulación</label>
-                        <input type="date" id="repro-fecha-ovulacion">
-                        <small style="color: var(--color-text-muted); font-size: 0.78rem;">
-                            Puedes dejarla en blanco si todavía no se detecta.
-                        </small>
-                    </div>
-                    <div class="form-group-premium">
-                        <label id="repro-fecha-esperada-label" for="repro-fecha-esperada">Fecha esperada</label>
-                        <input type="date" id="repro-fecha-esperada">
-                        <small id="repro-fecha-esperada-ayuda" style="color: var(--color-text-muted); font-size: 0.78rem;">
-                            Elige primero la hembra para que esta etiqueta se ajuste a su tipo de reproducción.
-                        </small>
-                    </div>
-                    <div class="form-group-premium form-group-premium--full">
-                        <label for="repro-notas">Notas</label>
-                        <textarea id="repro-notas" rows="2" placeholder="Notas de este ciclo, temperatura de incubación, etc."></textarea>
-                    </div>
-                    <div class="filter-actions-right">
-                        <button type="submit" class="btn-premium">Registrar evento</button>
-                    </div>
-                </form>
-
-                <h3 style="font-size: 0.95rem; margin-bottom: 0.75rem;">Eventos en curso</h3>
-                <div id="repro-eventos-list" class="evento-repro-list">
-                    <p class="dash-loading">Cargando eventos...</p>
-                </div>
-            </section>
-
 
             <!-- AGREGAR EJEMPLAR -->
             <section class="premium-card">
@@ -300,47 +239,62 @@
             </section>
 
 
-            <!-- ESTADÍSTICAS -->
-            <div class="stats-panel" id="stats-container">
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-total">0</span>
-                    <span class="stat-label">Total Ejemplares</span>
+            <!-- REPRODUCCIÓN -->
+            <!-- La etiqueta del campo "fecha esperada" cambia sola según el
+                 tipo de reproducción de la especie de la hembra elegida
+                 (ver reproduccion.js -> actualizarEtiquetaFechaEsperada). -->
+            <section class="premium-card">
+                <h2 class="card-title">Reproducción</h2>
+                <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: -0.5rem 0 1rem;">
+                    Registra cada apareamiento o bloqueo. La fecha esperada se pide distinto
+                    según si la especie es ovípara u ovovivípara.
+                </p>
+
+                <form id="repro-form" class="filter-grid-premium" style="margin-bottom: 1.5rem;">
+                    <div class="form-group-premium">
+                        <label for="repro-hembra">Hembra *</label>
+                        <select id="repro-hembra" required>
+                            <option value="">Cargando...</option>
+                        </select>
+                    </div>
+                    <div class="form-group-premium">
+                        <label for="repro-macho">Macho</label>
+                        <select id="repro-macho">
+                            <option value="">Sin registrar</option>
+                        </select>
+                    </div>
+                    <div class="form-group-premium">
+                        <label id="repro-fecha-inicio-label" for="repro-fecha-inicio">Fecha de apareamiento/bloqueo *</label>
+                        <input type="date" id="repro-fecha-inicio" required>
+                    </div>
+                    <div class="form-group-premium hidden" id="repro-fecha-ovulacion-grupo">
+                        <label for="repro-fecha-ovulacion">Día de la ovulación</label>
+                        <input type="date" id="repro-fecha-ovulacion">
+                        <small style="color: var(--color-text-muted); font-size: 0.78rem;">
+                            Puedes dejarla en blanco si todavía no se detecta.
+                        </small>
+                    </div>
+                    <div class="form-group-premium">
+                        <label id="repro-fecha-esperada-label" for="repro-fecha-esperada">Fecha esperada</label>
+                        <input type="date" id="repro-fecha-esperada">
+                        <small id="repro-fecha-esperada-ayuda" style="color: var(--color-text-muted); font-size: 0.78rem;">
+                            Elige primero la hembra para que esta etiqueta se ajuste a su tipo de reproducción.
+                        </small>
+                    </div>
+                    <div class="form-group-premium form-group-premium--full">
+                        <label for="repro-notas">Notas</label>
+                        <textarea id="repro-notas" rows="2" placeholder="Notas de este ciclo, temperatura de incubación, etc."></textarea>
+                    </div>
+                    <div class="filter-actions-right">
+                        <button type="submit" class="btn-premium">Registrar evento</button>
+                    </div>
+                </form>
+
+                <h3 style="font-size: 0.95rem; margin-bottom: 0.75rem;">Eventos en curso</h3>
+                <div id="repro-eventos-list" class="evento-repro-list">
+                    <p class="dash-loading">Cargando eventos...</p>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-disponibles">0</span>
-                    <span class="stat-label">Disponibles</span>
-                </div>
-                <!--
-                    NUEVA FICHA — "Valor disponible"
-                    ------------------------------------------------
-                    Muestra la suma de "precio" de todos los ejemplares
-                    cuyo estatus es "Disponible". Le dice al criador,
-                    de un vistazo, cuánto dinero representa el inventario
-                    que todavía puede vender (no cuenta lo Apartado,
-                    Vendido ni Holdback, porque ese capital ya no está
-                    "disponible" para una venta nueva).
-                    El cálculo real vive en admin-view.js, función
-                    getEstadisticas() — aquí solo está el contenedor
-                    donde se pinta el resultado ya formateado como
-                    moneda (ej. "$45,231.00").
-                -->
-                <div class="stat-card">
-                    <span class="stat-number stat-number--currency" id="stat-valor-disponible">$0.00</span>
-                    <span class="stat-label">Valor disponible</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-apartados">0</span>
-                    <span class="stat-label">Apartados</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-vendidos">0</span>
-                    <span class="stat-label">Vendidos</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-holdbacks">0</span>
-                    <span class="stat-label">Holdbacks</span>
-                </div>
-            </div>
+            </section>
 
 
             <!-- INVENTARIO COMPLETO Y FILTROS -->

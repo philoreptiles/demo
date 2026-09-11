@@ -179,7 +179,6 @@ function updateUI(session) {
 
 async function loadEspecies() {
     especiesCache = await getEspecies();
-    renderEspeciesList();
     populateEspecieSelects();
 }
 
@@ -196,28 +195,6 @@ function resolverEspecieNombre(item) {
         if (especie) return especie.nombre;
     }
     return (item.especie || 'N/A').trim() || 'N/A';
-}
-
-function renderEspeciesList() {
-
-    const container = document.getElementById('especies-list');
-    if (!container) return;
-
-    if (especiesCache.length === 0) {
-        container.innerHTML = `
-            <p class="dash-loading">
-                Aún no registras ninguna especie. Agrega la primera arriba para poder dar de alta ejemplares.
-            </p>
-        `;
-        return;
-    }
-
-    container.innerHTML = especiesCache.map(especie => `
-        <div class="bar-row-meta" style="padding: 0.4rem 0;">
-            <span class="bar-row-label">${escapeHTML(especie.nombre)}</span>
-            <span class="bar-row-value">${escapeHTML(especie.tipo_reproduccion)}</span>
-        </div>
-    `).join('');
 }
 
 function populateEspecieSelects() {
@@ -263,6 +240,19 @@ function setupEspeciesFormListener() {
             return;
         }
 
+        // Chequeo en el cliente contra especiesCache (ya cargado): como la
+        // ficha ya no muestra la lista de especies, este es el único lugar
+        // donde el criador se entera de que ya la había dado de alta.
+        // Comparación insensible a mayúsculas para que "Boa constrictor" y
+        // "boa constrictor" cuenten como la misma especie.
+        const yaExiste = especiesCache.some(
+            e => e.nombre.trim().toLowerCase() === nombre.toLowerCase()
+        );
+        if (yaExiste) {
+            showAlert(`"${nombre}" ya ha sido registrada.`, 'error');
+            return;
+        }
+
         try {
             await crearEspecie(nombre, tipoReproduccion);
             showAlert(`Especie "${nombre}" agregada correctamente.`, 'success');
@@ -272,7 +262,15 @@ function setupEspeciesFormListener() {
 
         } catch (error) {
             console.error('Error al crear especie:', error);
-            showAlert(`No se pudo agregar la especie: ${error.message}`, 'error');
+            // Por si dos pestañas la agregan casi al mismo tiempo y el
+            // chequeo de arriba no alcanzó a detectarlo: Postgres avisa
+            // con el código 23505 (unique_violation) si la tabla tiene esa
+            // restricción.
+            if (error.code === '23505') {
+                showAlert(`"${nombre}" ya ha sido registrada.`, 'error');
+            } else {
+                showAlert(`No se pudo agregar la especie: ${error.message}`, 'error');
+            }
         }
     });
 }
@@ -372,72 +370,14 @@ function setupFormListeners() {
 }
 
 
-// ==========================================
-// ESTADÍSTICAS
-// ==========================================
-
-async function getEstadisticas() {
-
-    // CAMBIO: se agrega "precio" al select. Antes esta consulta solo
-    // traía "estatus" porque solo se contaban ejemplares por categoría;
-    // ahora también se necesita el precio de cada uno para poder sumar
-    // el valor de los que están Disponibles (ver "valorDisponible" abajo).
-    const { data, error } = await supabase
-        .from('ejemplares')
-        .select('estatus, precio');
-
-    if (error) {
-        throw error;
-    }
-
-    const disponibles = data.filter(e => e.estatus === 'Disponible');
-
-    // Suma de "precio" solo de los ejemplares Disponibles. Se usa
-    // "Number(e.precio) || 0" por si algún registro viejo tuviera el
-    // precio guardado como texto o vacío/null — así un dato sucio no
-    // rompe la suma completa (se cuenta como $0 en vez de tronar).
-    const valorDisponible = disponibles.reduce(
-        (suma, e) => suma + (Number(e.precio) || 0),
-        0
-    );
-
-    return {
-        total: data.length,
-        disponibles: disponibles.length,
-        valorDisponible,
-        apartados: data.filter(e => e.estatus === 'Apartado').length,
-        vendidos: data.filter(e => e.estatus === 'Vendido').length,
-        holdbacks: data.filter(e => e.estatus === 'Holdback').length
-    };
-}
-
-// Formateador de moneda reutilizado tal cual se usa en la tabla de
-// inventario (ver más abajo en este mismo archivo, dentro de
-// renderTableRows), para que el mismo número siempre se vea igual en
-// todo el panel: símbolo "$", separador de miles y 2 decimales, en
-// formato mexicano (es-MX / MXN).
-const formateadorMoneda = new Intl.NumberFormat('es-MX', {
-    style: 'currency',
-    currency: 'MXN'
-});
-
-async function renderEstadisticas() {
-
-    try {
-        const stats = await getEstadisticas();
-
-        document.getElementById('stat-total').textContent = stats.total;
-        document.getElementById('stat-disponibles').textContent = stats.disponibles;
-        document.getElementById('stat-valor-disponible').textContent =
-            formateadorMoneda.format(stats.valorDisponible);
-        document.getElementById('stat-apartados').textContent = stats.apartados;
-        document.getElementById('stat-vendidos').textContent = stats.vendidos;
-        document.getElementById('stat-holdbacks').textContent = stats.holdbacks;
-
-    } catch (error) {
-        console.error('Error al actualizar estadísticas:', error);
-    }
-}
+// Nota: las tarjetas de "Total ejemplares / Disponibles / Valor
+// disponible / Apartados / Vendidos / Holdbacks" que vivían aquí se
+// quitaron de Control -- esos mismos conteos ya se ven en el
+// Dashboard (Estatus del inventario), que es donde vive el resto de
+// las estadísticas del negocio. "Valor disponible" (suma de precio de
+// lo Disponible) no tenía un lugar equivalente en el Dashboard; si se
+// vuelve a necesitar, es la cifra que habría que reintroducir ahí en
+// vez de aquí.
 
 
 // ==========================================
@@ -1211,7 +1151,6 @@ async function loadDashboardData() {
     await Promise.all([
         loadFullInventory(),
         populateYearFilter(),
-        renderEstadisticas(),
         loadEspecies(),
         loadPadreMadreOptions()
     ]);

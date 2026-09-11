@@ -9,6 +9,18 @@
 @import '../components/ui/modal/modal.css';
 
 :root {
+    /* Le dice al navegador que TODO el "chrome" nativo de la página
+       (el menú emergente de un <select>, la casilla de un checkbox,
+       la barra de scroll, el selector de fecha de un <input
+       type="date">) debe pintarse en su variante oscura en vez de la
+       clara por default del sistema operativo. Es soportado por
+       Chrome/Edge/Firefox/Safari actuales -- incluidas sus versiones
+       para Android/iOS -- y es la única forma real de que el menú
+       desplegable de un <select> deje de verse blanco: ese menú lo
+       dibuja el sistema operativo, no la página, así que no hay
+       "background: #181A1A" de CSS que lo alcance. */
+    color-scheme: dark;
+
     --primary-color: #EE6C29;
     --primary-hover: #d85a1a;
     --jet-color: #282B2B;
@@ -35,6 +47,16 @@
     --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.35);
     --shadow-sticky: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* Refuerzo para los navegadores de escritorio que sí pintan el
+   <option> con el CSS de la página (Firefox, y Chrome/Edge en
+   ciertas versiones) -- en el resto (la mayoría de los navegadores
+   móviles), el menú nativo ya se resuelve solo gracias al
+   "color-scheme: dark" del :root de arriba. */
+select option {
+    background-color: #181A1A;
+    color: #F4F5F5;
 }
 
 body {

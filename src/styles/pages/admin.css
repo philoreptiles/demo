@@ -27,10 +27,6 @@
 
    Excepciones deliberadas a "1 columna" en el base móvil, con su
    razón anotada en el lugar donde aparecen:
-   - .stats-panel usa 2 columnas en vez de 1: son tarjetas pequeñas
-     de solo un número y una etiqueta; en 1 columna quedarían 5
-     franjas larguísimas y vacías, mientras que 2 columnas ya se ve
-     bien a partir de 320px de ancho.
    - .table-premium mantiene scroll horizontal en vez de apilarse:
      una tabla de datos (precio, año, estatus...) pierde su
      significado si se apila en tarjetas; el scroll horizontal
@@ -420,60 +416,6 @@ input[type="number"] {
     transition: all 0.2s ease;
 }
 
-/* ==================== PANEL DE ESTADÍSTICAS ==================== */
-/* Excepción documentada arriba: 2 columnas en vez de 1 desde el base móvil. */
-.stats-panel {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.6rem;
-    margin-bottom: 1.5rem;
-}
-
-.stat-card {
-    background: var(--color-jet-card);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    padding: 0.9rem 0.6rem;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-}
-
-.stat-number {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--color-orange);
-}
-
-/*
-   Modificador para fichas cuyo número es una cantidad de dinero
-   (ej. "$45,231.00") en vez de un conteo simple (ej. "12").
-   Un texto así es mucho más largo, así que necesita:
-   - Un tamaño de letra menor, para que quepa en el mismo espacio
-     de tarjeta que las demás fichas sin agrandar toda la fila.
-   - "white-space: nowrap" + "text-overflow: ellipsis" como
-     salvavidas: si algún día el inventario vale tanto que ni con
-     letra chica cabe, se corta con "..." en vez de desbordar la
-     tarjeta o romper la cuadrícula de estadísticas.
-*/
-.stat-number--currency {
-    font-size: 1.7rem;
-    display: inline-block;
-    max-width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.stat-label {
-    font-size: 0.68rem;
-    color: var(--color-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    font-weight: 800;
-}
-
 /* ==================== FILTROS DE INVENTARIO ==================== */
 .premium-card:has(.filter-grid-premium) {
     padding: 1.1rem 1rem;
@@ -660,6 +602,86 @@ input[type="number"] {
 
 .btn-delete-icon {
     color: #EF5350;
+}
+
+/* ==================== REPRODUCCIÓN: tarjetas de eventos ====================
+   Nunca habían tenido su propia hoja de estilos (se apoyaban en clases
+   genéricas como .bar-row-*), así que las tarjetas de "Eventos en
+   curso" se veían como texto plano sin caja. Se agrega aquí lo mínimo
+   para que se vean como el resto de las tarjetas premium del panel. */
+.evento-repro-card {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.9rem;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.evento-repro-card:last-child {
+    margin-bottom: 0;
+}
+
+.evento-repro-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.evento-repro-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+}
+
+.evento-repro-inline-form {
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px dashed var(--color-border);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+/* Botón "de texto": para acciones secundarias como Cancelar, que no
+   deben competir visualmente con el botón principal de cada tarjeta. */
+.btn-text-premium {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.55rem 0.9rem;
+    border-radius: 8px;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.btn-text-premium:hover {
+    color: var(--color-text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Versión compacta de los botones premium, para no ocupar tanto
+   espacio dentro de una tarjeta de evento. */
+.btn-premium.btn-sm,
+.btn-secondary-premium.btn-sm,
+.btn-text-premium.btn-sm {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.85rem;
+}
+
+@media (min-width: 640px) {
+    .evento-repro-inline-form {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        align-items: end;
+    }
+
+    .evento-repro-inline-form .evento-repro-actions {
+        grid-column: 1 / -1;
+        margin-top: 0;
+    }
 }
 
 /* ==================== ENCABEZADO DE SECCIÓN + COLUMNAS ==================== */
@@ -1247,33 +1269,6 @@ input[type="number"] {
     .btn-secondary-premium:hover {
         background: #333737;
         border-color: #525858;
-    }
-
-    /* --- Panel de estadísticas: más columnas y más aire ------------------------------------------- */
-    .stats-panel {
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .stat-card {
-        padding: 1.4rem .5rem;
-    }
-
-    .stat-number {
-        font-size: 2rem;
-    }
-
-    /* La versión de moneda crece menos que el resto: a 2rem, una cifra
-       como "$45,231.00" ya no cabe cómodamente en una tarjeta de
-       160-200px de ancho (el mínimo que permite minmax() arriba). */
-    .stat-number--currency {
-        font-size: 1.4rem;
-    }
-
-    .stat-label {
-        font-size: 0.8rem;
-        letter-spacing: 0.5px;
     }
 
     /* --- Filtros: rejilla horizontal con acciones alineadas a la derecha --- */
