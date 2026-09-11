@@ -197,140 +197,149 @@
     </main>
 
     <!-- ============================================================
-         MODAL DE EDICIÓN DE EVENTO REPRODUCTIVO
+         MODAL DE EDICIÓN DE EVENTO REPRODUCTIVO (REDISEÑADO)
          ============================================================ -->
     <div class="edit-modal-overlay" id="repro-edit-modal">
         <div class="edit-modal">
             <div class="edit-modal-header">
-                <div>
-                    <span class="edit-modal-kicker">EDITAR EVENTO</span>
+                <div class="edit-modal-header-left">
+                    <span class="edit-modal-kicker">Editar evento reproductivo</span>
                     <h2 id="repro-edit-modal-title">Historial reproductivo</h2>
+                    <span class="edit-modal-id-chip" id="repro-edit-id-chip" title="ID del evento">
+                        ID: <strong id="repro-edit-id">—</strong>
+                    </span>
                 </div>
-                <button class="edit-modal-close" id="repro-edit-close" type="button">✕</button>
+                <button class="edit-modal-close" id="repro-edit-close" type="button" aria-label="Cerrar">✕</button>
             </div>
-            <form class="edit-modal-form" id="repro-edit-form">
-                <div class="edit-modal-id-row">
-                    <span>ID del evento</span>
-                    <strong id="repro-edit-id">—</strong>
-                </div>
 
-                <!-- Datos generales -->
-                <div class="edit-form-section">
-                    <h3 class="edit-form-section-title">Datos generales</h3>
-                    <div class="form-row">
-                        <div class="form-group-premium">
-                            <label for="repro-edit-estado">Estado</label>
-                            <select id="repro-edit-estado">
-                                <option value="EN_CURSO">En curso</option>
-                                <option value="COMPLETADO">Completado</option>
-                                <option value="CANCELADO">Cancelado</option>
-                            </select>
-                        </div>
-                        <div class="form-group-premium">
-                            <label for="repro-edit-tipo">Tipo de reproducción</label>
-                            <select id="repro-edit-tipo">
-                                <option value="">— Sin especificar —</option>
-                                <option value="Ovípara">Ovípara</option>
-                                <option value="Ovovivípara">Ovovivípara</option>
-                                <option value="Vivípara">Vivípara</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group-premium">
-                            <label for="repro-edit-hembra">Hembra</label>
-                            <input type="text" id="repro-edit-hembra" placeholder="Etiqueta o ID de la hembra">
-                        </div>
-                        <div class="form-group-premium">
-                            <label for="repro-edit-macho">Macho</label>
-                            <input type="text" id="repro-edit-macho" placeholder="Etiqueta o ID del macho">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group-premium">
-                            <label for="repro-edit-especie">Especie</label>
-                            <input type="text" id="repro-edit-especie" placeholder="Nombre de la especie">
-                        </div>
-                        <div class="form-group-premium">
-                            <label for="repro-edit-fecha-esperada">Fecha esperada</label>
-                            <input type="date" id="repro-edit-fecha-esperada">
-                        </div>
-                    </div>
-                </div>
+            <form class="edit-modal-form" id="repro-edit-form" style="display: contents;">
+                <div class="edit-modal-body">
 
-                <!-- Fechas de resultado -->
-                <div class="edit-form-section">
-                    <h3 class="edit-form-section-title">Fechas de resultado</h3>
-                    <div class="form-row">
-                        <div class="form-group-premium">
-                            <label for="repro-edit-fecha-puesta">Fecha de puesta</label>
-                            <input type="date" id="repro-edit-fecha-puesta">
+                    <!-- DATOS GENERALES -->
+                    <details class="edit-accordion" open>
+                        <summary class="edit-accordion-summary">Datos generales</summary>
+                        <div class="edit-accordion-body">
+                            <div class="edit-field-row">
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-estado">Estado</label>
+                                    <select id="repro-edit-estado">
+                                        <option value="EN_CURSO">En curso</option>
+                                        <option value="COMPLETADO">Completado</option>
+                                        <option value="CANCELADO">Cancelado</option>
+                                    </select>
+                                </div>
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-tipo">Tipo de reproducción</label>
+                                    <select id="repro-edit-tipo">
+                                        <option value="">— Sin especificar —</option>
+                                        <option value="Ovípara">Ovípara</option>
+                                        <option value="Ovovivípara">Ovovivípara</option>
+                                        <option value="Vivípara">Vivípara</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="edit-field-row">
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-hembra">Hembra</label>
+                                    <input type="text" id="repro-edit-hembra" placeholder="Etiqueta o ID">
+                                </div>
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-macho">Macho</label>
+                                    <input type="text" id="repro-edit-macho" placeholder="Etiqueta o ID">
+                                </div>
+                            </div>
+                            <div class="edit-field-row">
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-especie">Especie</label>
+                                    <input type="text" id="repro-edit-especie" placeholder="Nombre de la especie">
+                                </div>
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-fecha-esperada">Fecha esperada</label>
+                                    <input type="date" id="repro-edit-fecha-esperada">
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group-premium">
-                            <label for="repro-edit-fecha-eclosion">Fecha de eclosión</label>
-                            <input type="date" id="repro-edit-fecha-eclosion">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group-premium">
-                            <label for="repro-edit-fecha-parto">Fecha de parto</label>
-                            <input type="date" id="repro-edit-fecha-parto">
-                        </div>
-                    </div>
-                </div>
+                    </details>
 
-                <!-- Resultados Ovípara -->
-                <div class="edit-form-section">
-                    <h3 class="edit-form-section-title">Resultados de puesta (Ovípara)</h3>
-                    <div class="form-row">
-                        <div class="form-group-premium">
-                            <label for="repro-edit-huevos-fertiles">Huevos fértiles</label>
-                            <input type="number" id="repro-edit-huevos-fertiles" min="0">
+                    <!-- FECHAS DE RESULTADO -->
+                    <details class="edit-accordion">
+                        <summary class="edit-accordion-summary">Fechas de resultado</summary>
+                        <div class="edit-accordion-body">
+                            <div class="edit-field-row edit-field-row--3">
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-fecha-puesta">Fecha de puesta</label>
+                                    <input type="date" id="repro-edit-fecha-puesta">
+                                </div>
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-fecha-eclosion">Fecha de eclosión</label>
+                                    <input type="date" id="repro-edit-fecha-eclosion">
+                                </div>
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-fecha-parto">Fecha de parto</label>
+                                    <input type="date" id="repro-edit-fecha-parto">
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group-premium">
-                            <label for="repro-edit-huevos-no-fertiles">Huevos no fértiles</label>
-                            <input type="number" id="repro-edit-huevos-no-fertiles" min="0">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group-premium">
-                            <label for="repro-edit-huevos-eclosionados">Huevos eclosionados</label>
-                            <input type="number" id="repro-edit-huevos-eclosionados" min="0">
-                        </div>
-                        <div class="form-group-premium">
-                            <label for="repro-edit-huevos-perdidos">Huevos perdidos</label>
-                            <input type="number" id="repro-edit-huevos-perdidos" min="0">
-                        </div>
-                    </div>
-                </div>
+                    </details>
 
-                <!-- Resultados Ovovivípara -->
-                <div class="edit-form-section">
-                    <h3 class="edit-form-section-title">Resultados de parto (Ovovivípara)</h3>
-                    <div class="form-row">
-                        <div class="form-group-premium">
-                            <label for="repro-edit-crias-vivas">Crías vivas</label>
-                            <input type="number" id="repro-edit-crias-vivas" min="0">
+                    <!-- RESULTADOS OVÍPARA -->
+                    <details class="edit-accordion" id="repro-seccion-ovipara">
+                        <summary class="edit-accordion-summary">Resultados de puesta (Ovípara)</summary>
+                        <div class="edit-accordion-body">
+                            <div class="edit-field-row">
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-huevos-fertiles">Huevos fértiles</label>
+                                    <input type="number" id="repro-edit-huevos-fertiles" min="0">
+                                </div>
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-huevos-no-fertiles">Huevos no fértiles</label>
+                                    <input type="number" id="repro-edit-huevos-no-fertiles" min="0">
+                                </div>
+                            </div>
+                            <div class="edit-field-row">
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-huevos-eclosionados">Huevos eclosionados</label>
+                                    <input type="number" id="repro-edit-huevos-eclosionados" min="0">
+                                </div>
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-huevos-perdidos">Huevos perdidos</label>
+                                    <input type="number" id="repro-edit-huevos-perdidos" min="0">
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group-premium">
-                            <label for="repro-edit-slugs">Slugs</label>
-                            <input type="number" id="repro-edit-slugs" min="0">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group-premium">
-                            <label for="repro-edit-stillborns">Stillborns</label>
-                            <input type="number" id="repro-edit-stillborns" min="0">
-                        </div>
-                    </div>
-                </div>
+                    </details>
 
-                <!-- Notas -->
-                <div class="edit-form-section">
-                    <h3 class="edit-form-section-title">Notas</h3>
-                    <div class="form-group-premium">
-                        <textarea id="repro-edit-notas" rows="3" placeholder="Observaciones, incidencias, etc."></textarea>
-                    </div>
+                    <!-- RESULTADOS OVOVIVÍPARA -->
+                    <details class="edit-accordion" id="repro-seccion-ovovivipara">
+                        <summary class="edit-accordion-summary">Resultados de parto (Ovovivípara)</summary>
+                        <div class="edit-accordion-body">
+                            <div class="edit-field-row edit-field-row--3">
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-crias-vivas">Crías vivas</label>
+                                    <input type="number" id="repro-edit-crias-vivas" min="0">
+                                </div>
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-slugs">Slugs</label>
+                                    <input type="number" id="repro-edit-slugs" min="0">
+                                </div>
+                                <div class="form-group-premium">
+                                    <label for="repro-edit-stillborns">Stillborns</label>
+                                    <input type="number" id="repro-edit-stillborns" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <!-- NOTAS -->
+                    <details class="edit-accordion">
+                        <summary class="edit-accordion-summary">Notas</summary>
+                        <div class="edit-accordion-body">
+                            <div class="form-group-premium">
+                                <textarea id="repro-edit-notas" rows="3" placeholder="Observaciones, incidencias, etc."></textarea>
+                            </div>
+                        </div>
+                    </details>
+
                 </div>
 
                 <div class="edit-modal-actions">

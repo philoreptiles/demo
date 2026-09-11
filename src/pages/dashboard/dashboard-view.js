@@ -317,6 +317,8 @@ function initReproEditModal() {
         await renderHistorialReproduccion();
         await renderProximosEventos();
     });
+
+    initTipoReproListener();
 }
 
 function abrirModalEdicion(id) {
@@ -324,6 +326,9 @@ function abrirModalEdicion(id) {
     if (!ev) return;
 
     reproEditandoId = ev.id;
+
+    const idChip = document.getElementById('repro-edit-id');
+    if (idChip) idChip.textContent = ev.id;
 
     setValor('repro-edit-estado', ev.estado || '');
     setValor('repro-edit-tipo', ev.tipo_reproduccion || '');
@@ -343,11 +348,44 @@ function abrirModalEdicion(id) {
     setValor('repro-edit-stillborns', ev.stillborns ?? '');
     setValor('repro-edit-notas', ev.notas || '');
 
+    aplicarVisibilidadSecciones(ev.tipo_reproduccion);
+
     const modal = document.getElementById('repro-edit-modal');
     if (modal) {
         modal.classList.add('is-open');
         document.body.classList.add('modal-open');
     }
+}
+
+// ============================================================
+// Visibilidad dinámica de secciones del modal
+// ============================================================
+
+function aplicarVisibilidadSecciones(tipoReproduccion) {
+    const secOvi = document.getElementById('repro-seccion-ovipara');
+    const secOvo = document.getElementById('repro-seccion-ovovivipara');
+
+    if (!secOvi || !secOvo) return;
+
+    const tipo = (tipoReproduccion || '').trim();
+    const esOvi = tipo === 'Ovípara';
+    const esOvo = tipo === 'Ovovivípara';
+    const esViv = tipo === 'Vivípara';
+
+    secOvi.classList.toggle('is-hidden', !esOvi && (esOvo || esViv));
+    secOvo.classList.toggle('is-hidden', !esOvo && (esOvi || esViv));
+
+    if (esOvi) secOvi.setAttribute('open', '');
+    if (esOvo) secOvo.setAttribute('open', '');
+}
+
+function initTipoReproListener() {
+    const select = document.getElementById('repro-edit-tipo');
+    if (!select) return;
+
+    select.addEventListener('change', (e) => {
+        aplicarVisibilidadSecciones(e.target.value);
+    });
 }
 
 // ============================================================
@@ -775,6 +813,7 @@ function renderEtapaPriceList(etapaAcumulado, formatoMoneda) {
         `;
     }).join('');
 }
+
 function renderYearChart(ejemplares) {
     const container = document.getElementById('year-chart');
     if (!container) return;
@@ -1062,4 +1101,3 @@ function mostrarErrorEnKpis() {
     actualizarTexto('kpi-antiguedad-promedio', 'Error');
     actualizarTexto('kpi-linaje-pct', 'Error');
 }
-
