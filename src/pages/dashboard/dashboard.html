@@ -33,50 +33,43 @@
             <p>Resumen ejecutivo de tu criadero: inventario, ventas y salud de tus datos.</p>
         </div>
 
-        <!-- KPIs principales (siempre visibles) -->
+        <!-- KPIs principales -->
         <section class="kpi-grid" id="kpi-grid" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));">
             <article class="kpi-card">
                 <span class="kpi-label">Valor del Inventario</span>
                 <h3 class="kpi-value" id="kpi-valor-inventario">$0.00</h3>
                 <span class="kpi-subtext" id="kpi-valor-sub">Cargando...</span>
             </article>
-
             <article class="kpi-card">
                 <span class="kpi-label">Valor en Apartado</span>
                 <h3 class="kpi-value" id="kpi-valor-apartado">$0.00</h3>
                 <span class="kpi-subtext" id="kpi-apartado-sub">Cargando...</span>
             </article>
-
             <article class="kpi-card">
                 <span class="kpi-label">Ventas Totales</span>
                 <h3 class="kpi-value" id="kpi-ventas-totales">$0.00</h3>
                 <span class="kpi-subtext" id="kpi-ventas-sub">Cargando...</span>
             </article>
-
             <article class="kpi-card">
                 <span class="kpi-label">Ticket Promedio</span>
                 <h3 class="kpi-value" id="kpi-ticket-promedio">$0.00</h3>
                 <span class="kpi-subtext" id="kpi-ticket-sub">Cargando...</span>
             </article>
-
             <article class="kpi-card">
                 <span class="kpi-label">Ejemplares Totales</span>
                 <h3 class="kpi-value" id="kpi-total-ejemplares">0</h3>
                 <span class="kpi-subtext" id="kpi-disponibles-sub">Cargando...</span>
             </article>
-
             <article class="kpi-card">
                 <span class="kpi-label">Especie Principal</span>
                 <h3 class="kpi-value" id="kpi-top-especie">---</h3>
                 <span class="kpi-subtext" id="kpi-top-especie-count">Cargando...</span>
             </article>
-
             <article class="kpi-card">
                 <span class="kpi-label">Antigüedad del Inventario</span>
                 <h3 class="kpi-value" id="kpi-antiguedad-promedio">---</h3>
                 <span class="kpi-subtext" id="kpi-antiguedad-sub">Cargando...</span>
             </article>
-
             <article class="kpi-card">
                 <span class="kpi-label">Linaje Documentado</span>
                 <h3 class="kpi-value" id="kpi-linaje-pct">0%</h3>
@@ -84,9 +77,8 @@
             </article>
         </section>
 
-        <!-- Bloque 1: Distribuciones (Estatus, Especies y Sexo) -->
+        <!-- Bloque 1: Distribuciones -->
         <section class="dash-grid-2">
-            <!-- Estatus del inventario (desplegable) -->
             <details class="premium-card insight-details">
                 <summary class="insight-summary">
                     <h2 class="card-title">Estatus del inventario</h2>
@@ -98,7 +90,6 @@
                 </div>
             </details>
 
-            <!-- NUEVA: Top especies (desplegable) -->
             <details class="premium-card insight-details">
                 <summary class="insight-summary">
                     <h2 class="card-title">Especies con mayor presencia</h2>
@@ -110,7 +101,6 @@
                 </div>
             </details>
 
-            <!-- Distribución por sexo (desplegable) -->
             <details class="premium-card insight-details">
                 <summary class="insight-summary">
                     <h2 class="card-title">Distribución por sexo</h2>
@@ -126,7 +116,6 @@
 
         <!-- Bloque 2: Eventos e Historial Reproductivo -->
         <section class="dash-grid-2" style="margin-top: 1.5rem;">
-            <!-- Próximos eventos reproductivos -->
             <details class="premium-card insight-details">
                 <summary class="insight-summary">
                     <h2 class="card-title">Próximos eventos reproductivos</h2>
@@ -139,8 +128,7 @@
                 </div>
             </details>
 
-            <!-- Historial de reproducción (Desplegable) -->
-            <details class="premium-card insight-details">
+            <details class="premium-card insight-details" open>
                 <summary class="insight-summary">
                     <h2 class="card-title">Historial de reproducción</h2>
                 </summary>
@@ -161,7 +149,6 @@
 
         <!-- Bloque 3: Analíticas adicionales -->
         <section class="dash-grid-2" style="margin-top: 1.5rem;">
-            <!-- Precio promedio por etapa -->
             <details class="premium-card insight-details">
                 <summary class="insight-summary">
                     <h2 class="card-title">Precio promedio por etapa</h2>
@@ -173,7 +160,6 @@
                 </div>
             </details>
 
-            <!-- Ejemplares por año de nacimiento -->
             <details class="premium-card insight-details">
                 <summary class="insight-summary">
                     <h2 class="card-title">Ejemplares por año de nacimiento</h2>
@@ -185,7 +171,6 @@
                 </div>
             </details>
 
-            <!-- Ranking de progenitores -->
             <details class="premium-card insight-details">
                 <summary class="insight-summary">
                     <h2 class="card-title">Ranking de progenitores</h2>
@@ -198,7 +183,6 @@
                 </div>
             </details>
 
-            <!-- Alertas y sugerencias -->
             <details class="premium-card insight-details">
                 <summary class="insight-summary">
                     <h2 class="card-title">Alertas y sugerencias</h2>
@@ -211,6 +195,151 @@
         </section>
 
     </main>
+
+    <!-- ============================================================
+         MODAL DE EDICIÓN DE EVENTO REPRODUCTIVO
+         ============================================================ -->
+    <div class="edit-modal-overlay" id="repro-edit-modal">
+        <div class="edit-modal">
+            <div class="edit-modal-header">
+                <div>
+                    <span class="edit-modal-kicker">EDITAR EVENTO</span>
+                    <h2 id="repro-edit-modal-title">Historial reproductivo</h2>
+                </div>
+                <button class="edit-modal-close" id="repro-edit-close" type="button">✕</button>
+            </div>
+            <form class="edit-modal-form" id="repro-edit-form">
+                <div class="edit-modal-id-row">
+                    <span>ID del evento</span>
+                    <strong id="repro-edit-id">—</strong>
+                </div>
+
+                <!-- Datos generales -->
+                <div class="edit-form-section">
+                    <h3 class="edit-form-section-title">Datos generales</h3>
+                    <div class="form-row">
+                        <div class="form-group-premium">
+                            <label for="repro-edit-estado">Estado</label>
+                            <select id="repro-edit-estado">
+                                <option value="EN_CURSO">En curso</option>
+                                <option value="COMPLETADO">Completado</option>
+                                <option value="CANCELADO">Cancelado</option>
+                            </select>
+                        </div>
+                        <div class="form-group-premium">
+                            <label for="repro-edit-tipo">Tipo de reproducción</label>
+                            <select id="repro-edit-tipo">
+                                <option value="">— Sin especificar —</option>
+                                <option value="Ovípara">Ovípara</option>
+                                <option value="Ovovivípara">Ovovivípara</option>
+                                <option value="Vivípara">Vivípara</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group-premium">
+                            <label for="repro-edit-hembra">Hembra</label>
+                            <input type="text" id="repro-edit-hembra" placeholder="Etiqueta o ID de la hembra">
+                        </div>
+                        <div class="form-group-premium">
+                            <label for="repro-edit-macho">Macho</label>
+                            <input type="text" id="repro-edit-macho" placeholder="Etiqueta o ID del macho">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group-premium">
+                            <label for="repro-edit-especie">Especie</label>
+                            <input type="text" id="repro-edit-especie" placeholder="Nombre de la especie">
+                        </div>
+                        <div class="form-group-premium">
+                            <label for="repro-edit-fecha-esperada">Fecha esperada</label>
+                            <input type="date" id="repro-edit-fecha-esperada">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fechas de resultado -->
+                <div class="edit-form-section">
+                    <h3 class="edit-form-section-title">Fechas de resultado</h3>
+                    <div class="form-row">
+                        <div class="form-group-premium">
+                            <label for="repro-edit-fecha-puesta">Fecha de puesta</label>
+                            <input type="date" id="repro-edit-fecha-puesta">
+                        </div>
+                        <div class="form-group-premium">
+                            <label for="repro-edit-fecha-eclosion">Fecha de eclosión</label>
+                            <input type="date" id="repro-edit-fecha-eclosion">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group-premium">
+                            <label for="repro-edit-fecha-parto">Fecha de parto</label>
+                            <input type="date" id="repro-edit-fecha-parto">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultados Ovípara -->
+                <div class="edit-form-section">
+                    <h3 class="edit-form-section-title">Resultados de puesta (Ovípara)</h3>
+                    <div class="form-row">
+                        <div class="form-group-premium">
+                            <label for="repro-edit-huevos-fertiles">Huevos fértiles</label>
+                            <input type="number" id="repro-edit-huevos-fertiles" min="0">
+                        </div>
+                        <div class="form-group-premium">
+                            <label for="repro-edit-huevos-no-fertiles">Huevos no fértiles</label>
+                            <input type="number" id="repro-edit-huevos-no-fertiles" min="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group-premium">
+                            <label for="repro-edit-huevos-eclosionados">Huevos eclosionados</label>
+                            <input type="number" id="repro-edit-huevos-eclosionados" min="0">
+                        </div>
+                        <div class="form-group-premium">
+                            <label for="repro-edit-huevos-perdidos">Huevos perdidos</label>
+                            <input type="number" id="repro-edit-huevos-perdidos" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultados Ovovivípara -->
+                <div class="edit-form-section">
+                    <h3 class="edit-form-section-title">Resultados de parto (Ovovivípara)</h3>
+                    <div class="form-row">
+                        <div class="form-group-premium">
+                            <label for="repro-edit-crias-vivas">Crías vivas</label>
+                            <input type="number" id="repro-edit-crias-vivas" min="0">
+                        </div>
+                        <div class="form-group-premium">
+                            <label for="repro-edit-slugs">Slugs</label>
+                            <input type="number" id="repro-edit-slugs" min="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group-premium">
+                            <label for="repro-edit-stillborns">Stillborns</label>
+                            <input type="number" id="repro-edit-stillborns" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notas -->
+                <div class="edit-form-section">
+                    <h3 class="edit-form-section-title">Notas</h3>
+                    <div class="form-group-premium">
+                        <textarea id="repro-edit-notas" rows="3" placeholder="Observaciones, incidencias, etc."></textarea>
+                    </div>
+                </div>
+
+                <div class="edit-modal-actions">
+                    <button type="button" class="btn-secondary-premium" id="repro-edit-cancel">Cancelar</button>
+                    <button type="submit" class="btn-premium edit-save-btn" id="repro-edit-save">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script type="module" src="./dashboard-view.js"></script>
 </body>

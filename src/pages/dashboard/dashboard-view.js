@@ -2,8 +2,6 @@ import { supabase } from '../../supabase-config.js';
 
 // ==========================================
 // dashboard-view.js
-// ------------------------------------------
-// Lógica principal de la página Dashboard
 // ==========================================
 
 const COLOR_ESTATUS = {
@@ -24,7 +22,7 @@ const COLOR_SEXO = {
     Macho: '#5B8FB9',
     Hembra: '#F2A6C6',
 };
-const COLOR_SEXO_DEFAULT = '#8A8F8F'; 
+const COLOR_SEXO_DEFAULT = '#8A8F8F';
 
 const ESTATUS_INVENTARIO_ACTIVO = ['DISPONIBLE', 'APARTADO'];
 const DIAS_ALERTA_ANTIGUEDAD = 90;
@@ -56,6 +54,8 @@ async function initAuthGuard() {
         renderProximosEventos(),
         renderHistorialReproduccion()
     ]);
+
+    initReproEditModal();
 }
 
 const DIAS_URGENTE = 7;
@@ -218,6 +218,12 @@ function pintarHistorial(filtroHembra) {
                 <div class="evento-repro-header">
                     <span class="bar-row-label">${escapeHtml(ev.hembra_label || ev.hembra_id || '—')}</span>
                     <span class="bar-row-tag">${escapeHtml(ev.especie_nombre || '')}${ev.macho_id ? ' · ♂ ' + escapeHtml(ev.macho_id) : ''}</span>
+                    <button class="btn-icon btn-edit-icon" data-repro-id="${escapeHtml(ev.id)}" title="Editar evento" type="button" style="margin-left:auto;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                    </button>
                 </div>
                 <div class="bar-row-meta">
                     <span class="bar-row-value">${esCancelado ? 'Cancelado' : fechaTexto}</span>
@@ -229,6 +235,140 @@ function pintarHistorial(filtroHembra) {
             </div>
         `;
     }).join('');
+
+    container.querySelectorAll('.btn-edit-icon[data-repro-id]').forEach(btn => {
+        btn.addEventListener('click', () => abrirModalEdicion(btn.dataset.reproId));
+    });
+}
+
+// ============================================================
+// Lógica del modal de edición de eventos reproductivos
+// ============================================================
+
+let reproEditandoId = null;
+
+function initReproEditModal() {
+    const modal = document.getElementById('repro-edit-modal');
+    const form = document.getElementById('repro-edit-form');
+    const btnClose = document.getElementById('repro-edit-close');
+    const btnCancel = document.getElementById('repro-edit-cancel');
+
+    if (!modal || !form) return;
+
+    const cerrar = () => {
+        modal.classList.remove('is-open');
+        document.body.classList.remove('modal-open');
+        reproEditandoId = null;
+    };
+
+    btnClose?.addEventListener('click', cerrar);
+    btnCancel?.addEventListener('click', cerrar);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) cerrar();
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!reproEditandoId) return;
+
+        const btnSave = document.getElementById('repro-edit-save');
+        if (btnSave) {
+            btnSave.disabled = true;
+            btnSave.textContent = 'Guardando...';
+        }
+
+        const payload = {
+            estado: valorDe('repro-edit-estado') || null,
+            tipo_reproduccion: valorDe('repro-edit-tipo') || null,
+            hembra_label: valorDe('repro-edit-hembra') || null,
+            macho_id: valorDe('repro-edit-macho') || null,
+            especie_nombre: valorDe('repro-edit-especie') || null,
+            fecha_esperada: valorDe('repro-edit-fecha-esperada') || null,
+            fecha_puesta: valorDe('repro-edit-fecha-puesta') || null,
+            fecha_eclosion: valorDe('repro-edit-fecha-eclosion') || null,
+            fecha_parto: valorDe('repro-edit-fecha-parto') || null,
+            huevos_fertiles: numeroDe('repro-edit-huevos-fertiles'),
+            huevos_no_fertiles: numeroDe('repro-edit-huevos-no-fertiles'),
+            huevos_eclosionados: numeroDe('repro-edit-huevos-eclosionados'),
+            huevos_perdidos: numeroDe('repro-edit-huevos-perdidos'),
+            crias_vivas: numeroDe('repro-edit-crias-vivas'),
+            slugs: numeroDe('repro-edit-slugs'),
+            stillborns: numeroDe('repro-edit-stillborns'),
+            notas: valorDe('repro-edit-notas') || null,
+            updated_at: new Date().toISOString(),
+        };
+
+        const { error } = await supabase
+            .from('eventos_reproductivos')
+            .update(payload)
+            .eq('id', reproEditandoId);
+
+        if (error) {
+            console.error('Error al actualizar evento:', error);
+            alert('No se pudo guardar el cambio: ' + error.message);
+            if (btnSave) {
+                btnSave.disabled = false;
+                btnSave.textContent = 'Guardar cambios';
+            }
+            return;
+        }
+
+        cerrar();
+        await renderHistorialReproduccion();
+        await renderProximosEventos();
+    });
+}
+
+function abrirModalEdicion(id) {
+    const ev = historialEventosCache.find(e => String(e.id) === String(id));
+    if (!ev) return;
+
+    reproEditandoId = ev.id;
+
+    setValor('repro-edit-estado', ev.estado || '');
+    setValor('repro-edit-tipo', ev.tipo_reproduccion || '');
+    setValor('repro-edit-hembra', ev.hembra_label || ev.hembra_id || '');
+    setValor('repro-edit-macho', ev.macho_id || '');
+    setValor('repro-edit-especie', ev.especie_nombre || '');
+    setValor('repro-edit-fecha-esperada', ev.fecha_esperada || '');
+    setValor('repro-edit-fecha-puesta', ev.fecha_puesta || '');
+    setValor('repro-edit-fecha-eclosion', ev.fecha_eclosion || '');
+    setValor('repro-edit-fecha-parto', ev.fecha_parto || '');
+    setValor('repro-edit-huevos-fertiles', ev.huevos_fertiles ?? '');
+    setValor('repro-edit-huevos-no-fertiles', ev.huevos_no_fertiles ?? '');
+    setValor('repro-edit-huevos-eclosionados', ev.huevos_eclosionados ?? '');
+    setValor('repro-edit-huevos-perdidos', ev.huevos_perdidos ?? '');
+    setValor('repro-edit-crias-vivas', ev.crias_vivas ?? '');
+    setValor('repro-edit-slugs', ev.slugs ?? '');
+    setValor('repro-edit-stillborns', ev.stillborns ?? '');
+    setValor('repro-edit-notas', ev.notas || '');
+
+    const modal = document.getElementById('repro-edit-modal');
+    if (modal) {
+        modal.classList.add('is-open');
+        document.body.classList.add('modal-open');
+    }
+}
+
+// ============================================================
+// Utilidades auxiliares
+// ============================================================
+
+function valorDe(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+}
+
+function numeroDe(id) {
+    const el = document.getElementById(id);
+    if (!el || el.value.trim() === '') return null;
+    const n = parseInt(el.value, 10);
+    return isNaN(n) ? null : n;
+}
+
+function setValor(id, valor) {
+    const el = document.getElementById(id);
+    if (el) el.value = valor;
 }
 
 function renderAuthHeaderAction() {
@@ -379,10 +519,8 @@ async function renderResumenGeneral() {
 
         actualizarTexto('kpi-valor-inventario', formatoMoneda.format(valorInventario));
         actualizarTexto('kpi-valor-sub', `${disponiblesCount} ejemplares en venta`);
-
         actualizarTexto('kpi-valor-apartado', formatoMoneda.format(valorApartado));
         actualizarTexto('kpi-apartado-sub', `${apartadosCount} ejemplares apartados`);
-
         actualizarTexto('kpi-ventas-totales', formatoMoneda.format(ventasTotales));
         actualizarTexto('kpi-ventas-sub', `${vendidosCount} ejemplares vendidos`);
 
@@ -553,7 +691,6 @@ function buildPieLegend(items, total) {
     `;
 }
 
-/** Gráfica de pastel única reducida en px para evitar desbordes. */
 function renderPieChart(containerId, items, emptyMessage = 'Sin datos suficientes todavía.') {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -638,7 +775,6 @@ function renderEtapaPriceList(etapaAcumulado, formatoMoneda) {
         `;
     }).join('');
 }
-
 function renderYearChart(ejemplares) {
     const container = document.getElementById('year-chart');
     if (!container) return;
@@ -926,3 +1062,4 @@ function mostrarErrorEnKpis() {
     actualizarTexto('kpi-antiguedad-promedio', 'Error');
     actualizarTexto('kpi-linaje-pct', 'Error');
 }
+
