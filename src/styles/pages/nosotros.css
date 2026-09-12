@@ -1,20 +1,19 @@
-﻿:root {
-    --orange-primary: #EE6C29;
-    --orange-hover: #d45c1f;
-    --jet-dark: #282B2B;
-    --jet-card: #1f2121;
-    --moonstone: #7AA6B3;
+/* Las variables de marca (--primary-color, --primary-hover, --jet-dark,
+   --jet-card, --moonstone-color, --text-light, --font-primary,
+   --font-secondary, etc.) ya NO se definen aquí -- vienen por cascada
+   de main.css (importado desde nosotros.js), cuyos valores en tiempo
+   de carga los llena site-config.js vía applySiteTheme(). Solo se
+   quedan aquí --bg-light y --text-muted porque son específicas del
+   diseño de esta página y no tienen equivalente canónico. */
+:root {
     --bg-light: #f8f9fa;
-    --text-white: #ffffff;
     --text-muted: #b0bec5;
-    --font-title: 'Georgia', serif;
-    --font-body: system-ui, -apple-system, sans-serif;
 }
 
 body {
-    background-color: var(--jet-dark);
-    color: var(--text-white);
-    font-family: var(--font-body);
+    background-color: var(--jet-card);
+    color: var(--text-light);
+    font-family: var(--font-secondary);
     margin: 0;
     padding: 0;
 }
@@ -34,21 +33,21 @@ body {
 }
 
 .section-title {
-    font-family: var(--font-title);
+    font-family: var(--font-primary);
     font-size: 2rem;
-    color: var(--orange-primary);
+    color: var(--primary-color);
     text-align: center;
     margin-bottom: 2rem;
 }
 
 /* 1. Hero Section con Cuadro/Tarjeta independiente (Base - Mobile) */
 .nosotros-hero {
-    background-color: var(--jet-dark);
+    background-color: var(--jet-card);
     padding: 3rem 1.5rem 2.5rem;
 }
 
 .hero-card {
-    background-color: var(--jet-card);
+    background-color: var(--jet-dark);
     border: 1px solid rgba(122, 166, 179, 0.25);
     border-radius: 16px;
     padding: 2rem 1.25rem; /* Padding ajustado para móvil */
@@ -59,7 +58,7 @@ body {
 }
 
 .hero-subtitle {
-    color: var(--moonstone);
+    color: var(--moonstone-color);
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -69,9 +68,9 @@ body {
 }
 
 .hero-card h1 {
-    font-family: var(--font-title);
+    font-family: var(--font-primary);
     font-size: 2rem; /* Tamaño de fuente ajustado para móvil */
-    color: var(--orange-primary);
+    color: var(--primary-color);
     margin: 0 0 1.25rem 0;
     line-height: 1.2;
 }
@@ -79,12 +78,12 @@ body {
 .nosotros-description {
     font-size: 1rem; /* Tamaño de fuente ajustado para móvil */
     line-height: 1.7;
-    color: var(--text-white);
+    color: var(--text-light);
     margin: 0;
 }
 
 .nosotros-description strong {
-    color: var(--orange-primary);
+    color: var(--primary-color);
 }
 
 /* 2. Sección Valores (Base - Mobile) */
@@ -100,7 +99,7 @@ body {
 }
 
 .valor-card {
-    background-color: var(--jet-dark);
+    background-color: var(--jet-card);
     border: 1px solid rgba(122, 166, 179, 0.3);
     border-radius: 12px;
     padding: 2.5rem 1.5rem;
@@ -110,7 +109,7 @@ body {
 
 .valor-card:hover {
     transform: translateY(-5px);
-    border-color: var(--orange-primary);
+    border-color: var(--primary-color);
 }
 
 .valor-icon {
@@ -126,13 +125,13 @@ body {
 
 .valor-icon i {
     font-size: 1.75rem;
-    color: var(--orange-primary);
+    color: var(--primary-color);
 }
 
 .valor-card h3 {
-    font-family: var(--font-title);
+    font-family: var(--font-primary);
     font-size: 1.35rem;
-    color: var(--text-white);
+    color: var(--text-light);
     margin: 0 0 0.75rem 0;
 }
 
@@ -146,15 +145,15 @@ body {
 /* 3. Registro SEMARNAT (Base - Mobile) */
 .nosotros-registro-section {
     background-color: var(--bg-light);
-    color: var(--jet-dark);
+    color: var(--jet-card);
     padding: 4rem 1.5rem;
     display: flex;
     justify-content: center;
 }
 
 .registro-card {
-    background-color: var(--text-white);
-    border: 2px dashed var(--moonstone);
+    background-color: var(--text-light);
+    border: 2px dashed var(--moonstone-color);
     border-radius: 16px;
     padding: 2rem 1rem; /* Padding ajustado para móvil */
     text-align: center;
@@ -165,21 +164,21 @@ body {
 
 .registro-badge i {
     font-size: 3rem;
-    color: var(--orange-primary);
+    color: var(--primary-color);
     margin-bottom: 1rem;
 }
 
 .registro-card h2 {
-    font-family: var(--font-title);
+    font-family: var(--font-primary);
     font-size: 1.75rem;
-    color: var(--jet-dark);
+    color: var(--jet-card);
     margin: 0 0 0.5rem 0;
 }
 
 .registro-number {
     font-size: 1.25rem;
     font-weight: bold;
-    color: var(--orange-primary);
+    color: var(--primary-color);
     letter-spacing: 1px;
     margin: 0.5rem 0;
 }

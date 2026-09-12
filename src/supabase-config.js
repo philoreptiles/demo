@@ -39,10 +39,10 @@ export async function getEspecies() {
     return data || [];
 }
 
-export async function crearEspecie(nombre, tipoReproduccion) {
+export async function crearEspecie(nombre) {
     const { data, error } = await supabase
         .from('especies')
-        .insert([{ nombre, tipo_reproduccion: tipoReproduccion }])
+        .insert([{ nombre }])
         .select()
         .single();
 

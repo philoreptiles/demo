@@ -1,16 +1,13 @@
-﻿:root {
-    --color-orange: #EE6C29;
-    --color-orange-hover: #D85A1A;
-    --color-jet: #282B2B;
-    --color-jet-dark: #1E2020;
-    --color-jet-card: #282B2B;
-    --color-moonstone: #7AA6B3;
-    --color-border: #3D4242;
-    --color-text-main: #F4F5F5;
-    --color-text-muted: #A0AAB0;
-    --color-bg: #1E2020;
-    --font-primary: 'Apoc Revelations It', 'Georgia', serif;
-    --font-secondary: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+﻿/* Las variables de color y fuente (--primary-color, --jet-dark,
+   --moonstone-color, --border-color, --text-light, --font-primary,
+   --font-secondary, etc.) ya NO se definen aquí -- admin.html carga
+   main.css antes que este archivo, así que las hereda por cascada
+   desde ahí. Esas, a su vez, las llena site-config.js en tiempo de
+   carga (ver applySiteTheme() en admin-view.js). Solo se queda aquí
+   --text-muted porque es específica de este panel y no tiene
+   equivalente en el esquema canónico. */
+:root {
+    --text-muted: #A0AAB0;
 }
 
 /* ============================================================
@@ -35,8 +32,8 @@
    ============================================================ */
 
 body {
-    background-color: var(--color-bg);
-    color: var(--color-text-main);
+    background-color: var(--bg-color);
+    color: var(--text-light);
     font-family: var(--font-secondary);
     margin: 0;
     padding: 0;
@@ -49,8 +46,8 @@ body.modal-open {
 
 /* ==================== HEADER ==================== */
 .header {
-    background-color: var(--color-jet);
-    border-bottom: 1px solid var(--color-border);
+    background-color: var(--jet-color);
+    border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -74,7 +71,7 @@ body.modal-open {
 }
 
 .brand-title {
-    color: var(--color-orange);
+    color: var(--primary-color);
     font-family: var(--font-primary);
     font-size: 1.15rem;
     font-weight: 700;
@@ -90,7 +87,7 @@ body.modal-open {
 }
 
 .nav-link {
-    color: var(--color-text-main);
+    color: var(--text-light);
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 500;
@@ -103,7 +100,7 @@ body.modal-open {
    está parado el criador. Ejemplares no puede llevar este estado porque
    es un enlace externo al catálogo público, fuera de este layout. */
 .nav-link--active {
-    color: var(--color-orange);
+    color: var(--primary-color);
     background: rgba(238, 108, 41, 0.12);
 }
 
@@ -123,13 +120,13 @@ body.modal-open {
 .dashboard-header h1 {
     font-family: var(--font-primary);
     font-size: 1.6rem;
-    color: var(--color-text-main);
+    color: var(--text-light);
     margin: 0 0 0.5rem 0;
     font-weight: 700;
 }
 
 .dashboard-header p {
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     margin: 0;
     font-size: 0.9rem;
 }
@@ -138,8 +135,8 @@ body.modal-open {
 .premium-card {
     width: 100%;
     box-sizing: border-box;
-    background: var(--color-jet-card);
-    border: 1px solid var(--color-border);
+    background: var(--jet-card);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1.25rem 1rem;
     margin-bottom: 1.5rem;
@@ -149,7 +146,7 @@ body.modal-open {
 .card-title {
     font-family: var(--font-primary);
     font-size: 1.25rem;
-    color: var(--color-text-main);
+    color: var(--text-light);
     margin: 0 0 1rem 0;
     font-weight: 600;
 }
@@ -186,7 +183,7 @@ body.modal-open {
 .form-group-premium label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -198,10 +195,10 @@ body.modal-open {
 .form-group-premium select,
 .form-group-premium textarea {
     background: #181A1A;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 0.75rem 1rem;
-    color: var(--color-text-main);
+    color: var(--text-light);
     font-size: 0.95rem;
     font-family: var(--font-secondary);
     outline: none;
@@ -220,13 +217,13 @@ body.modal-open {
 .form-group-premium input:focus,
 .form-group-premium select:focus,
 .form-group-premium textarea:focus {
-    border-color: var(--color-orange);
+    border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(238, 108, 41, 0.2);
 }
 
 .form-group-premium select option {
     background: #181A1A;
-    color: var(--color-text-main);
+    color: var(--text-light);
 }
 
 /* Eliminar flechas en inputs number */
@@ -313,7 +310,7 @@ input[type="number"] {
 /* ==================== CARGA DE ARCHIVOS (drop zone genérica) ==================== */
 .drop-zone {
     position: relative;
-    border: 2px dashed var(--color-border);
+    border: 2px dashed var(--border-color);
     border-radius: 10px;
     background: #181A1A;
     padding: 1.25rem;
@@ -327,7 +324,7 @@ input[type="number"] {
 }
 
 .drop-zone.dragover {
-    border-color: var(--color-orange);
+    border-color: var(--primary-color);
     background: rgba(238, 108, 41, 0.08);
 }
 
@@ -342,7 +339,7 @@ input[type="number"] {
 
 .drop-text {
     font-size: 0.88rem;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     pointer-events: none;
 }
 
@@ -354,7 +351,7 @@ input[type="number"] {
     background: #181A1A;
     padding: 0.6rem 0.8rem;
     border-radius: 8px;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border-color);
 }
 
 .preview-thumb {
@@ -362,12 +359,12 @@ input[type="number"] {
     height: 54px;
     object-fit: cover;
     border-radius: 6px;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border-color);
 }
 
 .btn-change-img {
     background: #333737;
-    color: var(--color-text-main);
+    color: var(--text-light);
     border: none;
     border-radius: 6px;
     padding: 0.5rem 0.9rem;
@@ -385,7 +382,7 @@ input[type="number"] {
 
 /* ==================== BOTONES ==================== */
 .btn-premium {
-    background: var(--color-orange);
+    background: var(--primary-color);
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -406,8 +403,8 @@ input[type="number"] {
 
 .btn-secondary-premium {
     background: transparent;
-    color: var(--color-text-main);
-    border: 1px solid var(--color-border);
+    color: var(--text-light);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 0.8rem 1.25rem;
     font-size: 0.9rem;
@@ -473,7 +470,7 @@ input[type="number"] {
 .inventory-toggle-container .btn-secondary-premium:disabled {
     opacity: 0.4;
     cursor: not-allowed;
-    border-color: var(--color-border);
+    border-color: var(--border-color);
     background: transparent;
 }
 
@@ -484,7 +481,7 @@ input[type="number"] {
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     background: #181A1A;
 }
@@ -499,13 +496,13 @@ input[type="number"] {
 
 .table-premium th {
     background: #141616;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     padding: 0.75rem 0.85rem;
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.6px;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--border-color);
     white-space: nowrap;
 }
 
@@ -513,7 +510,7 @@ input[type="number"] {
     padding: 0.75rem 0.85rem;
     border-bottom: 1px solid #282B2B;
     vertical-align: middle;
-    color: var(--color-text-main);
+    color: var(--text-light);
     white-space: nowrap;
 }
 
@@ -522,7 +519,7 @@ input[type="number"] {
     height: 40px;
     object-fit: cover;
     border-radius: 6px;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border-color);
     display: block;
 }
 
@@ -556,7 +553,7 @@ input[type="number"] {
 
 .table-premium .status-apartado {
     background: rgba(238, 108, 41, 0.2);
-    color: #EE6C29;
+    color: var(--primary-color);
     border: 1px solid rgba(238, 108, 41, 0.4);
 }
 
@@ -568,7 +565,7 @@ input[type="number"] {
 
 .table-premium .status-holdback {
     background: rgba(122, 166, 179, 0.2);
-    color: #7AA6B3;
+    color: var(--moonstone-color);
     border: 1px solid rgba(122, 166, 179, 0.4);
 }
 
@@ -580,7 +577,7 @@ input[type="number"] {
 
 .btn-icon {
     background: #282B2B;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     width: 36px;
     height: 36px;
@@ -597,91 +594,11 @@ input[type="number"] {
 }
 
 .btn-edit-icon {
-    color: var(--color-moonstone);
+    color: var(--moonstone-color);
 }
 
 .btn-delete-icon {
     color: #EF5350;
-}
-
-/* ==================== REPRODUCCIÓN: tarjetas de eventos ====================
-   Nunca habían tenido su propia hoja de estilos (se apoyaban en clases
-   genéricas como .bar-row-*), así que las tarjetas de "Eventos en
-   curso" se veían como texto plano sin caja. Se agrega aquí lo mínimo
-   para que se vean como el resto de las tarjetas premium del panel. */
-.evento-repro-card {
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    padding: 0.9rem 1rem;
-    margin-bottom: 0.9rem;
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.evento-repro-card:last-child {
-    margin-bottom: 0;
-}
-
-.evento-repro-header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.4rem;
-    margin-bottom: 0.4rem;
-}
-
-.evento-repro-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-top: 0.75rem;
-}
-
-.evento-repro-inline-form {
-    margin-top: 0.9rem;
-    padding-top: 0.9rem;
-    border-top: 1px dashed var(--color-border);
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-}
-
-/* Botón "de texto": para acciones secundarias como Cancelar, que no
-   deben competir visualmente con el botón principal de cada tarjeta. */
-.btn-text-premium {
-    background: transparent;
-    border: 1px solid transparent;
-    color: var(--color-text-muted);
-    font-weight: 600;
-    cursor: pointer;
-    padding: 0.55rem 0.9rem;
-    border-radius: 8px;
-    transition: color 0.2s ease, background 0.2s ease;
-}
-
-.btn-text-premium:hover {
-    color: var(--color-text-main);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-/* Versión compacta de los botones premium, para no ocupar tanto
-   espacio dentro de una tarjeta de evento. */
-.btn-premium.btn-sm,
-.btn-secondary-premium.btn-sm,
-.btn-text-premium.btn-sm {
-    padding: 0.5rem 0.85rem;
-    font-size: 0.85rem;
-}
-
-@media (min-width: 640px) {
-    .evento-repro-inline-form {
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        align-items: end;
-    }
-
-    .evento-repro-inline-form .evento-repro-actions {
-        grid-column: 1 / -1;
-        margin-top: 0;
-    }
 }
 
 /* ==================== ENCABEZADO DE SECCIÓN + COLUMNAS ==================== */
@@ -704,7 +621,7 @@ input[type="number"] {
     z-index: 40;
     width: 220px;
     background: #181A1A;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 0.75rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -715,7 +632,7 @@ input[type="number"] {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     margin: 0 0 0.5rem 0;
 }
 
@@ -725,7 +642,7 @@ input[type="number"] {
     gap: 0.5rem;
     padding: 0.3rem 0;
     font-size: 0.85rem;
-    color: var(--color-text-main);
+    color: var(--text-light);
 }
 
 .columna-check input {
@@ -737,8 +654,8 @@ input[type="number"] {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    background: var(--color-jet-dark, #1E2020);
-    border: 1px solid var(--color-border);
+    background: var(--jet-dark, #1E2020);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 0.65rem 0.85rem;
     margin-bottom: 0.85rem;
@@ -748,7 +665,7 @@ input[type="number"] {
     width: 18px;
     height: 18px;
     flex-shrink: 0;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
 }
 
 .unified-search-bar input {
@@ -756,18 +673,18 @@ input[type="number"] {
     background: transparent;
     border: none;
     outline: none;
-    color: var(--color-text-main);
+    color: var(--text-light);
     font-size: 0.9rem;
     min-width: 0;
 }
 
 .unified-search-bar input::placeholder {
-    color: var(--color-text-muted);
+    color: var(--text-muted);
 }
 
 .search-results-count {
     font-size: 0.78rem;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     white-space: nowrap;
 }
 
@@ -778,7 +695,7 @@ input[type="number"] {
     gap: 0.65rem;
     padding: 0.75rem 0.85rem;
     background: rgba(255, 255, 255, 0.02);
-    border: 1px dashed var(--color-border);
+    border: 1px dashed var(--border-color);
     border-radius: 10px;
     margin-bottom: 1rem;
 }
@@ -793,7 +710,7 @@ input[type="number"] {
 
 .saved-views-select-group label {
     font-size: 0.78rem;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     white-space: nowrap;
 }
 
@@ -802,9 +719,9 @@ input[type="number"] {
     min-width: 140px;
     padding: 0.5rem 0.65rem;
     font-size: 0.85rem;
-    background: var(--color-jet-dark, #1E2020);
-    color: var(--color-text-main);
-    border: 1px solid var(--color-border);
+    background: var(--jet-dark, #1E2020);
+    color: var(--text-light);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
 }
 
@@ -813,9 +730,9 @@ input[type="number"] {
     min-width: 160px;
     padding: 0.5rem 0.65rem;
     font-size: 0.85rem;
-    background: var(--color-jet-dark, #1E2020);
-    color: var(--color-text-main);
-    border: 1px solid var(--color-border);
+    background: var(--jet-dark, #1E2020);
+    color: var(--text-light);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
 }
 
@@ -824,7 +741,7 @@ input[type="number"] {
     align-items: center;
     gap: 0.35rem;
     font-size: 0.78rem;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     white-space: nowrap;
 }
 
@@ -865,9 +782,9 @@ input[type="number"] {
     max-width: 780px;
     max-height: 96vh;
     overflow-y: auto;
-    background: var(--color-jet-card);
-    color: var(--color-text-main);
-    border: 1px solid var(--color-border);
+    background: var(--jet-card);
+    color: var(--text-light);
+    border: 1px solid var(--border-color);
     border-radius: 14px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
     box-sizing: border-box;
@@ -878,13 +795,13 @@ input[type="number"] {
     align-items: flex-start;
     justify-content: space-between;
     padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .edit-modal-kicker {
     font-size: 0.68rem;
     font-weight: 700;
-    color: var(--color-orange);
+    color: var(--primary-color);
     letter-spacing: 0.8px;
     text-transform: uppercase;
 }
@@ -893,16 +810,16 @@ input[type="number"] {
     font-family: var(--font-primary);
     font-size: 1.1rem;
     margin: 0.1rem 0 0 0;
-    color: var(--color-text-main);
+    color: var(--text-light);
 }
 
 .edit-modal-close {
     background: #181A1A;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border-color);
     border-radius: 50%;
     width: 32px;
     height: 32px;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -918,7 +835,7 @@ input[type="number"] {
 
 .edit-modal-id-row {
     background: #181A1A;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 0.45rem 0.75rem;
     margin-bottom: 0.75rem;
@@ -926,11 +843,11 @@ input[type="number"] {
     justify-content: space-between;
     align-items: center;
     font-size: 0.78rem;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
 }
 
 .edit-modal-id-row strong {
-    color: var(--color-orange);
+    color: var(--primary-color);
     font-size: 0.85rem;
 }
 
@@ -943,8 +860,8 @@ input[type="number"] {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    color: var(--color-moonstone);
-    border-bottom: 1px solid var(--color-border);
+    color: var(--moonstone-color);
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 0.3rem;
     margin-bottom: 0.6rem;
 }
@@ -968,10 +885,10 @@ input[type="number"] {
 .edit-modal-form input[type="number"],
 .edit-modal-form select {
     background: #181A1A;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 0.5rem 0.6rem;
-    color: var(--color-text-main);
+    color: var(--text-light);
     font-size: 0.85rem;
     font-family: var(--font-secondary);
     outline: none;
@@ -982,7 +899,7 @@ input[type="number"] {
 
 .edit-modal-form select option {
     background: #181A1A;
-    color: var(--color-text-main);
+    color: var(--text-light);
 }
 
 .edit-images-grid {
@@ -1002,7 +919,7 @@ input[type="number"] {
 .image-edit-container label {
     font-size: 0.72rem;
     font-weight: 600;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
 }
 
 .current-image-box {
@@ -1011,11 +928,11 @@ input[type="number"] {
     justify-content: center;
     width: 100%;
     height: 110px;
-    border: 1px dashed var(--color-border);
+    border: 1px dashed var(--border-color);
     border-radius: 6px;
     background: #181A1A;
     overflow: hidden;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     font-size: 0.72rem;
 }
 
@@ -1027,15 +944,15 @@ input[type="number"] {
 
 .image-edit-container input[type="file"] {
     font-size: 0.72rem;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     width: 100%;
 }
 
 .image-edit-container input[type="file"]::-webkit-file-upload-button {
     background: #333737;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
-    color: var(--color-text-main);
+    color: var(--text-light);
     padding: 0.3rem 0.5rem;
     font-size: 0.72rem;
     cursor: pointer;
@@ -1048,7 +965,7 @@ input[type="number"] {
     flex-direction: column;
     gap: 0.2rem;
     font-size: 0.7rem;
-    color: var(--color-orange);
+    color: var(--primary-color);
 }
 
 .new-image-preview img {
@@ -1056,7 +973,7 @@ input[type="number"] {
     height: 60px;
     object-fit: cover;
     border-radius: 4px;
-    border: 1px solid var(--color-orange);
+    border: 1px solid var(--primary-color);
 }
 
 .edit-modal-actions {
@@ -1065,7 +982,7 @@ input[type="number"] {
     gap: 0.5rem;
     margin-top: 0.75rem;
     padding-top: 0.75rem;
-    border-top: 1px solid var(--color-border);
+    border-top: 1px solid var(--border-color);
 }
 
 .edit-modal-actions .btn-premium,
@@ -1090,6 +1007,39 @@ input[type="number"] {
     margin-bottom: 1.25rem;
     font-size: 0.88rem;
     font-weight: 600;
+}
+
+/* #status-alert deja de ser parte del flujo normal de la página y se
+   vuelve un toast flotante fijo al viewport. Antes, si estabas
+   trabajando en una fila hasta abajo de la tabla (editar, eliminar),
+   el aviso de éxito/error aparecía hasta arriba del documento y
+   quedaba fuera de vista sin hacer scroll. Ahora aparece siempre
+   sobre lo que estás viendo, sin importar qué tan abajo hayas
+   scrolleado. */
+#status-alert {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    width: min(92vw, 480px);
+    margin-bottom: 0;
+    background-color: var(--jet-card);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    animation: alert-toast-in 0.2s ease-out;
+}
+
+@keyframes alert-toast-in {
+    from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Alerta propia del modal de edición: vive DENTRO de la tarjeta del
+   modal (justo bajo el encabezado), para que un error o confirmación
+   al guardar aparezca sobre la ficha que se está editando, en vez de
+   quedar detrás del overlay del modal. */
+#edit-modal-alert {
+    margin: 0 0 1rem 0;
 }
 
 .alert-info {
@@ -1143,11 +1093,11 @@ input[type="number"] {
     }
 
     .nav-link:hover {
-        color: var(--color-orange);
+        color: var(--primary-color);
     }
 
     .nav-link--active:hover {
-        color: var(--color-orange);
+        color: var(--primary-color);
     }
 
     /* --- Layout principal --- */
@@ -1253,7 +1203,7 @@ input[type="number"] {
 
     /* --- Drop zone genérica: hover y look táctil-vs-mouse --- */
     .drop-zone:hover {
-        border-color: var(--color-orange);
+        border-color: var(--primary-color);
         background: rgba(238, 108, 41, 0.08);
     }
 
@@ -1263,7 +1213,7 @@ input[type="number"] {
 
     /* --- Botones: efectos hover solo con mouse --- */
     .btn-premium:hover {
-        background: var(--color-orange-hover);
+        background: var(--primary-hover);
     }
 
     .btn-secondary-premium:hover {
@@ -1368,7 +1318,7 @@ input[type="number"] {
 
     .btn-edit-icon:hover {
         color: #9cd1e0;
-        border-color: var(--color-moonstone);
+        border-color: var(--moonstone-color);
     }
 
     .btn-delete-icon:hover {
@@ -1387,7 +1337,7 @@ input[type="number"] {
 
     .edit-modal-close:hover {
         background: #333737;
-        color: var(--color-text-main);
+        color: var(--text-light);
     }
 
     .edit-modal-form {

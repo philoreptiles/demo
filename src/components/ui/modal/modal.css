@@ -149,7 +149,7 @@
 
 .modal-thumb.active {
     opacity: 1;
-    border-color: #EE6C29; /* Orange */
+    border-color: var(--primary-color); /* Orange */
 }
 
 /* Columna Derecha: Información */
@@ -173,7 +173,7 @@
 .modal-nav-btn {
     background: none;
     border: none;
-    color: #7AA6B3; /* Moonstone */
+    color: var(--moonstone-color); /* Moonstone */
     font-weight: 700;
     font-size: 0.8rem;
     cursor: pointer;
@@ -205,7 +205,7 @@
 }
 
 .modal-genetics-badge {
-    background-color: #7AA6B3; /* Moonstone */
+    background-color: var(--moonstone-color); /* Moonstone */
     color: #282B2B;
     padding: 2px 8px;
     border-radius: 20px;
@@ -234,7 +234,7 @@
 .detail-item label {
     font-size: 0.7rem;
     font-weight: 800;
-    color: #7AA6B3; /* Moonstone */
+    color: var(--moonstone-color); /* Moonstone */
     letter-spacing: 0.8px;
 }
 
@@ -246,9 +246,9 @@
 
 /* Badges de Estatus */
 .status-disponible, .detail-status-text.status-disponible { background-color: #2e7d32; color: #fff; }
-.status-apartado, .detail-status-text.status-apartado { background-color: #EE6C29; color: #fff; }
+.status-apartado, .detail-status-text.status-apartado { background-color: var(--primary-color); color: #fff; }
 .status-vendido, .detail-status-text.status-vendido { background-color: #dc2626; color: #fff; }
-.status-holdback, .detail-status-text.status-holdback { background-color: #7AA6B3; color: #282B2B; }
+.status-holdback, .detail-status-text.status-holdback { background-color: var(--moonstone-color); color: #282B2B; }
 
 .detail-status-text {
     display: inline-block;
@@ -274,7 +274,7 @@
 .modal-price {
     font-size: 1.2rem;
     font-weight: 900;
-    color: #EE6C29; /* Orange */
+    color: var(--primary-color); /* Orange */
 }
 
 /* Botón WhatsApp */
@@ -303,7 +303,7 @@
 }
 
 .btn-whatsapp.btn-unavailable {
-    background-color: #7AA6B3; /* Moonstone */
+    background-color: var(--moonstone-color); /* Moonstone */
     color: #ffffff;
 }
 
@@ -317,7 +317,7 @@
 .modal-others-title {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #7AA6B3; /* Moonstone */
+    color: var(--moonstone-color); /* Moonstone */
     margin: 0 0 8px 0;
 }
 
@@ -340,7 +340,7 @@
 }
 
 .modal-others-grid::-webkit-scrollbar-thumb {
-    background: #7AA6B3; /* Moonstone */
+    background: var(--moonstone-color); /* Moonstone */
     border-radius: 4px;
 }
 
@@ -399,7 +399,7 @@
 
 .other-card-price {
     font-size: 0.75rem;
-    color: #EE6C29;
+    color: var(--primary-color);
     font-weight: 800;
 }
 
@@ -420,10 +420,10 @@
     }
 
     .modal-close:hover {
-        background-color: #EE6C29; /* Orange */
+        background-color: var(--primary-color); /* Orange */
         color: #ffffff;
         transform: scale(1.08);
-        border-color: #EE6C29;
+        border-color: var(--primary-color);
     }
 
     .modal-container {
@@ -580,7 +580,7 @@
 
     .other-card:hover {
         background-color: rgba(255, 255, 255, 0.05);
-        border-color: #EE6C29;
+        border-color: var(--primary-color);
         transform: translateY(-2px);
     }
 

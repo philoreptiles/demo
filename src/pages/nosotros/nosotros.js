@@ -1,8 +1,13 @@
 ﻿import { renderHeader } from '../../components/common/header/header.js';
 import { renderFooter } from '../../components/common/footer/footer.js';
+import '../../styles/main.css';
+import { siteConfig, applySiteTheme } from '../../site-config.js';
 import '../../components/common/header/header.css';
 import '../../components/common/footer/footer.css';
 import '../../styles/pages/nosotros.css';
+
+applySiteTheme();
+document.title = `Nosotros - ${siteConfig.brandName}`;
 
 export async function renderNosotrosPage() {
     await renderHeader('header-root');

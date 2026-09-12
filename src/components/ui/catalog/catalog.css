@@ -30,7 +30,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border-left-color: var(--primary-color, #EE6C29);
+    border-left-color: var(--primary-color);
     animation: spin 1s linear infinite;
     margin: 0 auto 1rem auto;
 }
@@ -49,7 +49,7 @@
     text-align: center;
     background-color: #282B2B;
     border-radius: 12px;
-    border: 2px dashed #7AA6B3;
+    border: 2px dashed var(--moonstone-color);
     margin: 2rem 0;
     width: 100%;
     box-sizing: border-box;
@@ -67,13 +67,13 @@
 }
 
 .empty-catalog p {
-    color: #7AA6B3;
+    color: var(--moonstone-color);
     font-size: 1rem;
     margin: 0 0 1.5rem 0;
 }
 
 .btn-clear-filters {
-    background-color: #EE6C29;
+    background-color: var(--primary-color);
     color: #ffffff;
     padding: 0.75rem 2rem;
     border: none;
@@ -114,7 +114,7 @@
     }
 
     .btn-clear-filters:hover {
-        background-color: #d45c1f;
+        background-color: var(--primary-hover);
         transform: translateY(-2px);
     }
 }

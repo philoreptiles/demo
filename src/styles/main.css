@@ -21,13 +21,20 @@
        "background: #181A1A" de CSS que lo alcance. */
     color-scheme: dark;
 
+    /* --primary-color, --moonstone-color, --bg-color/--jet-dark y las
+       2 variables de fuente de más abajo son SOBRESCRITAS en tiempo
+       de carga por applySiteTheme() (ver src/site-config.js y
+       main.js) con los valores del cliente activo. Lo que queda
+       aquí es solo el fallback antes de que corra ese JS -- para
+       cambiar la paleta de un cliente, edita site-config.js, NO
+       este archivo. */
     --primary-color: #EE6C29;
-    --primary-hover: #d85a1a;
+    --primary-hover: color-mix(in srgb, var(--primary-color) 82%, black);
     --jet-color: #282B2B;
     --jet-dark: #1E2020;
     --jet-card: #282B2B;
     --moonstone-color: #7AA6B3;
-    --moonstone-hover: #63909D;
+    --moonstone-hover: color-mix(in srgb, var(--moonstone-color) 82%, black);
     
     --bg-color: #1E2020;
     --card-bg: #282B2B;
@@ -40,6 +47,7 @@
     --status-vendido: #D32F2F;
     --status-holdback: #7AA6B3;
     
+    /* Fallback -- el valor real lo pone site-config.js (fonts.heading/body) */
     --font-primary: 'Apoc Revelations It', 'Georgia', serif;
     --font-secondary: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     

@@ -1,6 +1,10 @@
 ﻿import { supabase, getEspecies, crearEspecie } from '../../supabase-config.js';
 import { compressImage } from '../../utils/image-compressor.js';
 import { escapeHTML, safeImageUrl } from '../../utils/security.js';
+import { siteConfig, applySiteTheme } from '../../site-config.js';
+
+applySiteTheme();
+document.title = `Panel de Administración - ${siteConfig.brandName}`;
 
 // Limites de validacion para archivos subidos por el formulario.
 // MAX_RAW_FILE_SIZE es el limite del archivo ORIGINAL (antes de comprimir);
@@ -43,10 +47,9 @@ const COLUMNAS_CONFIG = [
     { key: 'publico', label: 'Público' },
 ];
 
-// Cache en memoria de especies y ejemplares (para llenar selects sin
-// disparar una consulta nueva cada vez que se abre un formulario).
+// Cache en memoria de especies (para llenar selects sin disparar una
+// consulta nueva cada vez que se abre un formulario).
 let especiesCache = [];
-let ejemplaresParaGenealogiaCache = [];
 
 
 // ==========================================
@@ -230,10 +233,8 @@ function setupEspeciesFormListener() {
         event.preventDefault();
 
         const nombreInput = document.getElementById('especie-nombre');
-        const tipoSelect = document.getElementById('especie-tipo-reproduccion');
 
         const nombre = nombreInput?.value.trim();
-        const tipoReproduccion = tipoSelect?.value;
 
         if (!nombre) {
             showAlert('El nombre de la especie es obligatorio.', 'error');
@@ -254,11 +255,10 @@ function setupEspeciesFormListener() {
         }
 
         try {
-            await crearEspecie(nombre, tipoReproduccion);
+            await crearEspecie(nombre);
             showAlert(`Especie "${nombre}" agregada correctamente.`, 'success');
             form.reset();
             await loadEspecies();
-            await loadPadreMadreOptions();
 
         } catch (error) {
             console.error('Error al crear especie:', error);
@@ -273,56 +273,6 @@ function setupEspeciesFormListener() {
             }
         }
     });
-}
-
-
-// ==========================================
-// SELECTS DE GENEALOGÍA (PADRE / MADRE)
-// ==========================================
-//
-// Se listan ejemplares por sexo para que el criador elija de una lista
-// real en vez de escribir un ID a mano (evita romper la relación por un
-// error de dedo). "excludeId" se usa en el modal de edición para que un
-// ejemplar no pueda elegirse a sí mismo como su propio padre/madre.
-
-async function loadPadreMadreOptions() {
-
-    const { data, error } = await supabase
-        .from('ejemplares')
-        .select('id, especie, genetica, sexo')
-        .in('sexo', ['Macho', 'Hembra']);
-
-    if (error) {
-        console.error('Error al cargar opciones de genealogía:', error);
-        return;
-    }
-
-    ejemplaresParaGenealogiaCache = data || [];
-    populatePadreMadreSelects();
-}
-
-function populatePadreMadreSelects(excludeId = null) {
-
-    const construirOpciones = sexoDeseado =>
-        ejemplaresParaGenealogiaCache
-            .filter(e => e.sexo === sexoDeseado && String(e.id) !== String(excludeId))
-            .map(e => `<option value="${escapeHTML(e.id)}">${escapeHTML(e.id)} — ${escapeHTML(e.especie || '')} ${escapeHTML(e.genetica || '')}</option>`)
-            .join('');
-
-    const opcionesMachos = construirOpciones('Macho');
-    const opcionesHembras = construirOpciones('Hembra');
-
-    const selectPadreAdd = document.getElementById('id_padre');
-    if (selectPadreAdd) selectPadreAdd.innerHTML = `<option value="">Sin registrar</option>${opcionesMachos}`;
-
-    const selectMadreAdd = document.getElementById('id_madre');
-    if (selectMadreAdd) selectMadreAdd.innerHTML = `<option value="">Sin registrar</option>${opcionesHembras}`;
-
-    const selectPadreEdit = document.getElementById('edit-id_padre');
-    if (selectPadreEdit) selectPadreEdit.innerHTML = `<option value="">Sin registrar</option>${opcionesMachos}`;
-
-    const selectMadreEdit = document.getElementById('edit-id_madre');
-    if (selectMadreEdit) selectMadreEdit.innerHTML = `<option value="">Sin registrar</option>${opcionesHembras}`;
 }
 
 
@@ -652,16 +602,6 @@ function openEditModal(ejemplar) {
     const visibleCheckbox = document.getElementById('edit-visible_publico');
     if (visibleCheckbox) visibleCheckbox.checked = ejemplar.visible_publico !== false;
 
-    // Excluye al propio ejemplar de sus selects de padre/madre (no puede
-    // ser su propio ancestro).
-    populatePadreMadreSelects(ejemplar.id);
-
-    const padreSelect = document.getElementById('edit-id_padre');
-    if (padreSelect) padreSelect.value = ejemplar.id_padre ?? '';
-
-    const madreSelect = document.getElementById('edit-id_madre');
-    if (madreSelect) madreSelect.value = ejemplar.id_madre ?? '';
-
     setupCurrentImage('edit-imagen-actual-1', 'edit-imagen-empty-1', ejemplar.imagen_url);
     setupCurrentImage('edit-imagen-actual-2', 'edit-imagen-empty-2', ejemplar.imagen_url_2);
     setupCurrentImage('edit-imagen-actual-3', 'edit-imagen-empty-3', ejemplar.imagen_url_3);
@@ -738,7 +678,7 @@ function previewEditImage(input, previewId) {
         input.value = '';
         preview.innerHTML = '';
         preview.classList.add('hidden');
-        showAlert('Selecciona un archivo de imagen válido.', 'error');
+        showAlert('Selecciona un archivo de imagen válido.', 'error', 'modal');
         return;
     }
 
@@ -766,6 +706,8 @@ function closeEditModal() {
     modal.classList.add('hidden');
     modal.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('modal-open');
+
+    document.getElementById('edit-modal-alert')?.classList.add('hidden');
 
     editingEjemplarId = null;
 
@@ -814,7 +756,7 @@ async function handleEditSubmit(event) {
     const id = editingEjemplarId || document.getElementById('edit-id')?.value.trim();
 
     if (!id) {
-        showAlert('No se encontró el ID del ejemplar que deseas editar.', 'error');
+        showAlert('No se encontró el ID del ejemplar que deseas editar.', 'error', 'modal');
         return;
     }
 
@@ -829,11 +771,9 @@ async function handleEditSubmit(event) {
     const estatus = document.getElementById('edit-estatus')?.value || 'Disponible';
     const visiblePublico = document.getElementById('edit-visible_publico')?.checked ?? true;
     const notas = document.getElementById('edit-notas')?.value.trim() || null;
-    const idPadre = document.getElementById('edit-id_padre')?.value || null;
-    const idMadre = document.getElementById('edit-id_madre')?.value || null;
 
     if (!especieIdVal) {
-        showAlert('Selecciona una especie.', 'error');
+        showAlert('Selecciona una especie.', 'error', 'modal');
         return;
     }
 
@@ -864,9 +804,7 @@ async function handleEditSubmit(event) {
         precio,
         estatus,
         visible_publico: visiblePublico,
-        notas,
-        id_padre: idPadre,
-        id_madre: idMadre
+        notas
     };
 
     const nuevasImagenes = {
@@ -878,13 +816,13 @@ async function handleEditSubmit(event) {
     try {
         await updateEjemplar(id, data, nuevasImagenes);
 
-        showAlert(`Ejemplar ${id} actualizado correctamente.`, 'success');
-        closeEditModal();
+        showAlert(`Ejemplar ${id} actualizado correctamente.`, 'success', 'modal');
         await loadDashboardData();
+        setTimeout(() => closeEditModal(), 900);
 
     } catch (error) {
         console.error('Error al actualizar ejemplar:', error);
-        showAlert(`No se pudo actualizar: ${error.message}`, 'error');
+        showAlert(`No se pudo actualizar: ${error.message}`, 'error', 'modal');
 
     } finally {
         if (btnActualizar) {
@@ -948,8 +886,6 @@ async function handleAddEjemplar(event) {
         const estatusVal = document.getElementById('estatus')?.value || 'Disponible';
         const visiblePublicoVal = document.getElementById('visible_publico')?.checked ?? true;
         const notasVal = document.getElementById('notas')?.value.trim() || null;
-        const idPadreVal = document.getElementById('id_padre')?.value || null;
-        const idMadreVal = document.getElementById('id_madre')?.value || null;
 
         const file1 = document.getElementById('imagen1')?.files[0];
         const file2 = document.getElementById('imagen2')?.files[0];
@@ -1004,8 +940,6 @@ async function handleAddEjemplar(event) {
             estatus: estatusVal,
             visible_publico: visiblePublicoVal,
             notas: notasVal,
-            id_padre: idPadreVal,
-            id_madre: idMadreVal,
             imagen_url: url1,
             imagen_url_2: url2,
             imagen_url_3: url3
@@ -1151,8 +1085,7 @@ async function loadDashboardData() {
     await Promise.all([
         loadFullInventory(),
         populateYearFilter(),
-        loadEspecies(),
-        loadPadreMadreOptions()
+        loadEspecies()
     ]);
 
     // Se cargan y aplican DESPUÉS del Promise.all de arriba a propósito:
@@ -1630,7 +1563,7 @@ function renderTableRows(ejemplares, targetTbody) {
                     <td data-col="sexo">${escapeHTML(item.sexo || 'No sexado')}</td>
                     <td data-col="etapa">${escapeHTML(item.etapa || '—')}</td>
                     <td data-col="anio">${escapeHTML(item.nacimiento || 'N/A')}</td>
-                    <td data-col="precio" style="font-weight: 700; color: var(--color-orange, #EE6C29);">
+                    <td data-col="precio" style="font-weight: 700; color: var(--primary-color);">
                         ${precioFormatted}
                     </td>
                     <td data-col="estatus">
@@ -1727,19 +1660,20 @@ function renderTableRows(ejemplares, targetTbody) {
 // ALERTAS DE ESTADO
 // ==========================================
 
-function showAlert(message, type = 'info') {
+function showAlert(message, type = 'info', target = 'toast') {
 
-    const statusAlert = document.getElementById('status-alert');
+    const alertId = target === 'modal' ? 'edit-modal-alert' : 'status-alert';
+    const alertEl = document.getElementById(alertId);
 
-    if (!statusAlert) return;
+    if (!alertEl) return;
 
-    statusAlert.className = `alert-premium alert-${type}`;
-    statusAlert.textContent = message;
-    statusAlert.classList.remove('hidden');
+    alertEl.className = `alert-premium alert-${type}`;
+    alertEl.textContent = message;
+    alertEl.classList.remove('hidden');
 
     if (type === 'success' || type === 'info') {
         setTimeout(() => {
-            statusAlert.classList.add('hidden');
+            alertEl.classList.add('hidden');
         }, 4000);
     }
 }

@@ -31,7 +31,7 @@
         <!-- LOGIN -->
         <section id="login-section" class="premium-card" style="max-width: 440px; margin: 4rem auto;">
             <h2 class="card-title" style="text-align: center;">Acceso Administrativo</h2>
-            <p style="color: var(--color-text-muted); margin-bottom: 1.5rem; text-align: center;">
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem; text-align: center;">
                 Ingresa tus credenciales para gestionar el catálogo
             </p>
             <div id="login-error-msg" class="alert-premium alert-error hidden"></div>
@@ -68,25 +68,17 @@
                  veces, si el criador maneja más de una especie) y alimenta
                  el select de "Especie" del formulario de alta/edición. Esto
                  evita inconsistencias de texto (mayúsculas, typos) que antes
-                 fragmentaban las estadísticas del Dashboard, y determina el
-                 tipo de reproducción para el módulo de Camadas. -->
+                 fragmentaban las estadísticas del Dashboard. -->
             <section class="premium-card">
                 <h2 class="card-title">Especies registradas</h2>
-                <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: -0.5rem 0 1rem;">
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin: -0.5rem 0 1rem;">
                     Da de alta cada especie que manejas una sola vez. Si solo trabajas con una especie, es un paso único.
                 </p>
 
                 <form id="add-especie-form" class="filter-grid-premium" style="margin-bottom: 1rem;">
                     <div class="form-group-premium">
                         <label for="especie-nombre">Nombre de la especie *</label>
-                        <input type="text" id="especie-nombre" required placeholder="Ej. Crotalus atrox">
-                    </div>
-                    <div class="form-group-premium">
-                        <label for="especie-tipo-reproduccion">Tipo de reproducción *</label>
-                        <select id="especie-tipo-reproduccion" required>
-                            <option value="Ovípara">Ovípara (pone huevos)</option>
-                            <option value="Ovovivípara">Ovovivípara (cría viva)</option>
-                        </select>
+                        <input type="text" id="especie-nombre" required placeholder="Ej. Boa sigma">
                     </div>
                     <div class="filter-actions-right">
                         <button type="submit" class="btn-premium">Agregar especie</button>
@@ -168,20 +160,6 @@
                             </select>
                         </div>
 
-                        <div class="form-group-premium">
-                            <label for="id_padre">Padre (opcional)</label>
-                            <select id="id_padre" name="id_padre">
-                                <option value="">Sin registrar</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group-premium">
-                            <label for="id_madre">Madre (opcional)</label>
-                            <select id="id_madre" name="id_madre">
-                                <option value="">Sin registrar</option>
-                            </select>
-                        </div>
-
                         <div class="form-group-premium form-group-full" style="display: flex; align-items: center; gap: 0.5rem;">
                             <input type="checkbox" id="visible_publico" name="visible_publico" checked style="width: auto;">
                             <label for="visible_publico" style="margin: 0;">Mostrar este ejemplar en el catálogo público</label>
@@ -236,64 +214,6 @@
                     </div>
 
                 </form>
-            </section>
-
-
-            <!-- REPRODUCCIÓN -->
-            <!-- La etiqueta del campo "fecha esperada" cambia sola según el
-                 tipo de reproducción de la especie de la hembra elegida
-                 (ver reproduccion.js -> actualizarEtiquetaFechaEsperada). -->
-            <section class="premium-card">
-                <h2 class="card-title">Reproducción</h2>
-                <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: -0.5rem 0 1rem;">
-                    Registra cada apareamiento o bloqueo. La fecha esperada se pide distinto
-                    según si la especie es ovípara u ovovivípara.
-                </p>
-
-                <form id="repro-form" class="filter-grid-premium" style="margin-bottom: 1.5rem;">
-                    <div class="form-group-premium">
-                        <label for="repro-hembra">Hembra *</label>
-                        <select id="repro-hembra" required>
-                            <option value="">Cargando...</option>
-                        </select>
-                    </div>
-                    <div class="form-group-premium">
-                        <label for="repro-macho">Macho</label>
-                        <select id="repro-macho">
-                            <option value="">Sin registrar</option>
-                        </select>
-                    </div>
-                    <div class="form-group-premium">
-                        <label id="repro-fecha-inicio-label" for="repro-fecha-inicio">Fecha de apareamiento/bloqueo *</label>
-                        <input type="date" id="repro-fecha-inicio" required>
-                    </div>
-                    <div class="form-group-premium hidden" id="repro-fecha-ovulacion-grupo">
-                        <label for="repro-fecha-ovulacion">Día de la ovulación</label>
-                        <input type="date" id="repro-fecha-ovulacion">
-                        <small style="color: var(--color-text-muted); font-size: 0.78rem;">
-                            Puedes dejarla en blanco si todavía no se detecta.
-                        </small>
-                    </div>
-                    <div class="form-group-premium">
-                        <label id="repro-fecha-esperada-label" for="repro-fecha-esperada">Fecha esperada</label>
-                        <input type="date" id="repro-fecha-esperada">
-                        <small id="repro-fecha-esperada-ayuda" style="color: var(--color-text-muted); font-size: 0.78rem;">
-                            Elige primero la hembra para que esta etiqueta se ajuste a su tipo de reproducción.
-                        </small>
-                    </div>
-                    <div class="form-group-premium form-group-premium--full">
-                        <label for="repro-notas">Notas</label>
-                        <textarea id="repro-notas" rows="2" placeholder="Notas de este ciclo, temperatura de incubación, etc."></textarea>
-                    </div>
-                    <div class="filter-actions-right">
-                        <button type="submit" class="btn-premium">Registrar evento</button>
-                    </div>
-                </form>
-
-                <h3 style="font-size: 0.95rem; margin-bottom: 0.75rem;">Eventos en curso</h3>
-                <div id="repro-eventos-list" class="evento-repro-list">
-                    <p class="dash-loading">Cargando eventos...</p>
-                </div>
             </section>
 
 
@@ -478,6 +398,8 @@
                 <form id="edit-ejemplar-form" class="edit-modal-form">
                     <input type="hidden" id="edit-id">
 
+                    <div id="edit-modal-alert" class="alert-premium hidden"></div>
+
                     <div class="edit-modal-id-row">
                         <span>ID del ejemplar</span>
                         <strong id="edit-id-display">—</strong>
@@ -558,21 +480,6 @@
                             </div>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group-premium">
-                                <label for="edit-id_padre">Padre (opcional)</label>
-                                <select id="edit-id_padre">
-                                    <option value="">Sin registrar</option>
-                                </select>
-                            </div>
-                            <div class="form-group-premium">
-                                <label for="edit-id_madre">Madre (opcional)</label>
-                                <select id="edit-id_madre">
-                                    <option value="">Sin registrar</option>
-                                </select>
-                            </div>
-                        </div>
-
                         <div class="form-group-premium">
                             <label for="edit-notas">Notas internas</label>
                             <textarea id="edit-notas" rows="2"></textarea>
@@ -637,6 +544,5 @@
     </main>
 
     <script type="module" src="./admin-view.js"></script>
-    <script type="module" src="./reproduccion.js"></script>
 </body>
 </html>

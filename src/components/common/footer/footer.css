@@ -27,7 +27,7 @@
 }
 
 .footer-link {
-    color: #7AA6B3;
+    color: var(--moonstone-color);
     text-decoration: none;
     font-size: 0.95rem;
     font-weight: 500;
@@ -47,6 +47,6 @@
     }
 
     .footer-link:hover {
-        color: #EE6C29;
+        color: var(--primary-color);
     }
 }
